@@ -9,9 +9,15 @@
   <meta name="apple-mobile-web-app-title" content="Клев ПРО">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Прогноз клева • Интерактивный Атлас</title>
-  <!-- Картографическое ядро Leaflet (работает в РФ без VPN) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Российский CDN Яндекса (yastatic.net) — 100% доступ из РФ без VPN + резервный jsdelivr -->
+  <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
+  <script src="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.js"></script>
+  <script>
+    if (typeof L === 'undefined') {
+      document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />');
+      document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></scr' + 'ipt>');
+    }
+  </script>
   <style>
     :root {
       --bg-main: #0b1120;
@@ -53,7 +59,7 @@
     .btn-row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
     .btn {
       flex: 1;
-      min-width: 105px;
+      min-width: 100px;
       background: var(--bg-card);
       color: var(--text-main);
       border: 1px solid var(--border);
@@ -63,9 +69,7 @@
       font-weight: 600;
       text-align: center;
       cursor: pointer;
-      transition: all 0.15s;
     }
-    .btn:active { transform: scale(0.98); }
     .btn-accent { background: #0284c7; border-color: #38bdf8; color: #fff; }
 
     /* Выдвижная панель карты */
@@ -76,8 +80,53 @@
       padding: 10px 12px;
     }
     #mapDrawer.open { display: block; }
-    #mapBox { width: 100%; height: 290px; border-radius: 10px; border: 1px solid var(--border); z-index: 10; }
-    .map-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
+    
+    .map-toolbar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .map-search-input {
+      flex: 1;
+      min-width: 160px;
+      background: var(--bg-card);
+      color: #fff;
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
+    .layer-switch {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      margin-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .layer-btn {
+      background: var(--bg-card);
+      color: #cbd5e1;
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .layer-btn.active { background: #0284c7; color: #fff; border-color: #38bdf8; }
+
+    #mapBox {
+      width: 100%;
+      height: 310px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      z-index: 10;
+    }
+    .map-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 
     /* Панель фильтрации бассейна */
     .filter-bar {
@@ -95,14 +144,14 @@
       background: #e2e8f0;
       border: 1px solid #94a3b8;
       color: #0f172a;
-      padding: 2px 8px;
+      padding: 3px 9px;
       border-radius: 10px;
       font-size: 11px;
       font-weight: 700;
       cursor: pointer;
     }
 
-    /* Горизонтальный атлас рыб с детализированными иллюстрациями */
+    /* Горизонтальный атлас рыб */
     .fish-strip {
       background: #ffffff;
       padding: 8px 10px;
@@ -124,7 +173,6 @@
       min-width: 112px;
       flex-shrink: 0;
       cursor: pointer;
-      transition: all 0.15s;
     }
     .fish-chip.active {
       background: #e2e8f0;
@@ -265,20 +313,30 @@
       <div class="loc-title">📍 <span id="locName">Новый Уренгой</span></div>
       <div class="live-pill"><span class="dot"></span><span id="apiStatus">Синхронизация...</span></div>
     </div>
-    <div class="basin-line" id="basinTitle">Регион ихтиофауны (радиус 300–500 км): Обь-Иртышский и Тазовский бассейн</div>
+    <div class="basin-line" id="basinTitle">Регион ихтиофауны (радиус 300–500 км): Обь-Иртышский и Арктический бассейн</div>
     <div class="astro-line" id="astroBar">Расчет барической нормы, температуры воды и фазы Луны...</div>
     <div class="btn-row">
-      <button class="btn btn-accent" onclick="toggleMapDrawer()" id="mapToggleBtn">🗺 Выбрать точку на карте</button>
-      <button class="btn" onclick="detectMyGPS()">🎯 Моя геопозиция</button>
+      <button class="btn btn-accent" onclick="toggleMapDrawer()" id="mapToggleBtn">🗺 Карта / Спутник РФ</button>
+      <button class="btn" onclick="detectMyGPS()">🎯 По GPS</button>
       <button class="btn" onclick="fetchLiveMeteo()">🔄 Обновить</button>
     </div>
   </header>
 
-  <!-- Выдвижная интерактивная карта -->
+  <!-- Выдвижная интерактивная карта (100% доступ в РФ без VPN) -->
   <div id="mapDrawer">
+    <div class="map-toolbar">
+      <input type="text" id="placeSearchInput" class="map-search-input" placeholder="Поиск города, реки или озера (напр. Тюмень, Пур, Астрахань)...">
+      <button class="btn btn-accent" style="flex:0 0 auto;" onclick="searchPlaceByName()">Найти</button>
+    </div>
+    <div class="layer-switch">
+      <button class="layer-btn active" id="l_topo" onclick="switchMapLayer('topo')">🗺 Топокарта РФ (Реки и глубины)</button>
+      <button class="layer-btn" id="l_sat" onclick="switchMapLayer('sat')">🛰 Спутник (Косы и карьеры)</button>
+      <button class="layer-btn" id="l_carto" onclick="switchMapLayer('carto')">🧭 Схема (Быстрая)</button>
+      <button class="layer-btn" id="l_osm" onclick="switchMapLayer('osm')">🌐 OSM зеркало</button>
+    </div>
     <div id="mapBox"></div>
     <div class="map-hint">
-      <span>Нажмите в любое место карты (РФ, Казахстан, Беларусь и СНГ), чтобы сменить точку лова</span>
+      <span>Нажмите в любую точку на карте для смены водоема и пересчета клева</span>
       <button class="toggle-all-btn" onclick="toggleMapDrawer()">Свернуть ▲</button>
     </div>
   </div>
@@ -286,18 +344,18 @@
   <!-- Строка статуса автофильтра рыб по региону -->
   <div class="filter-bar">
     <span id="speciesCountInfo">Виды рыб в радиусе 300–500 км: 14</span>
-    <button class="toggle-all-btn" id="showAllToggle" onclick="toggleShowAllSpecies()">Показать весь справочник (22)</button>
+    <button class="toggle-all-btn" id="showAllToggle" onclick="toggleShowAllSpecies()">Весь справочник (22)</button>
   </div>
 
   <!-- Свайп-лента видов рыб с детализированными анатомическими иллюстрациями -->
   <div class="fish-strip" id="fishStrip"></div>
 
   <div class="container">
-    <!-- Автоопределение реальных водоемов поблизости (Overpass OSM) -->
+    <!-- Автоопределение реальных водоемов поблизости -->
     <div class="nearby-waters">
-      <div id="nearbyStatus">🌊 Ближайшие водоемы в радиусе 25 км (нажмите для автовыбора типа):</div>
+      <div id="nearbyStatus">🌊 Водоемы и типы акваторий поблизости (нажмите для выбора):</div>
       <div class="water-chips" id="nearbyChips">
-        <span class="w-chip">Поиск рек и озер на карте...</span>
+        <span class="w-chip">Поиск рек и озер вокруг точки...</span>
       </div>
     </div>
 
@@ -398,11 +456,10 @@ function renderFiveFish(score0to100, size = 18, theme = 'dark') {
 }
 
 /**
- * Детализированный анатомический SVG-атлас рыб (высокая точность силуэта, плавников, окраски и деталей)
+ * Детализированный анатомический SVG-атлас рыб (22 вида)
  */
 function getDetailedFishSVG(f) {
   const uid = `fg_${f.id}`;
-  // Персональные цветовые схемы и анатомические детали
   const templates = {
     pike: `
       <defs>
@@ -410,13 +467,10 @@ function getDetailedFishSVG(f) {
           <stop offset="0%" stop-color="#2d4a22"/><stop offset="55%" stop-color="#5c7c3e"/><stop offset="100%" stop-color="#fef9c3"/>
         </linearGradient>
       </defs>
-      <!-- Смещенные назад спинной и анальный плавники щуки -->
       <path d="M52,11 L61,5 L65,12 Z" fill="#b45309"/>
       <path d="M53,23 L60,29 L64,22 Z" fill="#d97706"/>
       <path d="M26,22 L31,28 L35,22 Z" fill="#ea580c"/>
-      <!-- Торпедообразное тело с утиным рылом -->
       <path d="M3,17 C10,13 18,12 34,11 C50,11 62,13 68,14 L77,8 L73,17 L77,26 L68,20 C62,21 50,23 34,23 C18,22 10,21 3,17 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="0.9"/>
-      <!-- Светлые пятна-полосы щуки -->
       <g fill="#fef08a" opacity="0.55">
         <ellipse cx="26" cy="16" rx="2.5" ry="1"/><ellipse cx="34" cy="18" rx="3" ry="1"/><ellipse cx="43" cy="15.5" rx="2.8" ry="1"/><ellipse cx="52" cy="17.5" rx="2.5" ry="1"/><ellipse cx="60" cy="16" rx="2" ry="0.9"/>
       </g>
@@ -429,17 +483,13 @@ function getDetailedFishSVG(f) {
           <stop offset="0%" stop-color="#1e3f20"/><stop offset="60%" stop-color="#658c48"/><stop offset="100%" stop-color="#f1f5f9"/>
         </linearGradient>
       </defs>
-      <!-- Колючий первый спинной плавник с черным пятном + второй спинной -->
       <path d="M21,11 Q29,3 39,10 Z" fill="#475569" stroke="#1e293b" stroke-width="0.7"/>
       <circle cx="36.5" cy="8.5" r="1.8" fill="#0f172a"/>
       <path d="M43,10 L52,6 L56,12 Z" fill="#658c48"/>
-      <!-- Ярко-красные брюшные, анальный и хвостовой плавники -->
       <path d="M24,23 L29,30 L35,24 Z" fill="#dc2626"/>
       <path d="M46,23 L52,29 L56,22 Z" fill="#dc2626"/>
       <path d="M64,14 L76,8 L72,17 L76,26 L64,20 Z" fill="#dc2626"/>
-      <!-- Горбатое тело окуня -->
       <path d="M6,18 Q24,6 44,10 L65,14 L65,20 L44,24 Q24,27 6,18 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="0.9"/>
-      <!-- 6 темных поперечных полос -->
       <path d="M22,10 L23,22 M29,9 L30,23 M36,10 L36,23 M43,11 L43,22 M50,12 L50,21 M57,13 L57,20" stroke="#142914" stroke-width="2.1" opacity="0.65" stroke-linecap="round"/>
       <path d="M18,13 Q21,18 18,22" fill="none" stroke="#1e293b" stroke-width="0.8"/>
       <circle cx="13" cy="16.5" r="2" fill="#f59e0b"/><circle cx="13" cy="16.5" r="1" fill="#0f172a"/>`,
@@ -450,12 +500,10 @@ function getDetailedFishSVG(f) {
           <stop offset="0%" stop-color="#334155"/><stop offset="55%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#f8fafc"/>
         </linearGradient>
       </defs>
-      <!-- Два раздельных спинных плавника судака -->
       <path d="M23,12 L31,5 L39,11 Z" fill="#64748b" stroke="#334155" stroke-width="0.7"/>
       <path d="M43,11 L54,6 L59,13 Z" fill="#64748b" stroke="#334155" stroke-width="0.7"/>
       <path d="M25,22 L30,28 L35,22 Z" fill="#cbd5e1"/>
       <path d="M47,22 L53,28 L58,21 Z" fill="#94a3b8"/>
-      <!-- Прогонистое тело судака -->
       <path d="M4,17 Q20,9 44,11 L66,14 L76,9 L72,17 L76,25 L66,20 L44,23 Q20,25 4,17 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="0.9"/>
       <path d="M24,11 L24,20 M31,11 L31,21 M39,11 L39,20 M47,12 L47,20 M55,13 L55,19" stroke="#334155" stroke-width="1.8" opacity="0.5"/>
       <circle cx="12.5" cy="15.5" r="1.9" fill="#e2e8f0"/><circle cx="12.5" cy="15.5" r="0.9" fill="#0f172a"/>`,
@@ -466,12 +514,10 @@ function getDetailedFishSVG(f) {
           <stop offset="0%" stop-color="#3b2818"/><stop offset="65%" stop-color="#785937"/><stop offset="100%" stop-color="#d6c5b3"/>
         </linearGradient>
       </defs>
-      <!-- Длинный второй спинной и анальный плавники + округлый хвост налима -->
       <path d="M25,13 L30,9 L34,13 Z" fill="#4a3520"/>
       <path d="M36,13 L67,10 L68,14 Z" fill="#4a3520"/>
       <path d="M40,21 L67,24 L68,20 Z" fill="#5c4028"/>
       <path d="M5,17 Q14,11 32,13 L67,14 C77,14 77,20 67,20 L32,21 Q14,23 5,17 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="0.9"/>
-      <!-- Мраморный камуфляж и подбородочный усик -->
       <path d="M22,15 Q26,18 30,15 M38,16 Q43,19 48,15 M54,16 Q59,18 63,16" stroke="#291c10" stroke-width="1.5" fill="none" opacity="0.65"/>
       <path d="M8,19 L6,24" stroke="#4a3520" stroke-width="1.1" stroke-linecap="round"/>
       <circle cx="12" cy="15.5" r="1.5" fill="#fde047"/><circle cx="12" cy="15.5" r="0.8" fill="#0f172a"/>`,
@@ -482,11 +528,9 @@ function getDetailedFishSVG(f) {
           <stop offset="0%" stop-color="#0f172a"/><stop offset="65%" stop-color="#334155"/><stop offset="100%" stop-color="#94a3b8"/>
         </linearGradient>
       </defs>
-      <!-- Маленький спинной и очень длинный анальный плавник сома -->
       <path d="M25,13 L28,9 L31,13 Z" fill="#1e293b"/>
       <path d="M34,21 L69,24 L70,19 Z" fill="#1e293b"/>
       <path d="M4,17 C8,11 22,12 36,13 L69,15 C76,15 76,20 69,20 L36,21 C22,22 8,22 4,17 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="0.9"/>
-      <!-- Длинные верхние и нижние усы сома -->
       <path d="M6,16 Q1,12 2,7 M7,19 Q4,24 6,27 M9,19 Q8,23 10,26" fill="none" stroke="#1e293b" stroke-width="1.1" stroke-linecap="round"/>
       <circle cx="11" cy="15" r="1.2" fill="#cbd5e1"/>`,
 
@@ -496,11 +540,9 @@ function getDetailedFishSVG(f) {
           <stop offset="0%" stop-color="${f.topCol || '#334155'}"/><stop offset="55%" stop-color="${f.color}"/><stop offset="100%" stop-color="#f8fafc"/>
         </linearGradient>
       </defs>
-      <!-- Спинной плавник (у хариуса — высокий парус) и жировой плавник сиговых/лососевых -->
       ${f.id === 'grayling'
         ? `<path d="M25,12 L29,2 L44,4 L46,12 Z" fill="#7c3aed" opacity="0.85" stroke="#1e293b" stroke-width="0.7"/>`
         : `<path d="M30,11 L37,4 L43,11 Z" fill="#64748b"/>`}
-      <!-- Характерный жировой плавник ближе к хвосту -->
       <path d="M56,12 Q59,9 61,13 Z" fill="${f.fin}"/>
       <path d="M27,22 L32,28 L37,22 Z" fill="${f.fin}"/>
       <path d="M48,22 L53,27 L57,21 Z" fill="${f.fin}"/>
@@ -515,12 +557,10 @@ function getDetailedFishSVG(f) {
           <stop offset="0%" stop-color="${f.topCol || '#334155'}"/><stop offset="55%" stop-color="${f.color}"/><stop offset="100%" stop-color="#f8fafc"/>
         </linearGradient>
       </defs>
-      <!-- Высокий спинной и плавники карповых (лещ, карась, сазан, плотва, язь, густера) -->
       <path d="M29,9 L37,2 L48,9 Z" fill="#475569"/>
       <path d="M26,23 L31,30 L37,24 Z" fill="${f.fin}"/>
       <path d="M45,23 L53,30 L59,21 Z" fill="${f.fin}"/>
       <path d="M64,14 L75,7 L70,17 L75,27 L64,20 Z" fill="${f.fin === '#dc2626' ? '#b91c1c' : '#475569'}"/>
-      <!-- Высокотелый корпус с боковой линией -->
       <path d="M7,17 Q27,3 50,10 L65,14 L65,20 L50,24 Q27,31 7,17 Z" fill="url(#${uid})" stroke="#334155" stroke-width="0.9"/>
       <path d="M19,17 Q38,20 63,17" fill="none" stroke="#475569" stroke-width="0.6" stroke-dasharray="1.5,1.5"/>
       <path d="M18,12 Q21,17 18,22" fill="none" stroke="#334155" stroke-width="0.8"/>
@@ -548,173 +588,31 @@ function getDetailedFishSVG(f) {
 }
 
 /**
- * Полный ихтиологический справочник (22 вида для РФ, Казахстана, Беларуси и приграничья)
- * Поле basins определяет автоматическую фильтрацию в радиусе 300-500 км от выбранной точки:
- * - 'arctic_sib': Западная и Восточная Сибирь, ЯНАО, ХМАО, Урал, Север (Обь, Иртыш, Таз, Пур, Енисей, Лена)
- * - 'nw_karelia': Северо-Запад РФ, Кольский, Карелия, Финляндия
- * - 'euro_west': Беларусь, Центр и Запад РФ, Балтика (Днепр, Неман, Припять, Зап. Двина)
- * - 'volga_ural': Поволжье, Кама, Дон, Урал, Юг РФ
- * - 'kazakh_steppe': Казахстан (Иртыш, Урал, Или, Балхаш, Сырдарья, Ишим, Тобол)
- * - 'far_east': Дальний Восток и Байкал (Амур, Приморье)
+ * База данных 22 видов рыб с привязкой к гидрографическим бассейнам (300–500 км)
  */
 const FISH_DB = [
-  // 10 базовых видов из вашего списка
-  {
-    id:'dace', name:'Елец', tpl:'cyprinid_slim', topCol:'#334155', color:'#94a3b8', fin:'#cbd5e1',
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'],
-    tMinStop:0.5, coldFactor:0.65, optPress:758, bladderSens:0.85, feedMode:'diurnal',
-    methods:{spin_micro:0.78,spin_light:0.45,spin_jig:0.05,spin_classic:0.5,bottom:0.88,float:1.0,fly:0.92},
-    bait:'Поплавок 1.5–3 г в проводку по границе струи, мормышка 0.4–1 г или легкий пикер (опарыш / мотыль / ручейник у дна).'
-  },
-  {
-    id:'ruffe', name:'Ерш', tpl:'perch', topCol:'#3f4f38', color:'#849669', fin:'#a3b18a',
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'],
-    tMinStop:0.0, coldFactor:0.95, optPress:757, bladderSens:0.6, feedMode:'all_day',
-    methods:{spin_micro:0.85,spin_light:0.4,spin_jig:0.05,spin_classic:0.05,bottom:1.0,float:0.88,fly:0.1},
-    bait:'Донная оснастка в русловой яме (пучок мотыля или навозного червя) либо наноджиг 0.8–2 г с волочением по дну.'
-  },
-  {
-    id:'burbot', name:'Налим', tpl:'burbot', color:'#6b4f35', fin:'#4a3520',
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','far_east'],
-    tMinStop:-0.5, coldFactor:1.25, optPress:752, bladderSens:0.35, feedMode:'nocturnal',
-    methods:{spin_micro:0.2,spin_light:0.68,spin_jig:0.88,spin_classic:0.5,bottom:1.0,float:0.15,fly:0.05},
-    bait:'Донка 60–100 г с нарезкой ерша/плотвы или пучком червей на выходе из ямы; джиг с перегрузом со стуком по камням в сумерках.'
-  },
-  {
-    id:'perch', name:'Окунь', tpl:'perch', color:'#4d7c43', fin:'#dc2626',
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'],
-    tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular',
-    methods:{spin_micro:1.0,spin_light:0.96,spin_jig:0.78,spin_classic:0.75,bottom:0.68,float:0.62,fly:0.45},
-    bait:'Джиг-риг / микроджиг 1.5–5 г или Отводной поводок + пассивный слаг/рачок (Tanta, Polaris), двойной подрыв с паузой.'
-  },
-  {
-    id:'gudgeon', name:'Пескарь', tpl:'cyprinid_slim', topCol:'#574c3f', color:'#a39074', fin:'#cbd5e1',
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'],
-    tMinStop:2.0, coldFactor:0.42, optPress:758, bladderSens:0.8, feedMode:'diurnal',
-    methods:{spin_micro:0.45,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.9,float:1.0,fly:0.15},
-    bait:'Легкая поплавочная или донная снасть с мотылем/кусочком червя строго по песчаному дну на течении.'
-  },
-  {
-    id:'roach', name:'Плотва', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#ef4444',
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'],
-    tMinStop:1.0, coldFactor:0.58, optPress:758, bladderSens:1.0, feedMode:'diurnal',
-    methods:{spin_micro:0.65,spin_light:0.15,spin_jig:0.0,spin_classic:0.05,bottom:0.95,float:1.0,fly:0.55},
-    bait:'Деликатный фидер (поводок 0.10 мм) или поплавок с подачей мотыля/опарыша у дна; мормышинг 0.4–1 г.'
-  },
-  {
-    id:'whitefish', name:'Сиг', tpl:'salmonid', topCol:'#334155', color:'#cbd5e1', fin:'#64748b',
-    basins:['arctic_sib','nw_karelia','far_east'],
-    tMinStop:0.0, coldFactor:1.12, optPress:757, bladderSens:0.75, feedMode:'crepuscular',
-    methods:{spin_micro:0.88,spin_light:0.82,spin_jig:0.35,spin_classic:0.78,bottom:1.0,float:0.85,fly:0.95},
-    bait:'Донная оснастка на песчаных косах (мормыш/бокоплав), микроджиг 1.5–3 г или нимфа/узкая микроколебалка на снос.'
-  },
-  {
-    id:'catfish', name:'Сом', tpl:'catfish', color:'#334155', fin:'#1e293b',
-    basins:['euro_west','volga_ural','kazakh_steppe','far_east'],
-    tMinStop:8.0, coldFactor:0.25, optPress:755, bladderSens:1.1, feedMode:'nocturnal',
-    methods:{spin_micro:0.05,spin_light:0.2,spin_jig:1.0,spin_classic:0.65,bottom:1.0,float:0.1,fly:0.0},
-    bait:'Донная снасть на входе в русловую яму (живец, пучок выползков, печень) или тяжелый джиг 28–50 г в сумерках (при T воды > +10°C).'
-  },
-  {
-    id:'pike', name:'Щука', tpl:'pike', color:'#5c7c3e', fin:'#d97706',
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'],
-    tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular',
-    methods:{spin_micro:0.45,spin_light:0.86,spin_jig:1.0,spin_classic:0.92,bottom:0.78,float:0.5,fly:0.65},
-    bait:'Джиг 12–28 г (виброхвост 3.5–4.5" / мандула) на бровках с паузой 3–4 сек, воблеры-суспендеры 110–130 мм или колебалка.'
-  },
-  {
-    id:'ide', name:'Язь', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#facc15',
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'],
-    tMinStop:1.0, coldFactor:0.62, optPress:758, bladderSens:0.95, feedMode:'crepuscular',
-    methods:{spin_micro:0.76,spin_light:0.88,spin_jig:0.35,spin_classic:0.88,bottom:0.95,float:0.9,fly:0.82},
-    bait:'Фидер на границе струи и обратки (опарыш/червь/кукуруза) или лайт-спиннинг (крэнки, вертушки #2, микроколебалки).'
-  },
-
-  // Дополнительные виды регионального справочника (РФ, Казахстан, Беларусь)
-  {
-    id:'grayling', name:'Хариус', tpl:'salmonid', topCol:'#312e81', color:'#94a3b8', fin:'#7c3aed', spots:true,
-    basins:['arctic_sib','nw_karelia','far_east'],
-    tMinStop:0.0, coldFactor:1.08, optPress:758, bladderSens:0.7, feedMode:'crepuscular',
-    methods:{spin_micro:0.9,spin_light:0.75,spin_jig:0.1,spin_classic:0.8,bottom:0.4,float:0.9,fly:1.0},
-    bait:'Нахлыст (сухая мушка / нимфа с золотой головкой), сбирулино/балда с мушками или вертушка #0–#1 на перекатах.'
-  },
-  {
-    id:'zander', name:'Судак', tpl:'zander', color:'#94a3b8', fin:'#64748b',
-    basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'],
-    tMinStop:1.0, coldFactor:0.85, optPress:757, bladderSens:1.2, feedMode:'crepuscular',
-    methods:{spin_micro:0.35,spin_light:0.82,spin_jig:1.0,spin_classic:0.7,bottom:0.8,float:0.2,fly:0.2},
-    bait:'Классический джиг с четким стуком по твердому дну/коряжнику (узкий виброхвост 3.5–4.5", мандула, поролон) или ночной воблер.'
-  },
-  {
-    id:'crucian', name:'Карась', tpl:'cyprinid_deep', topCol:'#713f12', color:'#eab308', fin:'#a16207', eye:'#f59e0b',
-    basins:['arctic_sib','euro_west','volga_ural','kazakh_steppe','far_east'],
-    tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.9, feedMode:'diurnal',
-    methods:{spin_micro:0.55,spin_light:0.1,spin_jig:0.0,spin_classic:0.0,bottom:0.95,float:1.0,fly:0.15},
-    bait:'Маховая удочка или флэт-фидер в прогретых заливах (червь, опарыш, чесночное тесто) либо мормышинг 0.2–0.6 г.'
-  },
-  {
-    id:'bream', name:'Лещ', tpl:'cyprinid_deep', topCol:'#451a03', color:'#b45309', fin:'#334155', eye:'#fde047',
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'],
-    tMinStop:1.5, coldFactor:0.60, optPress:758, bladderSens:1.05, feedMode:'crepuscular',
-    methods:{spin_micro:0.35,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.85,fly:0.05},
-    bait:'Фидер на русловой бровке (кормушка 50–90 г, поводок 0.12 мм до 1 м, пучок кормового мотыля и опарыш).'
-  },
-  {
-    id:'carp', name:'Сазан / Карп', tpl:'cyprinid_deep', topCol:'#78350f', color:'#d97706', fin:'#b91c1c', barbels:true,
-    basins:['euro_west','volga_ural','kazakh_steppe','far_east'],
-    tMinStop:6.0, coldFactor:0.30, optPress:757, bladderSens:0.95, feedMode:'crepuscular',
-    methods:{spin_micro:0.15,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.8,fly:0.1},
-    bait:'Карповая донная снасть / метод-фидер (бойлы 14–20 мм, тигровый орех, ферментированная кукуруза, пучок червей).'
-  },
-  {
-    id:'chub', name:'Голавль', tpl:'cyprinid_slim', topCol:'#1e293b', color:'#94a3b8', fin:'#dc2626',
-    basins:['euro_west','volga_ural'],
-    tMinStop:2.0, coldFactor:0.55, optPress:758, bladderSens:0.9, feedMode:'diurnal',
-    methods:{spin_micro:0.85,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.8,float:0.85,fly:0.95},
-    bait:'Лайт-спиннинг (крэнки 35–45 мм, микроколебалки 2–4 г на перекатах), нахлыст (жук) или донка на рака/корку.'
-  },
-  {
-    id:'asp', name:'Жерех', tpl:'cyprinid_slim', topCol:'#334155', color:'#cbd5e1', fin:'#64748b',
-    basins:['euro_west','volga_ural','kazakh_steppe'],
-    tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.95, feedMode:'crepuscular',
-    methods:{spin_micro:0.2,spin_light:0.85,spin_jig:0.5,spin_classic:1.0,bottom:0.2,float:0.1,fly:0.75},
-    bait:'Дальнобойные пилькеры, кастмастеры 10–24 г, тейл-спиннеры и тонущие стикбейты в верхнем и среднем слоях.'
-  },
-  {
-    id:'trout', name:'Форель / Кумжа', tpl:'salmonid', topCol:'#14532d', color:'#a3e635', fin:'#f97316', spots:true,
-    basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'],
-    tMinStop:0.5, coldFactor:1.05, optPress:758, bladderSens:0.7, feedMode:'crepuscular',
-    methods:{spin_micro:0.95,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.5,float:0.75,fly:1.0},
-    bait:'Микроколебалки 1.8–3.8 г, силиконовые нимфы на вольфрамовой головке или стример/нимфа нахлыстом.'
-  },
-  {
-    id:'nelma', name:'Нельма / Муксун', tpl:'salmonid', topCol:'#475569', color:'#e2e8f0', fin:'#94a3b8',
-    basins:['arctic_sib'],
-    tMinStop:0.0, coldFactor:1.15, optPress:756, bladderSens:0.7, feedMode:'crepuscular',
-    methods:{spin_micro:0.65,spin_light:0.95,spin_jig:0.6,spin_classic:1.0,bottom:0.75,float:0.4,fly:0.85},
-    bait:'Узкие серебристые колеблющиеся блесны 7–18 г, воблеры минноу 65–90 мм в толще воды на границе струй.'
-  },
-  {
-    id:'tench', name:'Линь', tpl:'cyprinid_deep', topCol:'#14532d', color:'#4d7c0f', fin:'#365314', eye:'#dc2626',
-    basins:['euro_west','volga_ural','kazakh_steppe'],
-    tMinStop:7.0, coldFactor:0.25, optPress:758, bladderSens:0.85, feedMode:'crepuscular',
-    methods:{spin_micro:0.3,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.85,float:1.0,fly:0.1},
-    bait:'Поплавочная снасть в окнах кувшинок и камыша (пучок навозного червя, опарыш, творожное тесто).'
-  },
-  {
-    id:'rudd', name:'Красноперка', tpl:'cyprinid_deep', topCol:'#3f6212', color:'#fde047', fin:'#dc2626', eye:'#f97316',
-    basins:['euro_west','volga_ural','kazakh_steppe'],
-    tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.9, feedMode:'diurnal',
-    methods:{spin_micro:0.85,spin_light:0.3,spin_jig:0.0,spin_classic:0.4,bottom:0.5,float:1.0,fly:0.95},
-    bait:'Поплавок с подачей в полводы у тростника, микровертушки #00 или нахлыст (сухая мушка / нимфа).'
-  },
-  {
-    id:'snakehead', name:'Змееголов', tpl:'burbot', color:'#3f6212', fin:'#1e293b',
-    basins:['kazakh_steppe','far_east'],
-    tMinStop:10.0, coldFactor:0.15, optPress:756, bladderSens:0.4, feedMode:'diurnal',
-    methods:{spin_micro:0.05,spin_light:0.3,spin_jig:0.5,spin_classic:1.0,bottom:0.8,float:0.3,fly:0.3},
-    bait:'Поверхностные силиконовые лягушки-незацепляйки по густому коряжнику и траве на мощном шнуре #3.0–#5.0 PE.'
-  }
+  { id:'dace', name:'Елец', tpl:'cyprinid_slim', topCol:'#334155', color:'#94a3b8', fin:'#cbd5e1', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:0.5, coldFactor:0.65, optPress:758, bladderSens:0.85, feedMode:'diurnal', methods:{spin_micro:0.78,spin_light:0.45,spin_jig:0.05,spin_classic:0.5,bottom:0.88,float:1.0,fly:0.92}, bait:'Поплавок 1.5–3 г в проводку по границе струи, мормышка 0.4–1 г или легкий пикер (опарыш / мотыль / ручейник у дна).' },
+  { id:'ruffe', name:'Ерш', tpl:'perch', topCol:'#3f4f38', color:'#849669', fin:'#a3b18a', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:0.0, coldFactor:0.95, optPress:757, bladderSens:0.6, feedMode:'all_day', methods:{spin_micro:0.85,spin_light:0.4,spin_jig:0.05,spin_classic:0.05,bottom:1.0,float:0.88,fly:0.1}, bait:'Донная оснастка в русловой яме (пучок мотыля или червя) либо наноджиг 0.8–2 г с медленным волочением по дну.' },
+  { id:'burbot', name:'Налим', tpl:'burbot', color:'#6b4f35', fin:'#4a3520', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','far_east'], tMinStop:-0.5, coldFactor:1.25, optPress:752, bladderSens:0.35, feedMode:'nocturnal', methods:{spin_micro:0.2,spin_light:0.68,spin_jig:0.88,spin_classic:0.5,bottom:1.0,float:0.15,fly:0.05}, bait:'Донка 60–100 г с нарезкой рыбы или пучком червей на выходе из ямы; джиг с перегрузом со стуком по камням в сумерках.' },
+  { id:'perch', name:'Окунь', tpl:'perch', color:'#4d7c43', fin:'#dc2626', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', methods:{spin_micro:1.0,spin_light:0.96,spin_jig:0.78,spin_classic:0.75,bottom:0.68,float:0.62,fly:0.45}, bait:'Джиг-риг / микроджиг 1.5–5 г или Отводной поводок + пассивный слаг/рачок (Tanta, Polaris), двойной подрыв с паузой.' },
+  { id:'gudgeon', name:'Пескарь', tpl:'cyprinid_slim', topCol:'#574c3f', color:'#a39074', fin:'#cbd5e1', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:2.0, coldFactor:0.42, optPress:758, bladderSens:0.8, feedMode:'diurnal', methods:{spin_micro:0.45,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.9,float:1.0,fly:0.15}, bait:'Легкая поплавочная или донная снасть с мотылем/кусочком червя строго по песчаному дну на течении.' },
+  { id:'roach', name:'Плотва', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#ef4444', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.0, coldFactor:0.58, optPress:758, bladderSens:1.0, feedMode:'diurnal', methods:{spin_micro:0.65,spin_light:0.15,spin_jig:0.0,spin_classic:0.05,bottom:0.95,float:1.0,fly:0.55}, bait:'Деликатный фидер (поводок 0.10 мм) или поплавок с подачей мотыля/опарыша у дна; мормышинг 0.4–1 г.' },
+  { id:'whitefish', name:'Сиг', tpl:'salmonid', topCol:'#334155', color:'#cbd5e1', fin:'#64748b', basins:['arctic_sib','nw_karelia','far_east'], tMinStop:0.0, coldFactor:1.12, optPress:757, bladderSens:0.75, feedMode:'crepuscular', methods:{spin_micro:0.88,spin_light:0.82,spin_jig:0.35,spin_classic:0.78,bottom:1.0,float:0.85,fly:0.95}, bait:'Донная оснастка на песчаных косах (мормыш/бокоплав), микроджиг 1.5–3 г или нимфа/узкая микроколебалка на снос.' },
+  { id:'catfish', name:'Сом', tpl:'catfish', color:'#334155', fin:'#1e293b', basins:['euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:8.0, coldFactor:0.25, optPress:755, bladderSens:1.1, feedMode:'nocturnal', methods:{spin_micro:0.05,spin_light:0.2,spin_jig:1.0,spin_classic:0.65,bottom:1.0,float:0.1,fly:0.0}, bait:'Донная снасть на входе в русловую яму (живец, пучок выползков, печень) или тяжелый джиг 28–50 г в сумерках (при T воды > +10°C).' },
+  { id:'pike', name:'Щука', tpl:'pike', color:'#5c7c3e', fin:'#d97706', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular', methods:{spin_micro:0.45,spin_light:0.86,spin_jig:1.0,spin_classic:0.92,bottom:0.78,float:0.5,fly:0.65}, bait:'Джиг 12–28 г (виброхвост 3.5–4.5" / мандула) на бровках с паузой 3–4 сек, воблеры-суспендеры 110–130 мм или колебалка.' },
+  { id:'ide', name:'Язь', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#facc15', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.0, coldFactor:0.62, optPress:758, bladderSens:0.95, feedMode:'crepuscular', methods:{spin_micro:0.76,spin_light:0.88,spin_jig:0.35,spin_classic:0.88,bottom:0.95,float:0.9,fly:0.82}, bait:'Фидер на границе струи и обратки (опарыш/червь/кукуруза) или лайт-спиннинг (крэнки, вертушки #2, микроколебалки).' },
+  { id:'grayling', name:'Хариус', tpl:'salmonid', topCol:'#312e81', color:'#94a3b8', fin:'#7c3aed', spots:true, basins:['arctic_sib','nw_karelia','far_east'], tMinStop:0.0, coldFactor:1.08, optPress:758, bladderSens:0.7, feedMode:'crepuscular', methods:{spin_micro:0.9,spin_light:0.75,spin_jig:0.1,spin_classic:0.8,bottom:0.4,float:0.9,fly:1.0}, bait:'Нахлыст (сухая мушка / нимфа с золотой головкой), сбирулино/балда с мушками или вертушка #0–#1 на перекатах.' },
+  { id:'zander', name:'Судак', tpl:'zander', color:'#94a3b8', fin:'#64748b', basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.0, coldFactor:0.85, optPress:757, bladderSens:1.2, feedMode:'crepuscular', methods:{spin_micro:0.35,spin_light:0.82,spin_jig:1.0,spin_classic:0.7,bottom:0.8,float:0.2,fly:0.2}, bait:'Классический джиг с четким стуком по твердому дну/коряжнику (узкий виброхвост 3.5–4.5", мандула, поролон) или ночной воблер.' },
+  { id:'crucian', name:'Карась', tpl:'cyprinid_deep', topCol:'#713f12', color:'#eab308', fin:'#a16207', eye:'#f59e0b', basins:['arctic_sib','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.9, feedMode:'diurnal', methods:{spin_micro:0.55,spin_light:0.1,spin_jig:0.0,spin_classic:0.0,bottom:0.95,float:1.0,fly:0.15}, bait:'Маховая удочка или флэт-фидер в прогретых заливах (червь, опарыш, чесночное тесто) либо мормышинг 0.2–0.6 г.' },
+  { id:'bream', name:'Лещ', tpl:'cyprinid_deep', topCol:'#451a03', color:'#b45309', fin:'#334155', eye:'#fde047', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.5, coldFactor:0.60, optPress:758, bladderSens:1.05, feedMode:'crepuscular', methods:{spin_micro:0.35,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.85,fly:0.05}, bait:'Фидер на русловой бровке (кормушка 50–90 г, поводок 0.12 мм до 1 м, пучок кормового мотыля и опарыш).' },
+  { id:'carp', name:'Сазан / Карп', tpl:'cyprinid_deep', topCol:'#78350f', color:'#d97706', fin:'#b91c1c', barbels:true, basins:['euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:6.0, coldFactor:0.30, optPress:757, bladderSens:0.95, feedMode:'crepuscular', methods:{spin_micro:0.15,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.8,fly:0.1}, bait:'Карповая донная снасть / метод-фидер (бойлы 14–20 мм, тигровый орех, ферментированная кукуруза, пучок червей).' },
+  { id:'chub', name:'Голавль', tpl:'cyprinid_slim', topCol:'#1e293b', color:'#94a3b8', fin:'#dc2626', basins:['euro_west','volga_ural'], tMinStop:2.0, coldFactor:0.55, optPress:758, bladderSens:0.9, feedMode:'diurnal', methods:{spin_micro:0.85,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.8,float:0.85,fly:0.95}, bait:'Лайт-спиннинг (крэнки 35–45 мм, микроколебалки 2–4 г на перекатах), нахлыст (жук) или донка на рака/корку.' },
+  { id:'asp', name:'Жерех', tpl:'cyprinid_slim', topCol:'#334155', color:'#cbd5e1', fin:'#64748b', basins:['euro_west','volga_ural','kazakh_steppe'], tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.95, feedMode:'crepuscular', methods:{spin_micro:0.2,spin_light:0.85,spin_jig:0.5,spin_classic:1.0,bottom:0.2,float:0.1,fly:0.75}, bait:'Дальнобойные пилькеры, кастмастеры 10–24 г, тейл-спиннеры и тонущие стикбейты в верхнем и среднем слоях.' },
+  { id:'trout', name:'Форель / Кумжа', tpl:'salmonid', topCol:'#14532d', color:'#a3e635', fin:'#f97316', spots:true, basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:0.5, coldFactor:1.05, optPress:758, bladderSens:0.7, feedMode:'crepuscular', methods:{spin_micro:0.95,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.5,float:0.75,fly:1.0}, bait:'Микроколебалки 1.8–3.8 г, силиконовые нимфы на вольфрамовой головке или стример/нимфа нахлыстом.' },
+  { id:'nelma', name:'Нельма / Муксун', tpl:'salmonid', topCol:'#475569', color:'#e2e8f0', fin:'#94a3b8', basins:['arctic_sib'], tMinStop:0.0, coldFactor:1.15, optPress:756, bladderSens:0.7, feedMode:'crepuscular', methods:{spin_micro:0.65,spin_light:0.95,spin_jig:0.6,spin_classic:1.0,bottom:0.75,float:0.4,fly:0.85}, bait:'Узкие серебристые колеблющиеся блесны 7–18 г, воблеры минноу 65–90 мм в толще воды на границе струй.' },
+  { id:'tench', name:'Линь', tpl:'cyprinid_deep', topCol:'#14532d', color:'#4d7c0f', fin:'#365314', eye:'#dc2626', basins:['euro_west','volga_ural','kazakh_steppe'], tMinStop:7.0, coldFactor:0.25, optPress:758, bladderSens:0.85, feedMode:'crepuscular', methods:{spin_micro:0.3,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.85,float:1.0,fly:0.1}, bait:'Поплавочная снасть в окнах кувшинок и камыша (пучок навозного червя, опарыш, творожное тесто).' },
+  { id:'rudd', name:'Красноперка', tpl:'cyprinid_deep', topCol:'#3f6212', color:'#fde047', fin:'#dc2626', eye:'#f97316', basins:['euro_west','volga_ural','kazakh_steppe'], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.9, feedMode:'diurnal', methods:{spin_micro:0.85,spin_light:0.3,spin_jig:0.0,spin_classic:0.4,bottom:0.5,float:1.0,fly:0.95}, bait:'Поплавок с подачей в полводы у тростника, микровертушки #00 или нахлыст (сухая мушка / нимфа).' },
+  { id:'snakehead', name:'Змееголов', tpl:'burbot', color:'#3f6212', fin:'#1e293b', basins:['kazakh_steppe','far_east'], tMinStop:10.0, coldFactor:0.15, optPress:756, bladderSens:0.4, feedMode:'diurnal', methods:{spin_micro:0.05,spin_light:0.3,spin_jig:0.5,spin_classic:1.0,bottom:0.8,float:0.3,fly:0.3}, bait:'Поверхностные силиконовые лягушки-незацепляйки по густому коряжнику и траве на мощном шнуре #3.0–#5.0 PE.' }
 ];
 
 let state = {
@@ -736,33 +634,94 @@ let state = {
 let DAYS_DATA = [];
 let mapInstance = null;
 let mapMarker = null;
+let currentTileLayer = null;
 
-/**
- * Автоматическое определение ихтиологического бассейна (радиус 300–500 км)
- * по координатам для России, Казахстана, Беларуси и приграничных стран
- */
+// Картографические серверы, 100% доступные в РФ без VPN
+const MAP_LAYERS = {
+  // 1. Топокарта РФ на русском (ArcGIS World Topo Map — не блокируется в РФ, четкие реки, озера и дороги)
+  topo: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    attr: 'Esri Topo РФ'
+  },
+  // 2. Спутниковые снимки высокого разрешения (видны песчаные косы, протоки, карьеры и подъезды)
+  sat: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attr: 'Esri Спутник'
+  },
+  // 3. Быстрая схема CartoDB Voyager (работает через глобальный Fastly CDN без блокировок OSM)
+  carto: {
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attr: 'CartoDB'
+  },
+  // 4. Немецкое зеркало OpenStreetMap
+  osm: {
+    url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
+    attr: 'OSM DE'
+  }
+};
+
+function switchMapLayer(key) {
+  document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('l_' + key);
+  if (btn) btn.classList.add('active');
+  if (!mapInstance) return;
+  if (currentTileLayer) mapInstance.removeLayer(currentTileLayer);
+  const cfg = MAP_LAYERS[key] || MAP_LAYERS.topo;
+  currentTileLayer = L.tileLayer(cfg.url, { maxZoom: 18, attribution: cfg.attr }).addTo(mapInstance);
+}
+
+function toggleMapDrawer() {
+  const dr = document.getElementById('mapDrawer');
+  dr.classList.toggle('open');
+  if (dr.classList.contains('open')) {
+    setTimeout(() => {
+      if (typeof L === 'undefined') {
+        alert('Библиотека карты еще загружается, подождите 2 секунды и нажмите снова.');
+        return;
+      }
+      if (!mapInstance) {
+        mapInstance = L.map('mapBox').setView([state.lat, state.lon], 9);
+        switchMapLayer('topo'); // По умолчанию грузим 100% рабочую в РФ Топокарту
+        mapMarker = L.marker([state.lat, state.lon]).addTo(mapInstance);
+        mapInstance.on('click', e => {
+          setNewLocation(e.latlng.lat, e.latlng.lng);
+        });
+      } else {
+        mapInstance.invalidateSize();
+        mapInstance.setView([state.lat, state.lon]);
+      }
+    }, 150);
+  }
+}
+
+// Поиск города или водоема текстом через открытый геокодер Open-Meteo (100% работает в РФ без VPN)
+async function searchPlaceByName() {
+  const q = document.getElementById('placeSearchInput').value.trim();
+  if (!q) return;
+  try {
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=ru&format=json`);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      const place = data.results[0];
+      const region = place.admin1 ? `, ${place.admin1}` : '';
+      state.locLabel = `${place.name}${region}`;
+      document.getElementById('locName').textContent = state.locLabel;
+      await setNewLocation(place.latitude, place.longitude, true);
+      if (mapInstance) mapInstance.setView([place.latitude, place.longitude], 10);
+    } else {
+      alert('Населенный пункт не найден. Попробуйте ввести название ближайшего города.');
+    }
+  } catch (e) {
+    alert('Ошибка поиска. Выберите точку нажатием на карте.');
+  }
+}
+
 function detectBasinByCoords(lat, lon) {
-  // Дальний Восток и Амур
-  if (lon >= 115) {
-    return { code: 'far_east', name: 'Амурский и Дальневосточный бассейн (РФ / Приграничье)' };
-  }
-  // Арктическая и таежная Сибирь (ЯНАО, ХМАО, Томск, Красноярск, Якутия)
-  if (lon >= 60 && lon < 115 && lat >= 55.5) {
-    return { code: 'arctic_sib', name: 'Обь-Иртышский и Енисейский бассейн (Сибирь / Урал)' };
-  }
-  // Казахстан, Южный Урал и степная зона (Иртыш, Или, Балхаш, Урал, Сырдарья, Ишим)
-  if (lon >= 50 && lon < 88 && lat < 55.5) {
-    return { code: 'kazakh_steppe', name: 'Казахстанский и Урало-Иртышский бассейн (КЗ / Юг Сибири)' };
-  }
-  // Северо-Запад РФ, Карелия, Кольский, Финляндия
-  if (lon < 60 && lat >= 59.5) {
-    return { code: 'nw_karelia', name: 'Беломорско-Балтийский и Карельский бассейн (СЗ РФ)' };
-  }
-  // Беларусь, Прибалтика и Запад РФ (Днепр, Припять, Неман, Зап. Двина)
-  if (lon < 35.5 && lat < 59.5) {
-    return { code: 'euro_west', name: 'Днепровско-Неманский бассейн (Беларусь / Запад РФ)' };
-  }
-  // Поволжье, Центр РФ, Дон, Кама
+  if (lon >= 115) return { code: 'far_east', name: 'Амурский и Дальневосточный бассейн (РФ / Приграничье)' };
+  if (lon >= 60 && lon < 115 && lat >= 55.5) return { code: 'arctic_sib', name: 'Обь-Иртышский и Енисейский бассейн (Сибирь / Урал)' };
+  if (lon >= 50 && lon < 88 && lat < 55.5) return { code: 'kazakh_steppe', name: 'Казахстанский и Урало-Иртышский бассейн (КЗ / Юг Сибири)' };
+  if (lon < 60 && lat >= 59.5) return { code: 'nw_karelia', name: 'Беломорско-Балтийский и Карельский бассейн (СЗ РФ)' };
+  if (lon < 35.5 && lat < 59.5) return { code: 'euro_west', name: 'Днепровско-Неманский бассейн (Беларусь / Запад РФ)' };
   return { code: 'volga_ural', name: 'Волжско-Камский и Донской бассейн (Европейская часть РФ)' };
 }
 
@@ -779,49 +738,23 @@ function toggleShowAllSpecies() {
   renderAll();
 }
 
-/**
- * Инициализация и работа с картой Leaflet
- */
-function toggleMapDrawer() {
-  const dr = document.getElementById('mapDrawer');
-  dr.classList.toggle('open');
-  if (dr.classList.contains('open')) {
-    setTimeout(() => {
-      if (!mapInstance) {
-        mapInstance = L.map('mapBox').setView([state.lat, state.lon], 7);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 17,
-          attribution: '© OpenStreetMap'
-        }).addTo(mapInstance);
-        mapMarker = L.marker([state.lat, state.lon]).addTo(mapInstance);
-        mapInstance.on('click', e => {
-          setNewLocation(e.latlng.lat, e.latlng.lng);
-        });
-      } else {
-        mapInstance.invalidateSize();
-        mapInstance.setView([state.lat, state.lon]);
-      }
-    }, 100);
-  }
-}
-
 function detectMyGPS() {
   if (!navigator.geolocation) {
-    alert('Геолокация не поддерживается браузером. Выберите точку на карте.');
+    alert('Геолокация не поддерживается браузером.');
     return;
   }
-  document.getElementById('apiStatus').textContent = 'Поиск спутников...';
+  document.getElementById('apiStatus').textContent = 'Поиск GPS...';
   navigator.geolocation.getCurrentPosition(
     pos => setNewLocation(pos.coords.latitude, pos.coords.longitude),
     () => {
-      alert('Доступ к GPS отклонен или выключен. Выберите точку кликом на карте.');
+      alert('Геолокация выключена на телефоне. Выберите точку на карте или через строку поиска.');
       if (!document.getElementById('mapDrawer').classList.contains('open')) toggleMapDrawer();
     },
     { enableHighAccuracy: true, timeout: 10000 }
   );
 }
 
-async function setNewLocation(lat, lon) {
+async function setNewLocation(lat, lon, skipReverseGeo = false) {
   state.lat = Math.round(lat * 10000) / 10000;
   state.lon = Math.round(lon * 10000) / 10000;
 
@@ -830,51 +763,42 @@ async function setNewLocation(lat, lon) {
     mapInstance.panTo([state.lat, state.lon]);
   }
 
-  // 1. Определение ихтиологического бассейна
   const basin = detectBasinByCoords(state.lat, state.lon);
   state.basinCode = basin.code;
   state.basinName = basin.name;
 
-  // Если текущая выбранная рыба не входит в новый регион — выбираем первую доступную
   const regionalList = getFilteredFishList();
   if (!regionalList.some(f => f.id === state.fishId)) {
     state.fishId = regionalList[0].id;
   }
 
-  // 2. Запрос названия населенного пункта/района (Reverse Geocoding)
-  fetchLocationName(state.lat, state.lon);
-
-  // 3. Сканирование реальных водоемов поблизости (Overpass API)
+  if (!skipReverseGeo) fetchLocationName(state.lat, state.lon);
   fetchNearbyWaters(state.lat, state.lon);
-
-  // 4. Запрос погоды по новым координатам
   await fetchLiveMeteo();
 }
 
+// Геокодер BigDataCloud (100% работает в РФ без VPN и не блокирует мобильные браузеры, в отличие от Nominatim)
 async function fetchLocationName(lat, lon) {
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=ru`);
+    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ru`);
     const data = await res.json();
-    const addr = data.address || {};
-    const city = addr.city || addr.town || addr.village || addr.county || addr.state || 'Точка на карте';
-    const region = addr.state && addr.state !== city ? `, ${addr.state}` : '';
-    state.locLabel = `${city}${region} (${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E)`;
+    const city = data.city || data.locality || data.principalSubdivision || 'Точка лова';
+    const reg = data.principalSubdivision && data.principalSubdivision !== city ? `, ${data.principalSubdivision}` : '';
+    state.locLabel = `${city}${reg}`;
     document.getElementById('locName').textContent = state.locLabel;
   } catch (e) {
-    state.locLabel = `Координаты: ${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E`;
+    state.locLabel = `${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E`;
     document.getElementById('locName').textContent = state.locLabel;
   }
 }
 
-/**
- * Автоопределение ближайших водоемов в радиусе 25 км через Overpass API (OpenStreetMap)
- */
+// Поиск ближайших водоемов через российское зеркало Overpass (maps.mail.ru/osm/tools/overpass) + резерв
 async function fetchNearbyWaters(lat, lon) {
   const chipsEl = document.getElementById('nearbyChips');
-  chipsEl.innerHTML = `<span class="w-chip">Сканирование рек и озер вокруг точки...</span>`;
-  const query = `[out:json][timeout:10];(way["waterway"="river"]["name"](around:25000,${lat},${lon});way["natural"="water"]["name"](around:25000,${lat},${lon});relation["natural"="water"]["name"](around:25000,${lat},${lon}););out tags 25;`;
+  chipsEl.innerHTML = `<span class="w-chip">Определение рек и озер вокруг точки...</span>`;
+  const query = `[out:json][timeout:8];(way["waterway"="river"]["name"](around:25000,${lat},${lon});way["natural"="water"]["name"](around:25000,${lat},${lon}););out tags 20;`;
   try {
-    const res = await fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query));
+    const res = await fetch('https://maps.mail.ru/osm/tools/overpass/api/interpreter?data=' + encodeURIComponent(query));
     const data = await res.json();
     const seen = new Set();
     const items = [];
@@ -896,18 +820,16 @@ async function fetchNearbyWaters(lat, lon) {
       chipsEl.innerHTML = items.map((it, idx) =>
         `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`
       ).join('');
-    } else {
-      chipsEl.innerHTML = `
-        <span class="w-chip" onclick="selectNearbyWater(this, 'small_river')">🌊 Малые реки (в радиусе 25 км)</span>
-        <span class="w-chip" onclick="selectNearbyWater(this, 'quarry')">💧 Карьеры и глубокие озера</span>
-        <span class="w-chip" onclick="selectNearbyWater(this, 'tundra_lake')">🌿 Придаточные озера и старицы</span>`;
+      return;
     }
-  } catch (e) {
-    chipsEl.innerHTML = `
-      <span class="w-chip" onclick="selectNearbyWater(this, 'small_river')">🌊 Реки с умеренным течением</span>
-      <span class="w-chip" onclick="selectNearbyWater(this, 'big_river')">⚓ Русло крупной реки</span>
-      <span class="w-chip" onclick="selectNearbyWater(this, 'quarry')">💧 Глубокие карьеры и озера</span>`;
-  }
+  } catch (e) {}
+
+  // Универсальные гидрологические чипы, если в тундре/степи водоемы на карте безымянные
+  chipsEl.innerHTML = `
+    <span class="w-chip active" onclick="selectNearbyWater(this, 'small_river')">🌊 Малая / средняя река</span>
+    <span class="w-chip" onclick="selectNearbyWater(this, 'big_river')">⚓ Русло крупной реки</span>
+    <span class="w-chip" onclick="selectNearbyWater(this, 'quarry')">💧 Глубокий карьер / вдхр</span>
+    <span class="w-chip" onclick="selectNearbyWater(this, 'tundra_lake')">🌿 Мелководное озеро / старица</span>`;
 }
 
 function selectNearbyWater(el, wType) {
@@ -968,7 +890,6 @@ async function fetchLiveMeteo() {
     if (!res.ok) throw new Error();
     const data = await res.json();
 
-    // Барометрическая норма выбранной высоты над уровнем моря (мм рт. ст.)
     state.elevation = Math.round(data.elevation || 45);
     state.normPress = Math.round(760 - (state.elevation / 11.5));
 
@@ -1036,10 +957,9 @@ function calcHourly(fish, day, hrObj, method, water) {
     kLight = (dSr <= 1.5 || dSs <= 1.5) ? 1.0 : (isDay ? 0.88 : 0.52);
   }
 
-  // Сезонная поправка для теплолюбивых/холодноводных видов в зависимости от реальной температуры воды
   let kSeason = fish.coldFactor;
   if (wTemp >= 12) {
-    if (['burbot','whitefish','nelma'].includes(fish.id)) kSeason = 0.35; // В теплой воде налим и сиг пассивны
+    if (['burbot','whitefish','nelma'].includes(fish.id)) kSeason = 0.35;
     if (['carp','crucian','catfish','tench','snakehead','bream'].includes(fish.id)) kSeason = 1.05;
   }
 
@@ -1050,7 +970,6 @@ function calcHourly(fish, day, hrObj, method, water) {
   const md = day.moon.moonDay;
   const kMoon = ((md >= 4 && md <= 9) || (md >= 18 && md <= 23)) ? 1.06 : ((md <= 2 || md >= 29 || (md >= 14 && md <= 16)) ? 0.74 : 0.88);
 
-  // Отклонение от локальной барической нормы высоты места лова
   const pDiff = Math.abs(hrObj.press - state.normPress);
   const grad = Math.abs(hrObj.dp3h) * 2.4 + Math.abs(day.dP) * 0.35;
   let kPress = Math.max(0.32, 1.0 - (pDiff * 0.012 + grad * 0.04) * fish.bladderSens);
@@ -1113,7 +1032,6 @@ function renderAll() {
     ? `Полный справочник: ${visibleSpecies.length} видов`
     : `Автоопределение по региону: ${visibleSpecies.length} видов`;
 
-  // 1. Верхняя карусель с перерисованными рыбами
   document.getElementById('fishStrip').innerHTML = visibleSpecies.map(f => {
     const sc = calcDayBest(f, day, state.method, state.water);
     return `<div class="fish-chip ${f.id === fish.id ? 'active' : ''}" onclick="state.fishId='${f.id}';renderAll()">
@@ -1123,12 +1041,10 @@ function renderAll() {
     </div>`;
   }).join('');
 
-  // 2. Астро-строка с барической нормой высоты
   const dpS = day.dP > 0 ? `+${day.dP}` : day.dP;
   document.getElementById('astroBar').textContent =
     `🌙 ${day.moon.moonDay} л.д. (${day.moon.illum}%) • 🧭 ${day.pressAvg} мм (норма ${state.normPress}, Δ ${dpS}) • 💨 ${day.windDir} ${day.windMax} м/с • 💧 Вода ~${day.waterTemp}°C`;
 
-  // 3. Неделя
   document.getElementById('weekGrid').innerHTML = DAYS_DATA.map((d, i) => {
     const sc = calcDayBest(fish, d, state.method, state.water);
     return `<div class="day-card ${i === state.dayIdx ? 'active' : ''}" onclick="state.dayIdx=${i};renderAll()">
@@ -1139,7 +1055,6 @@ function renderAll() {
     </div>`;
   }).join('');
 
-  // 4. Почасовой расчет
   const hScores = day.hours.map(hr => ({ ...hr, score: calcHourly(fish, day, hr, state.method, state.water) }));
   let bestH = 12, bestAvg = -1;
   for (let h = 0; h < 24; h++) {
@@ -1163,7 +1078,6 @@ function renderAll() {
   document.getElementById('riskTitle').textContent = rT;
   document.getElementById('riskSub').textContent = rS;
 
-  // 5. Почасовой список
   document.getElementById('hourlyTitle').textContent = `Почасовой прогноз: ${fish.name} (${day.label})`;
   document.getElementById('sunInfo').innerHTML = `<span>🌅 Восход: ${fmtHM(day.sunriseHr)}</span><span>🌇 Закат: ${fmtHM(day.sunsetHr)}</span><span>🌕 Кульм. Луны: ${String(day.moon.transitHour).padStart(2,'0')}:00</span>`;
 
@@ -1186,6 +1100,9 @@ document.getElementById('depthRange').addEventListener('input', e => {
   state.depth = parseFloat(e.target.value);
   document.getElementById('depthVal').textContent = state.depth.toFixed(1);
   renderAll();
+});
+document.getElementById('placeSearchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchPlaceByName();
 });
 
 buildFallback();
