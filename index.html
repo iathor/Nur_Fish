@@ -6,9 +6,8 @@
   <meta name="theme-color" content="#0b1120">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Клев ПРО">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>Прогноз клева • Интерактивный Атлас</title>
+  <title>Прогноз клева • Атлас ПРО</title>
   <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
   <script src="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.js"></script>
   <script>
@@ -29,293 +28,115 @@
       --warn: #f59e0b;
       --bad: #ef4444;
       --border: #334155;
+      --strip-bg: #ffffff;
+      --chip-bg: #f8fafc;
+      --chip-text: #0f172a;
+    }
+    [data-theme="light"] {
+      --bg-main: #f1f5f9;
+      --bg-panel: #ffffff;
+      --bg-card: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent: #0284c7;
+      --good: #059669;
+      --warn: #d97706;
+      --bad: #dc2626;
+      --border: #cbd5e1;
+      --strip-bg: #e2e8f0;
+      --chip-bg: #ffffff;
+      --chip-text: #0f172a;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg-main); color: var(--text-main); padding-bottom: 32px; }
+    body { background: var(--bg-main); color: var(--text-main); padding-bottom: 32px; transition: background 0.2s, color 0.2s; }
 
-    /* Шапка */
-    .header {
-      background: var(--bg-panel);
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
+    .header { background: var(--bg-panel); padding: 12px 14px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
     .header-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .loc-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; color: #fff; }
-    .live-pill {
-      font-size: 11px; padding: 3px 8px; border-radius: 12px;
-      background: #064e3b; color: #34d399; font-weight: 600;
-      display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
-    }
+    .loc-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .live-pill { font-size: 11px; padding: 3px 8px; border-radius: 12px; background: #064e3b; color: #34d399; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; }
     .dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; animation: blink 1.6s infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
     
     .basin-line { font-size: 11px; color: var(--accent); margin-top: 3px; font-weight: 600; }
     .astro-line { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.35; }
 
-    /* Панель быстрого выбора городов (ответ на замечание) */
-    .quick-cities {
-      display: flex;
-      gap: 5px;
-      overflow-x: auto;
-      margin-top: 8px;
-      padding-bottom: 2px;
-      scrollbar-width: none;
-    }
+    .quick-cities { display: flex; gap: 5px; overflow-x: auto; margin-top: 8px; padding-bottom: 2px; scrollbar-width: none; }
     .quick-cities::-webkit-scrollbar { display: none; }
-    .city-pill {
-      background: var(--bg-card);
-      color: #e2e8f0;
-      border: 1px solid var(--border);
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      white-space: nowrap;
-      cursor: pointer;
-    }
+    .city-pill { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 4px 10px; border-radius: 12px; font-size: 11px; white-space: nowrap; cursor: pointer; }
     .city-pill.active { background: #0284c7; color: #fff; border-color: #38bdf8; font-weight: 600; }
 
     .btn-row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-    .btn {
-      flex: 1;
-      min-width: 95px;
-      background: var(--bg-card);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      padding: 7px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-    }
+    .btn { flex: 1; min-width: 90px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; text-align: center; cursor: pointer; }
     .btn-accent { background: #0284c7; border-color: #38bdf8; color: #fff; }
 
-    /* Выдвижная панель карты и поиска */
-    #mapDrawer {
-      display: none;
-      background: var(--bg-panel);
-      border-bottom: 2px solid var(--accent);
-      padding: 10px 12px;
-    }
+    #mapDrawer { display: none; background: var(--bg-panel); border-bottom: 2px solid var(--accent); padding: 10px 12px; }
     #mapDrawer.open { display: block; }
-    
     .map-toolbar { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
-    .map-search-input {
-      flex: 1;
-      min-width: 160px;
-      background: var(--bg-card);
-      color: #fff;
-      border: 1px solid var(--border);
-      padding: 7px 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      outline: none;
-    }
-    .layer-switch {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      margin-bottom: 8px;
-      scrollbar-width: none;
-    }
-    .layer-btn {
-      background: var(--bg-card);
-      color: #cbd5e1;
-      border: 1px solid var(--border);
-      padding: 5px 10px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-    }
+    .map-search-input { flex: 1; min-width: 160px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 7px 10px; border-radius: 8px; font-size: 13px; outline: none; }
+    .layer-switch { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 8px; scrollbar-width: none; }
+    .layer-btn { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; }
     .layer-btn.active { background: #0284c7; color: #fff; border-color: #38bdf8; }
-
-    #mapBox {
-      width: 100%;
-      height: 310px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #0f172a;
-      z-index: 10;
-    }
+    #mapBox { width: 100%; height: 290px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; z-index: 10; }
     .map-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 
-    .filter-bar {
-      background: #f1f5f9;
-      color: #334155;
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #cbd5e1;
-    }
-    .toggle-all-btn {
-      background: #e2e8f0;
-      border: 1px solid #94a3b8;
-      color: #0f172a;
-      padding: 3px 9px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+    .filter-bar { background: var(--bg-card); color: var(--text-main); padding: 6px 12px; font-size: 11px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+    .toggle-all-btn { background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-main); padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
 
-    /* Атлас рыб */
-    .fish-strip {
-      background: #ffffff;
-      padding: 8px 10px;
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      border-bottom: 2px solid var(--border);
-      scrollbar-width: none;
-    }
+    .fish-strip { background: var(--strip-bg); padding: 8px 10px; display: flex; gap: 8px; overflow-x: auto; border-bottom: 2px solid var(--border); scrollbar-width: none; }
     .fish-strip::-webkit-scrollbar { display: none; }
-    .fish-chip {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 16px;
-      padding: 6px 10px;
-      min-width: 112px;
-      flex-shrink: 0;
-      cursor: pointer;
-    }
-    .fish-chip.active {
-      background: #e2e8f0;
-      border-color: #334155;
-      box-shadow: inset 0 0 0 1px #475569;
-    }
-    .fish-chip-name { font-size: 13px; font-weight: 700; color: #0f172a; margin: 2px 0 3px; white-space: nowrap; }
+    .fish-chip { display: flex; flex-direction: column; align-items: center; background: var(--chip-bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 6px 10px; min-width: 112px; flex-shrink: 0; cursor: pointer; }
+    .fish-chip.active { background: var(--bg-card); border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+    .fish-chip-name { font-size: 13px; font-weight: 700; color: var(--chip-text); margin: 2px 0 3px; white-space: nowrap; }
+    [data-theme="light"] .fish-chip-name { color: #0f172a; }
     .fish-icon { width: 76px; height: 34px; }
 
     .container { padding: 12px; display: flex; flex-direction: column; gap: 12px; max-width: 1100px; margin: 0 auto; }
 
-    .nearby-waters {
-      background: #111c2d;
-      border: 1px dashed #334155;
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
+    /* Билборд справки по рыбе */
+    .fish-encyclopedia { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .enc-title { font-size: 13px; font-weight: 700; color: var(--accent); display: flex; justify-content: space-between; align-items: center; }
+    .enc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px; margin-top: 4px; }
+    .enc-item { background: var(--bg-card); padding: 6px 10px; border-radius: 8px; font-size: 11px; color: var(--text-muted); }
+    .enc-item b { color: var(--text-main); display: block; margin-bottom: 2px; }
+
+    .nearby-waters { background: var(--bg-panel); border: 1px dashed var(--border); border-radius: 10px; padding: 8px 10px; font-size: 11px; color: var(--text-muted); }
     .water-chips { display: flex; gap: 6px; overflow-x: auto; margin-top: 5px; padding-bottom: 2px; scrollbar-width: none; }
     .water-chips::-webkit-scrollbar { display: none; }
-    .w-chip {
-      background: var(--bg-card);
-      color: #e2e8f0;
-      border: 1px solid var(--border);
-      padding: 4px 9px;
-      border-radius: 12px;
-      font-size: 11px;
-      white-space: nowrap;
-      cursor: pointer;
-    }
+    .w-chip { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 4px 9px; border-radius: 12px; font-size: 11px; white-space: nowrap; cursor: pointer; }
     .w-chip.active { border-color: var(--accent); background: #162a45; color: var(--accent); font-weight: 600; }
 
-    .controls-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
-    }
+    .controls-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
     .ctrl-item { display: flex; flex-direction: column; gap: 4px; }
     .ctrl-item label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-    select, input[type="range"] {
-      width: 100%;
-      background: var(--bg-card);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      padding: 9px 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      outline: none;
-    }
+    select, input[type="range"] { width: 100%; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 9px 10px; border-radius: 8px; font-size: 13px; outline: none; }
 
     .section-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .week-scroll {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
+    .week-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
     .week-scroll::-webkit-scrollbar { display: none; }
-    .day-card {
-      min-width: 132px;
-      flex: 1;
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      cursor: pointer;
-    }
+    .day-card { min-width: 132px; flex: 1; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 10px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; cursor: pointer; }
     .day-card.active { border: 2px solid var(--accent); background: #162a45; }
     .d-head { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
     .d-temp { font-size: 15px; font-weight: 700; margin: 2px 0; }
     .d-meta { font-size: 11px; color: var(--text-muted); line-height: 1.35; }
-    .d-fishes { margin-top: 4px; padding-top: 5px; border-top: 1px solid #263348; display: flex; justify-content: center; }
+    .d-fishes { margin-top: 4px; padding-top: 5px; border-top: 1px solid var(--border); display: flex; justify-content: center; }
 
     .tackle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
-    .tackle-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-    }
+    .tackle-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
     .t-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
     .t-val { font-size: 15px; font-weight: 700; color: var(--accent); }
-    .t-sub { font-size: 12px; color: #cbd5e1; margin-top: 4px; line-height: 1.35; }
+    .t-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.35; }
 
-    .hourly-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
-    }
-    .sun-bar {
-      font-size: 11px; color: #fde047; background: #422006;
-      padding: 6px 10px; border-radius: 8px; margin: 8px 0 10px;
-      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
-    }
-    .hour-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
-      gap: 6px 12px;
-    }
-    .hour-item {
-      display: grid;
-      grid-template-columns: 44px 110px 1fr;
-      align-items: center;
-      gap: 6px;
-      background: var(--bg-card);
-      padding: 7px 10px;
-      border-radius: 8px;
-      border-left: 3px solid transparent;
-    }
+    .hourly-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .sun-bar { font-size: 11px; color: #fde047; background: #422006; padding: 6px 10px; border-radius: 8px; margin: 8px 0 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+    .hour-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(275px, 1fr)); gap: 6px 12px; }
+    .hour-item { display: grid; grid-template-columns: 44px 110px 1fr; align-items: center; gap: 6px; background: var(--bg-card); padding: 7px 10px; border-radius: 8px; border-left: 3px solid transparent; }
     .hour-item.now { border: 1px solid var(--accent); background: #172a46; }
-    .hour-item.twilight { border-left-color: var(--warn); }
     .h-tm { font-size: 13px; font-weight: 700; }
     .h-met { font-size: 11px; color: var(--text-muted); text-align: right; white-space: nowrap; }
     .fish-scale { display: inline-flex; gap: 2px; align-items: center; }
   </style>
 </head>
-<body>
+<body data-theme="dark">
 
   <!-- Шапка -->
   <header class="header">
@@ -326,30 +147,32 @@
     <div class="basin-line" id="basinTitle">Регион ихтиофауны (300–500 км): Обь-Иртышский бассейн</div>
     <div class="astro-line" id="astroBar">Расчет барической нормы, температуры воды и фазы Луны...</div>
     
-    <!-- Панель быстрого выбора популярных городов -->
-    <div class="quick-cities">
-      <span class="city-pill active" onclick="selectCityPreset(this, 66.084, 76.679, 'Новый Уренгой')">📍 Новый Уренгой</span>
-      <span class="city-pill" onclick="selectCityPreset(this, 65.539, 72.742, 'Надым')">Надым</span>
-      <span class="city-pill" onclick="selectCityPreset(this, 66.529, 66.614, 'Салехард')">Салехард</span>
-      <span class="city-pill" onclick="selectCityPreset(this, 63.190, 75.448, 'Тарко-Сале')">Тарко-Сале</span>
-      <span class="city-pill" onclick="selectCityPreset(this, 61.250, 73.400, 'Сургут')">Сургут</span>
-      <span class="city-pill" onclick="selectCityPreset(this, 60.985, 69.036, 'Ханты-Мансийск')">Ханты-Мансийск</span>
-      <span class="city-pill" onclick="selectCityPreset(this, 57.152, 65.527, 'Тюмень')">Тюмень</span>
-      <span class="city-pill" onclick="selectCityPreset(this, 58.010, 56.250, 'Пермь')">Пермь</span>
-      <span class="city-pill" onclick="selectCityPreset(this, 46.349, 48.032, 'Астрахань')">Астрахань</span>
+    <!-- Панель иерархических городов (от крупного к меньшему) -->
+    <div class="quick-cities" id="quickCitiesBar">
+      <span class="city-pill active" onclick="selectCityPreset(this, 66.084, 76.679, 'Новый Уренгой', 'arctic_sib')">📍 Новый Уренгой</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 65.539, 72.742, 'Надым', 'arctic_sib')">Надым</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 66.529, 66.614, 'Салехард', 'arctic_sib')">Салехард</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 73.506, 80.402, 'Новый Порт', 'arctic_sib')">Новый Порт</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 63.190, 75.448, 'Тарко-Сале', 'arctic_sib')">Тарко-Сале</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 65.340, 78.033, 'Коротчаево', 'arctic_sib')">Коротчаево</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 61.250, 73.400, 'Сургут', 'arctic_sib')">Сургут</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 57.152, 65.527, 'Тюмень', 'volga_ural')">Тюмень</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 54.988, 73.368, 'Омск', 'kazakh_steppe')">Омск</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 55.755, 37.617, 'Москва', 'euro_west')">Москва</span>
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-accent" onclick="toggleMapDrawer()" id="mapToggleBtn">🗺 Карта / Спутник</button>
-      <button class="btn" onclick="detectMyGPS()">🎯 По GPS</button>
+      <button class="btn btn-accent" onclick="toggleMapDrawer()" id="mapToggleBtn">🗺 Карта / GPS</button>
+      <button class="btn" onclick="detectMyGPS()">🎯 Моя геопозиция</button>
+      <button class="btn" onclick="toggleTheme()" id="themeBtn" title="Переключить тему">🌓 Тема: Авто</button>
       <button class="btn" onclick="fetchLiveMeteo()">🔄 Обновить</button>
     </div>
   </header>
 
-  <!-- Выдвижная карта и строка поиска -->
+  <!-- Выдвижная карта и поиск -->
   <div id="mapDrawer">
     <div class="map-toolbar">
-      <input type="text" id="placeSearchInput" class="map-search-input" placeholder="Введите любой город или реку (напр. Пур, Тобольск, Омск)...">
+      <input type="text" id="placeSearchInput" class="map-search-input" placeholder="Введите город или реку (напр. Пур, Тобольск, Минск)...">
       <button class="btn btn-accent" style="flex:0 0 auto;" onclick="searchPlaceByName()">Найти</button>
     </div>
     <div class="layer-switch">
@@ -373,6 +196,16 @@
   <div class="fish-strip" id="fishStrip"></div>
 
   <div class="container">
+    <!-- Справочный билборд (Календарь года для выбранной рыбы) -->
+    <div class="fish-encyclopedia" id="fishEncContainer">
+      <div class="enc-title"><span id="encFishTitle">📖 Справочник: Налим</span> <span style="font-size:11px; color:var(--text-muted);" id="encBasinTitle">Обь-Иртышский бассейн</span></div>
+      <div class="enc-grid">
+        <div class="enc-item"><b id="encSpawning">❄️ Нерест:</b> <span id="encSpawVal">Ноябрь – Январь ( подо льдом при +0.5...+2°C )</span></div>
+        <div class="enc-item"><b id="encBan">⚖️ Запрет на вылов:</b> <span id="encBanVal">В период нереста (региональные правила рыболовства)</span></div>
+        <div class="enc-item"><b id="encActivity">🔥 Пик активности:</b> <span id="encActVal">Октябрь – Апрель (предзимний и зимний жор)</span></div>
+      </div>
+    </div>
+
     <div class="nearby-waters">
       <div id="nearbyStatus">🌊 Водоемы и типы акваторий поблизости:</div>
       <div class="water-chips" id="nearbyChips">
@@ -424,7 +257,7 @@
       </div>
       <div class="tackle-card">
         <div class="t-lbl" id="baitTitle">Подача и приманка</div>
-        <div class="t-sub" id="baitSub" style="color:#f1f5f9;">--</div>
+        <div class="t-sub" id="baitSub">--</div>
       </div>
       <div class="tackle-card">
         <div class="t-lbl">Контроль погоды и факторов</div>
@@ -446,13 +279,44 @@
 
 <script>
 let clipSeq = 0;
+let userThemeMode = 'auto'; // 'auto', 'dark', 'light'
 
-function renderFiveFish(score0to100, size = 18, theme = 'dark') {
+function toggleTheme() {
+  const body = document.body;
+  const btn = document.getElementById('themeBtn');
+  if (userThemeMode === 'auto') {
+    userThemeMode = 'dark';
+    body.setAttribute('data-theme', 'dark');
+    btn.textContent = '🌓 Тема: Темная';
+  } else if (userThemeMode === 'dark') {
+    userThemeMode = 'light';
+    body.setAttribute('data-theme', 'light');
+    btn.textContent = '🌓 Тема: Светлая';
+  } else {
+    userThemeMode = 'auto';
+    applySystemTheme();
+    btn.textContent = '🌓 Тема: Авто';
+  }
+  renderAll();
+}
+
+function applySystemTheme() {
+  if (userThemeMode !== 'auto') return;
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  document.body.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
+}
+
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+  if (userThemeMode === 'auto') applySystemTheme();
+});
+
+function renderFiveFish(score0to100, size = 18) {
   const rating = Math.max(0, Math.min(5, (score0to100 / 100) * 5));
   let col = '#10b981';
   if (rating < 1.8) col = '#ef4444';
   else if (rating < 3.3) col = '#f59e0b';
-  const bgCol = theme === 'light' ? '#cbd5e1' : '#334155';
+  const isLight = document.body.getAttribute('data-theme') === 'light';
+  const bgCol = isLight ? '#cbd5e1' : '#334155';
   const dPath = "M2,8 Q8,2 15,5 L21,2 L19,8 L21,14 L15,11 Q8,14 2,8 Z";
   let out = `<div class="fish-scale" title="Активность: ${rating.toFixed(1)} из 5">`;
   for (let i = 1; i <= 5; i++) {
@@ -484,28 +348,28 @@ function getDetailedFishSVG(f) {
 }
 
 const FISH_DB = [
-  { id:'dace', name:'Елец', tpl:'cyprinid_slim', topCol:'#334155', color:'#94a3b8', fin:'#cbd5e1', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:0.5, coldFactor:0.65, optPress:758, bladderSens:0.85, feedMode:'diurnal', methods:{spin_micro:0.78,spin_light:0.45,spin_jig:0.05,spin_classic:0.5,bottom:0.88,float:1.0,fly:0.92}, bait:'Поплавок 1.5–3 г в проводку по границе струи, мормышка 0.4–1 г или легкий пикер (опарыш / мотыль / ручейник у дна).' },
-  { id:'ruffe', name:'Ерш', tpl:'perch', topCol:'#3f4f38', color:'#849669', fin:'#a3b18a', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:0.0, coldFactor:0.95, optPress:757, bladderSens:0.6, feedMode:'all_day', methods:{spin_micro:0.85,spin_light:0.4,spin_jig:0.05,spin_classic:0.05,bottom:1.0,float:0.88,fly:0.1}, bait:'Донная оснастка в русловой яме (пучок мотыля или червя) либо наноджиг 0.8–2 г с медленным волочением по дну.' },
-  { id:'burbot', name:'Налим', tpl:'burbot', color:'#6b4f35', fin:'#4a3520', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','far_east'], tMinStop:-0.5, coldFactor:1.25, optPress:752, bladderSens:0.35, feedMode:'nocturnal', methods:{spin_micro:0.2,spin_light:0.68,spin_jig:0.88,spin_classic:0.5,bottom:1.0,float:0.15,fly:0.05}, bait:'Донка 60–100 г с нарезкой рыбы или пучком червей на выходе из ямы; джиг с перегрузом со стуком по камням в сумерках.' },
-  { id:'perch', name:'Окунь', tpl:'perch', color:'#4d7c43', fin:'#dc2626', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', methods:{spin_micro:1.0,spin_light:0.96,spin_jig:0.78,spin_classic:0.75,bottom:0.68,float:0.62,fly:0.45}, bait:'Джиг-риг / микроджиг 1.5–5 г или Отводной поводок + пассивный слаг/рачок (Tanta, Polaris), двойной подрыв с паузой.' },
-  { id:'gudgeon', name:'Пескарь', tpl:'cyprinid_slim', topCol:'#574c3f', color:'#a39074', fin:'#cbd5e1', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:2.0, coldFactor:0.42, optPress:758, bladderSens:0.8, feedMode:'diurnal', methods:{spin_micro:0.45,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.9,float:1.0,fly:0.15}, bait:'Легкая поплавочная или донная снасть с мотылем/кусочком червя строго по песчаному дну на течении.' },
-  { id:'roach', name:'Плотва', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#ef4444', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.0, coldFactor:0.58, optPress:758, bladderSens:1.0, feedMode:'diurnal', methods:{spin_micro:0.65,spin_light:0.15,spin_jig:0.0,spin_classic:0.05,bottom:0.95,float:1.0,fly:0.55}, bait:'Деликатный фидер (поводок 0.10 мм) или поплавок с подачей мотыля/опарыша у дна; мормышинг 0.4–1 г.' },
-  { id:'whitefish', name:'Сиг', tpl:'salmonid', topCol:'#334155', color:'#cbd5e1', fin:'#64748b', basins:['arctic_sib','nw_karelia','far_east'], tMinStop:0.0, coldFactor:1.12, optPress:757, bladderSens:0.75, feedMode:'crepuscular', methods:{spin_micro:0.88,spin_light:0.82,spin_jig:0.35,spin_classic:0.78,bottom:1.0,float:0.85,fly:0.95}, bait:'Донная оснастка на песчаных косах (мормыш/бокоплав), микроджиг 1.5–3 г или нимфа/узкая микроколебалка на снос.' },
-  { id:'catfish', name:'Сом', tpl:'catfish', color:'#334155', fin:'#1e293b', basins:['euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:8.0, coldFactor:0.25, optPress:755, bladderSens:1.1, feedMode:'nocturnal', methods:{spin_micro:0.05,spin_light:0.2,spin_jig:1.0,spin_classic:0.65,bottom:1.0,float:0.1,fly:0.0}, bait:'Донная снасть на входе в русловую яму (живец, пучок выползков, печень) или тяжелый джиг 28–50 г в сумерках (при T воды > +10°C).' },
-  { id:'pike', name:'Щука', tpl:'pike', color:'#5c7c3e', fin:'#d97706', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular', methods:{spin_micro:0.45,spin_light:0.86,spin_jig:1.0,spin_classic:0.92,bottom:0.78,float:0.5,fly:0.65}, bait:'Джиг 12–28 г (виброхвост 3.5–4.5" / мандула) на бровках с паузой 3–4 сек, воблеры-суспендеры 110–130 мм или колебалка.' },
-  { id:'ide', name:'Язь', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#facc15', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.0, coldFactor:0.62, optPress:758, bladderSens:0.95, feedMode:'crepuscular', methods:{spin_micro:0.76,spin_light:0.88,spin_jig:0.35,spin_classic:0.88,bottom:0.95,float:0.9,fly:0.82}, bait:'Фидер на границе струи и обратки (опарыш/червь/кукуруза) или лайт-спиннинг (крэнки, вертушки #2, микроколебалки).' },
-  { id:'grayling', name:'Хариус', tpl:'salmonid', topCol:'#312e81', color:'#94a3b8', fin:'#7c3aed', spots:true, basins:['arctic_sib','nw_karelia','far_east'], tMinStop:0.0, coldFactor:1.08, optPress:758, bladderSens:0.7, feedMode:'crepuscular', methods:{spin_micro:0.9,spin_light:0.75,spin_jig:0.1,spin_classic:0.8,bottom:0.4,float:0.9,fly:1.0}, bait:'Нахлыст (сухая мушка / нимфа с золотой головкой), сбирулино/балда с мушками или вертушка #0–#1 на перекатах.' },
-  { id:'zander', name:'Судак', tpl:'zander', color:'#94a3b8', fin:'#64748b', basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.0, coldFactor:0.85, optPress:757, bladderSens:1.2, feedMode:'crepuscular', methods:{spin_micro:0.35,spin_light:0.82,spin_jig:1.0,spin_classic:0.7,bottom:0.8,float:0.2,fly:0.2}, bait:'Классический джиг с четким стуком по твердому дну/коряжнику (узкий виброхвост 3.5–4.5", мандула, поролон) или ночной воблер.' },
-  { id:'crucian', name:'Карась', tpl:'cyprinid_deep', topCol:'#713f12', color:'#eab308', fin:'#a16207', eye:'#f59e0b', basins:['arctic_sib','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.9, feedMode:'diurnal', methods:{spin_micro:0.55,spin_light:0.1,spin_jig:0.0,spin_classic:0.0,bottom:0.95,float:1.0,fly:0.15}, bait:'Маховая удочка или флэт-фидер в прогретых заливах (червь, опарыш, чесночное тесто) либо мормышинг 0.2–0.6 г.' },
-  { id:'bream', name:'Лещ', tpl:'cyprinid_deep', topCol:'#451a03', color:'#b45309', fin:'#334155', eye:'#fde047', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.5, coldFactor:0.60, optPress:758, bladderSens:1.05, feedMode:'crepuscular', methods:{spin_micro:0.35,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.85,fly:0.05}, bait:'Фидер на русловой бровке (кормушка 50–90 г, поводок 0.12 мм до 1 м, пучок кормового мотыля и опарыш).' },
-  { id:'carp', name:'Сазан / Карп', tpl:'cyprinid_deep', topCol:'#78350f', color:'#d97706', fin:'#b91c1c', barbels:true, basins:['euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:6.0, coldFactor:0.30, optPress:757, bladderSens:0.95, feedMode:'crepuscular', methods:{spin_micro:0.15,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.8,fly:0.1}, bait:'Карповая донная снасть / метод-фидер (бойлы 14–20 мм, тигровый орех, ферментированная кукуруза, пучок червей).' },
-  { id:'chub', name:'Голавль', tpl:'cyprinid_slim', topCol:'#1e293b', color:'#94a3b8', fin:'#dc2626', basins:['euro_west','volga_ural'], tMinStop:2.0, coldFactor:0.55, optPress:758, bladderSens:0.9, feedMode:'diurnal', methods:{spin_micro:0.85,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.8,float:0.85,fly:0.95}, bait:'Лайт-спиннинг (крэнки 35–45 мм, микроколебалки 2–4 г на перекатах), нахлыст (жук) или донка на рака/корку.' },
-  { id:'asp', name:'Жерех', tpl:'cyprinid_slim', topCol:'#334155', color:'#cbd5e1', fin:'#64748b', basins:['euro_west','volga_ural','kazakh_steppe'], tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.95, feedMode:'crepuscular', methods:{spin_micro:0.2,spin_light:0.85,spin_jig:0.5,spin_classic:1.0,bottom:0.2,float:0.1,fly:0.75}, bait:'Дальнобойные пилькеры, кастмастеры 10–24 г, тейл-спиннеры и тонущие стикбейты в верхнем и среднем слоях.' },
-  { id:'trout', name:'Форель / Кумжа', tpl:'salmonid', topCol:'#14532d', color:'#a3e635', fin:'#f97316', spots:true, basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:0.5, coldFactor:1.05, optPress:758, bladderSens:0.7, feedMode:'crepuscular', methods:{spin_micro:0.95,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.5,float:0.75,fly:1.0}, bait:'Микроколебалки 1.8–3.8 г, силиконовые нимфы на вольфрамовой головке или стример/нимфа нахлыстом.' },
-  { id:'nelma', name:'Нельма / Муксун', tpl:'salmonid', topCol:'#475569', color:'#e2e8f0', fin:'#94a3b8', basins:['arctic_sib'], tMinStop:0.0, coldFactor:1.15, optPress:756, bladderSens:0.7, feedMode:'crepuscular', methods:{spin_micro:0.65,spin_light:0.95,spin_jig:0.6,spin_classic:1.0,bottom:0.75,float:0.4,fly:0.85}, bait:'Узкие серебристые колеблющиеся блесны 7–18 г, воблеры минноу 65–90 мм в толще воды на границе струй.' },
-  { id:'tench', name:'Линь', tpl:'cyprinid_deep', topCol:'#14532d', color:'#4d7c0f', fin:'#365314', eye:'#dc2626', basins:['euro_west','volga_ural','kazakh_steppe'], tMinStop:7.0, coldFactor:0.25, optPress:758, bladderSens:0.85, feedMode:'crepuscular', methods:{spin_micro:0.3,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.85,float:1.0,fly:0.1}, bait:'Поплавочная снасть в окнах кувшинок и камыша (пучок навозного червя, опарыш, творожное тесто).' },
-  { id:'rudd', name:'Красноперка', tpl:'cyprinid_deep', topCol:'#3f6212', color:'#fde047', fin:'#dc2626', eye:'#f97316', basins:['euro_west','volga_ural','kazakh_steppe'], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.9, feedMode:'diurnal', methods:{spin_micro:0.85,spin_light:0.3,spin_jig:0.0,spin_classic:0.4,bottom:0.5,float:1.0,fly:0.95}, bait:'Поплавок с подачей в полводы у тростника, микровертушки #00 или нахлыст (сухая мушка / нимфа).' },
-  { id:'snakehead', name:'Змееголов', tpl:'burbot', color:'#3f6212', fin:'#1e293b', basins:['kazakh_steppe','far_east'], tMinStop:10.0, coldFactor:0.15, optPress:756, bladderSens:0.4, feedMode:'diurnal', methods:{spin_micro:0.05,spin_light:0.3,spin_jig:0.5,spin_classic:1.0,bottom:0.8,float:0.3,fly:0.3}, bait:'Поверхностные силиконовые лягушки-незацепляйки по густому коряжнику и траве на мощном шнуре #3.0–#5.0 PE.' }
+  { id:'dace', name:'Елец', tpl:'cyprinid_slim', topCol:'#334155', color:'#94a3b8', fin:'#cbd5e1', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:0.5, coldFactor:0.65, optPress:758, bladderSens:0.85, feedMode:'diurnal', methods:{spin_micro:0.78,spin_light:0.45,spin_jig:0.05,spin_classic:0.5,bottom:0.88,float:1.0,fly:0.92}, bait:'Поплавок 1.5–3 г в проводку, мормышка 0.4–1 г или легкий пикер (опарыш / мотыль).', spawn:'Май – Июнь (+10...+14°C)', ban:'В период весеннего нереста (по срокам региона)', peak:'Июль – Август (активный нагул)' },
+  { id:'ruffe', name:'Ерш', tpl:'perch', topCol:'#3f4f38', color:'#849669', fin:'#a3b18a', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:0.0, coldFactor:0.95, optPress:757, bladderSens:0.6, feedMode:'all_day', methods:{spin_micro:0.85,spin_light:0.4,spin_jig:0.05,spin_classic:0.05,bottom:1.0,float:0.88,fly:0.1}, bait:'Донка в русловой яме (пучок мотыля или червя) либо наноджиг 0.8–2 г с волочением по дну.', spawn:'Апрель – Май (+6...+10°C)', ban:'Круглогодично разрешен', peak:'Октябрь – Апрель (круглый год)' },
+  { id:'burbot', name:'Налим', tpl:'burbot', color:'#6b4f35', fin:'#4a3520', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','far_east'], tMinStop:-0.5, coldFactor:1.25, optPress:752, bladderSens:0.35, feedMode:'nocturnal', methods:{spin_micro:0.2,spin_light:0.68,spin_jig:0.88,spin_classic:0.5,bottom:1.0,float:0.15,fly:0.05}, bait:'Донка 60–100 г с нарезкой рыбы или пучком червей на выходе из ямы; джиг в сумерках.', spawn:'Ноябрь – Январь ( подо льдом при +0.5...+2°C )', ban:'В ряде регионов в период нереста', peak:'Октябрь – Апрель (предзимний и зимний жор)' },
+  { id:'perch', name:'Окунь', tpl:'perch', color:'#4d7c43', fin:'#dc2626', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', methods:{spin_micro:1.0,spin_light:0.96,spin_jig:0.78,spin_classic:0.75,bottom:0.68,float:0.62,fly:0.45}, bait:'Джиг-риг / микроджиг 1.5–5 г или Отводной поводок + пассивный слаг/рачок (Tanta, Polaris).', spawn:'Апрель – Май (+7...+12°C)', ban:'Нет жестких ограничений (кроме общих правил)', peak:'Сентябрь – Ноябрь (осенний жор)' },
+  { id:'gudgeon', name:'Пескарь', tpl:'cyprinid_slim', topCol:'#574c3f', color:'#a39074', fin:'#cbd5e1', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:2.0, coldFactor:0.42, optPress:758, bladderSens:0.8, feedMode:'diurnal', methods:{spin_micro:0.45,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.9,float:1.0,fly:0.15}, bait:'Легкая поплавочная или донная снасть с мотылем строго по песчаному дну на течении.', spawn:'Май – Июнь (+12...+15°C)', ban:'Круглогодично разрешен', peak:'Июнь – Август (теплое время)' },
+  { id:'roach', name:'Плотва', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#ef4444', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.0, coldFactor:0.58, optPress:758, bladderSens:1.0, feedMode:'diurnal', methods:{spin_micro:0.65,spin_light:0.15,spin_jig:0.0,spin_classic:0.05,bottom:0.95,float:1.0,fly:0.55}, bait:'Деликатный фидер (поводок 0.10 мм) или поплавок с подачей мотыля/опарыша у дна.', spawn:'Апрель – Май (+10...+14°C)', ban:'В период весеннего нереста', peak:'Апрель – Июнь (преднерестовый и посленерестовый жор)' },
+  { id:'whitefish', name:'Сиг', tpl:'salmonid', topCol:'#334155', color:'#cbd5e1', fin:'#64748b', basins:['arctic_sib','nw_karelia','far_east'], tMinStop:0.0, coldFactor:1.12, optPress:757, bladderSens:0.75, feedMode:'crepuscular', methods:{spin_micro:0.88,spin_light:0.82,spin_jig:0.35,spin_classic:0.78,bottom:1.0,float:0.85,fly:0.95}, bait:'Донка на песчаных косах (мормыш/бокоплав), микроджиг 1.5–3 г или нимфа на снос.', spawn:'Сентябрь – Ноябрь (+2...+6°C)', ban:'Строгие сезонные запреты в северных реках', peak:'Сентябрь – Ноябрь (перед ледоставом)' },
+  { id:'catfish', name:'Сом', tpl:'catfish', color:'#334155', fin:'#1e293b', basins:['euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:8.0, coldFactor:0.25, optPress:755, bladderSens:1.1, feedMode:'nocturnal', methods:{spin_micro:0.05,spin_light:0.2,spin_jig:1.0,spin_classic:0.65,bottom:1.0,float:0.1,fly:0.0}, bait:'Донная снасть (живец, пучок выползков, печень) или тяжелый джиг 28–50 г в сумерках.', spawn:'Июнь (+18...+22°C)', ban:'Май – Июнь (охрана нерестилищ)', peak:'Июнь – Август (ночной жор в теплой воде)' },
+  { id:'pike', name:'Щука', tpl:'pike', color:'#5c7c3e', fin:'#d97706', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular', methods:{spin_micro:0.45,spin_light:0.86,spin_jig:1.0,spin_classic:0.92,bottom:0.78,float:0.5,fly:0.65}, bait:'Джиг 12–28 г (виброхвост 3.5–4.5" / мандула) на бровках с паузой 3–4 сек, воблеры.', spawn:'Апрель – Май (+4...+8°C — сразу после схода льда)', ban:'Весенний запрет (зависит от региона)', peak:'Сентябрь – Октябрь (мощный осенний жор)' },
+  { id:'ide', name:'Язь', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#facc15', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.0, coldFactor:0.62, optPress:758, bladderSens:0.95, feedMode:'crepuscular', methods:{spin_micro:0.76,spin_light:0.88,spin_jig:0.35,spin_classic:0.88,bottom:0.95,float:0.9,fly:0.82}, bait:'Фидер на границе струи и обратки (опарыш/червь/кукуруза) или лайт-спиннинг (крэнки).', spawn:'Апрель – Май (+6...+10°C)', ban:'В период нереста', peak:'Май – Июнь (после нереста) и сентябрь' },
+  { id:'grayling', name:'Хариус', tpl:'salmonid', topCol:'#312e81', color:'#94a3b8', fin:'#7c3aed', spots:true, basins:['arctic_sib','nw_karelia','far_east'], tMinStop:0.0, coldFactor:1.08, optPress:758, bladderSens:0.7, feedMode:'crepuscular', methods:{spin_micro:0.9,spin_light:0.75,spin_jig:0.1,spin_classic:0.8,bottom:0.4,float:0.9,fly:1.0}, bait:'Нахлыст (сухая мушка / нимфа), сбирулино с мушками или вертушка #0–#1 на перекатах.', spawn:'Май – Июнь (+5...+8°C)', ban:'Весенне-летний запрет на ценные виды', peak:'Июнь – Сентябрь (активный нагул)' },
+  { id:'zander', name:'Судак', tpl:'zander', color:'#94a3b8', fin:'#64748b', basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.0, coldFactor:0.85, optPress:757, bladderSens:1.2, feedMode:'crepuscular', methods:{spin_micro:0.35,spin_light:0.82,spin_jig:1.0,spin_classic:0.7,bottom:0.8,float:0.2,fly:0.2}, bait:'Классический джиг со стуком по твердому дну (узкий виброхвост 3.5–4.5", мандула).', spawn:'Май – Июнь (+12...+16°C)', ban:'С 10 мая по 10 июня (во многих регионах)', peak:'Август – Октябрь (осенний жор)' },
+  { id:'crucian', name:'Карась', tpl:'cyprinid_deep', topCol:'#713f12', color:'#eab308', fin:'#a16207', eye:'#f59e0b', basins:['arctic_sib','euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.9, feedMode:'diurnal', methods:{spin_micro:0.55,spin_light:0.1,spin_jig:0.0,spin_classic:0.0,bottom:0.95,float:1.0,fly:0.15}, bait:'Маховая удочка или флэт-фидер в прогретых заливах (червь, опарыш, тесто).', spawn:'Июнь – Июль (+16...+20°C)', ban:'Круглогодично разрешен', peak:'Июнь – Август (середина лета)' },
+  { id:'bream', name:'Лещ', tpl:'cyprinid_deep', topCol:'#451a03', color:'#b45309', fin:'#334155', eye:'#fde047', basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:1.5, coldFactor:0.60, optPress:758, bladderSens:1.05, feedMode:'crepuscular', methods:{spin_micro:0.35,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.85,fly:0.05}, bait:'Фидер на русловой бровке (кормушка 50–90 г, поводок 0.12 мм, мотыль и опарыш).', spawn:'Май – Июнь (+14...+18°C)', ban:'Период нереста (по регионам)', peak:'Июнь – Август и сентябрь' },
+  { id:'carp', name:'Сазан / Карп', tpl:'cyprinid_deep', topCol:'#78350f', color:'#d97706', fin:'#b91c1c', barbels:true, basins:['euro_west','volga_ural','kazakh_steppe','far_east'], tMinStop:6.0, coldFactor:0.30, optPress:757, bladderSens:0.95, feedMode:'crepuscular', methods:{spin_micro:0.15,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.8,fly:0.1}, bait:'Карповая донка / метод-фидер (бойлы 14–20 мм, кукуруза, тигровый орех, черви).', spawn:'Июнь (+18...+22°C)', ban:'Нерестовый запрет', peak:'Июль – Август (самая теплая вода)' },
+  { id:'chub', name:'Голавль', tpl:'cyprinid_slim', topCol:'#1e293b', color:'#94a3b8', fin:'#dc2626', basins:['euro_west','volga_ural'], tMinStop:2.0, coldFactor:0.55, optPress:758, bladderSens:0.9, feedMode:'diurnal', methods:{spin_micro:0.85,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.8,float:0.85,fly:0.95}, bait:'Лайт-спиннинг (крэнки 35–45 мм, микроколебалки 2–4 г), нахлыст (жук).', spawn:'Май – Июнь (+12...+15°C)', ban:'Весенний запрет', peak:'Июнь – Август (активность по жукам и мальку)' },
+  { id:'asp', name:'Жерех', tpl:'cyprinid_slim', topCol:'#334155', color:'#cbd5e1', fin:'#64748b', basins:['euro_west','volga_ural','kazakh_steppe'], tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.95, feedMode:'crepuscular', methods:{spin_micro:0.2,spin_light:0.85,spin_jig:0.5,spin_classic:1.0,bottom:0.2,float:0.1,fly:0.75}, bait:'Пилькеры, кастмастеры 10–24 г, тейл-спиннеры и стикбейты при бое на поверхности.', spawn:'Апрель – Май (+8...+12°C)', ban:'Весенний запрет', peak:'Июль – Сентябрь (активный бой)' },
+  { id:'trout', name:'Форель / Кумжа', tpl:'salmonid', topCol:'#14532d', color:'#a3e635', fin:'#f97316', spots:true, basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'], tMinStop:0.5, coldFactor:1.05, optPress:758, bladderSens:0.7, feedMode:'crepuscular', methods:{spin_micro:0.95,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.5,float:0.75,fly:1.0}, bait:'Микроколебалки 1.8–3.8 г, силиконовые нимфы или нахлыстовый стример.', spawn:'Сентябрь – Ноябрь (+6...+9°C)', ban:'Осенне-зимний запрет на красную рыбу', peak:'Май – Июнь и сентябрь – октябрь' },
+  { id:'nelma', name:'Нельма / Муксун', tpl:'salmonid', topCol:'#475569', color:'#e2e8f0', fin:'#94a3b8', basins:['arctic_sib'], tMinStop:0.0, coldFactor:1.15, optPress:756, bladderSens:0.7, feedMode:'crepuscular', methods:{spin_micro:0.65,spin_light:0.95,spin_jig:0.6,spin_classic:1.0,bottom:0.75,float:0.4,fly:0.85}, bait:'Узкие серебристые колебалки 7–18 г, воблеры минноу в толще воды на течении.', spawn:'Сентябрь – Октябрь (+3...+6°C)', ban:'Строгий запрет (красная книга / ценные виды)', peak:'Август – Октябрь (предзимний ход)' },
+  { id:'tench', name:'Линь', tpl:'cyprinid_deep', topCol:'#14532d', color:'#4d7c0f', fin:'#365314', eye:'#dc2626', basins:['euro_west','volga_ural','kazakh_steppe'], tMinStop:7.0, coldFactor:0.25, optPress:758, bladderSens:0.85, feedMode:'crepuscular', methods:{spin_micro:0.3,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.85,float:1.0,fly:0.1}, bait:'Поплавок в окнах кувшинок (пучок навозного червя, опарыш, творожное тесто).', spawn:'Июнь – Июль (+18...+22°C)', ban:'Круглогодично разрешен (в рамках норм)', peak:'Июнь – Август (тихие заводи)' },
+  { id:'rudd', name:'Красноперка', tpl:'cyprinid_deep', topCol:'#3f6212', color:'#fde047', fin:'#dc2626', eye:'#f97316', basins:['euro_west','volga_ural','kazakh_steppe'], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.9, feedMode:'diurnal', methods:{spin_micro:0.85,spin_light:0.3,spin_jig:0.0,spin_classic:0.4,bottom:0.5,float:1.0,fly:0.95}, bait:'Поплавок с подачей у тростника, микровертушки #00 или нахлыст.', spawn:'Май – Июнь (+14...+18°C)', ban:'Круглогодично разрешен', peak:'Июнь – Август (теплая вода)' },
+  { id:'snakehead', name:'Змееголов', tpl:'burbot', color:'#3f6212', fin:'#1e293b', basins:['kazakh_steppe','far_east'], tMinStop:10.0, coldFactor:0.15, optPress:756, bladderSens:0.4, feedMode:'diurnal', methods:{spin_micro:0.05,spin_light:0.3,spin_jig:0.5,spin_classic:1.0,bottom:0.8,float:0.3,fly:0.3}, bait:'Поверхностные силиконовые лягушки-незацепляйки по густой траве на шнуре #4.0 PE.', spawn:'Июнь – Июль (+20...+25°C)', ban:'Летний нерестовый запрет', peak:'Июль – Август (жара, мелководные заросшие заливы)' }
 ];
 
 let state = {
@@ -565,7 +429,44 @@ function toggleMapDrawer() {
   }
 }
 
-// Быстрый выбор города из пресетов
+// Обновление набора иерархических городов в зависимости от региона
+function updateCityPresetsBar(basinCode) {
+  const bar = document.getElementById('quickCitiesBar');
+  let html = '';
+  if (basinCode === 'arctic_sib') {
+    html = `
+      <span class="city-pill ${state.locLabel.includes('Уренгой') ? 'active' : ''}" onclick="selectCityPreset(this, 66.084, 76.679, 'Новый Уренгой')">📍 Новый Уренгой</span>
+      <span class="city-pill ${state.locLabel.includes('Надым') ? 'active' : ''}" onclick="selectCityPreset(this, 65.539, 72.742, 'Надым')">Надым</span>
+      <span class="city-pill ${state.locLabel.includes('Салехард') ? 'active' : ''}" onclick="selectCityPreset(this, 66.529, 66.614, 'Салехард')">Салехард</span>
+      <span class="city-pill ${state.locLabel.includes('Новый Порт') ? 'active' : ''}" onclick="selectCityPreset(this, 73.506, 80.402, 'Новый Порт')">Новый Порт</span>
+      <span class="city-pill ${state.locLabel.includes('Тарко-Сале') ? 'active' : ''}" onclick="selectCityPreset(this, 63.190, 75.448, 'Тарко-Сале')">Тарко-Сале</span>
+      <span class="city-pill ${state.locLabel.includes('Коротчаево') ? 'active' : ''}" onclick="selectCityPreset(this, 65.340, 78.033, 'Коротчаево')">Коротчаево</span>
+      <span class="city-pill ${state.locLabel.includes('Сургут') ? 'active' : ''}" onclick="selectCityPreset(this, 61.250, 73.400, 'Сургут')">Сургут</span>
+      <span class="city-pill ${state.locLabel.includes('Тюмень') ? 'active' : ''}" onclick="selectCityPreset(this, 57.152, 65.527, 'Тюмень')">Тюмень</span>
+    `;
+  } else if (basinCode === 'euro_west' || basinCode === 'nw_karelia') {
+    html = `
+      <span class="city-pill" onclick="selectCityPreset(this, 53.900, 27.566, 'Минск')">📍 Минск</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 55.755, 37.617, 'Москва')">Москва</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 59.934, 30.335, 'Санкт-Петербург')">Санкт-Петербург</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 52.434, 30.975, 'Гомель')">Гомель</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 53.916, 30.334, 'Могилев')">Могилев</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 56.843, 60.605, 'Екатеринбург')">Екатеринбург</span>
+    `;
+  } else {
+    html = `
+      <span class="city-pill" onclick="selectCityPreset(this, 46.349, 48.032, 'Астрахань')">📍 Астрахань</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 48.708, 44.516, 'Волгоград')">Волгоград</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 51.533, 46.034, 'Саратов')">Саратов</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 54.328, 48.386, 'Ульяновск')">Ульяновск</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 55.796, 49.106, 'Казань')">Казань</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 56.326, 44.005, 'Нижний Новгород')">Нижний Новгород</span>
+      <span class="city-pill" onclick="selectCityPreset(this, 51.169, 71.449, 'Астана')">Астана</span>
+    `;
+  }
+  bar.innerHTML = html;
+}
+
 async function selectCityPreset(el, lat, lon, name) {
   document.querySelectorAll('.city-pill').forEach(c => c.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -597,7 +498,7 @@ async function searchPlaceByName() {
 
 function detectBasinByCoords(lat, lon) {
   if (lon >= 115) return { code: 'far_east', name: 'Амурский и Дальневосточный бассейн' };
-  if (lon >= 60 && lon < 115 && lat >= 55.5) return { code: 'arctic_sib', name: 'Обь-Иртышский и Енисейский бассейн' };
+  if (lon >= 60 && lon < 115 && lat >= 55.5) return { code: 'arctic_sib', name: 'Обь-Иртышский бассейн' };
   if (lon >= 50 && lon < 88 && lat < 55.5) return { code: 'kazakh_steppe', name: 'Казахстанский и Урало-Иртышский бассейн' };
   if (lon < 60 && lat >= 59.5) return { code: 'nw_karelia', name: 'Беломорско-Балтийский и Карельский бассейн' };
   if (lon < 35.5 && lat < 59.5) return { code: 'euro_west', name: 'Днепровско-Неманский бассейн' };
@@ -616,10 +517,7 @@ function toggleShowAllSpecies() {
 }
 
 function detectMyGPS() {
-  if (!navigator.geolocation) {
-    alert('GPS не поддерживается.');
-    return;
-  }
+  if (!navigator.geolocation) { alert('GPS не поддерживается.'); return; }
   document.getElementById('apiStatus').textContent = 'Поиск GPS...';
   navigator.geolocation.getCurrentPosition(
     pos => setNewLocation(pos.coords.latitude, pos.coords.longitude),
@@ -638,6 +536,7 @@ async function setNewLocation(lat, lon, skipGeo = false) {
   const basin = detectBasinByCoords(state.lat, state.lon);
   state.basinCode = basin.code;
   state.basinName = basin.name;
+  updateCityPresetsBar(state.basinCode);
 
   const regionalList = getFilteredFishList();
   if (!regionalList.some(f => f.id === state.fishId)) state.fishId = regionalList[0].id;
@@ -651,8 +550,7 @@ async function fetchLocationName(lat, lon) {
   try {
     const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ru`);
     const data = await res.json();
-    const city = data.city || data.locality || data.principalSubdivision || 'Точка лова';
-    state.locLabel = city;
+    state.locLabel = data.city || data.locality || data.principalSubdivision || 'Точка лова';
     document.getElementById('locName').textContent = state.locLabel;
   } catch (e) {
     state.locLabel = `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
@@ -811,12 +709,19 @@ function renderAll() {
   document.getElementById('basinTitle').textContent = `Регион ихтиофауны (300–500 км): ${state.basinName}`;
   document.getElementById('speciesCountInfo').textContent = state.showAllSpecies ? `Справочник: ${visible.length}` : `Авто по региону: ${visible.length}`;
 
+  // Заполнение энциклопедического билборда по рыбе
+  document.getElementById('encFishTitle').textContent = `📖 Справочник: ${fish.name}`;
+  document.getElementById('encBasinTitle').textContent = state.basinName;
+  document.getElementById('encSpawVal').textContent = fish.spawn;
+  document.getElementById('encBanVal').textContent = fish.ban;
+  document.getElementById('encActVal').textContent = fish.peak;
+
   document.getElementById('fishStrip').innerHTML = visible.map(f => {
     const sc = calcDayBest(f, day, state.method, state.water);
     return `<div class="fish-chip ${f.id === fish.id ? 'active' : ''}" onclick="state.fishId='${f.id}';renderAll()">
       ${getDetailedFishSVG(f)}
       <div class="fish-chip-name">${f.name}</div>
-      ${renderFiveFish(sc, 14, 'light')}
+      ${renderFiveFish(sc, 14)}
     </div>`;
   }).join('');
 
@@ -828,7 +733,7 @@ function renderAll() {
       <div class="d-head"><span>${d.label}</span><span>🌙${d.moon.moonDay}</span></div>
       <div class="d-temp">${d.tDay > 0 ? '+'+d.tDay : d.tDay}° / ${d.tNight}°C</div>
       <div class="d-meta">🧭 ${d.pressAvg} мм<br>💨 ${d.windDir}, ${d.windMax} м/с</div>
-      <div class="d-fishes">${renderFiveFish(sc, 16, 'dark')}</div>
+      <div class="d-fishes">${renderFiveFish(sc, 16)}</div>
     </div>`;
   }).join('');
 
@@ -839,7 +744,7 @@ function renderAll() {
     if (avg > bestAvg) { bestAvg = avg; bestH = h; }
   }
 
-  document.getElementById('peakFishes').innerHTML = renderFiveFish(calcDayBest(fish, day, state.method, state.water), 20, 'dark');
+  document.getElementById('peakFishes').innerHTML = renderFiveFish(calcDayBest(fish, day, state.method, state.water), 20);
   document.getElementById('peakWindowSub').textContent = `Лучший выход: ${String(bestH).padStart(2,'0')}:00 – ${String((bestH+3)%24).padStart(2,'0')}:00`;
 
   const rig = calcRig(state.method, state.water, state.depth, day.windMax);
@@ -863,7 +768,7 @@ function renderAll() {
     const arr = it.dp3h > 0.4 ? '↑' : (it.dp3h < -0.4 ? '↓' : '→');
     return `<div class="hour-item ${isNow ? 'now' : ''}">
       <div class="h-tm">${String(it.hour).padStart(2,'0')}:00</div>
-      <div>${renderFiveFish(it.score, 17, 'dark')}</div>
+      <div>${renderFiveFish(it.score, 17)}</div>
       <div class="h-met">${it.tAir > 0 ? '+'+it.tAir : it.tAir}°C • ${it.press}${arr} • ${it.windDir} ${it.wind}м/с</div>
     </div>`;
   }).join('');
@@ -878,6 +783,8 @@ document.getElementById('depthRange').addEventListener('input', e => {
 });
 document.getElementById('placeSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchPlaceByName(); });
 
+// Инициализация темы при загрузке
+applySystemTheme();
 buildFallback();
 renderAll();
 fetchLiveMeteo();
