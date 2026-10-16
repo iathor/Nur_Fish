@@ -9,7 +9,8 @@
   <meta name="apple-mobile-web-app-title" content="Клев ПРО">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Прогноз клева • Интерактивный Атлас</title>
-  <!-- Российский CDN Яндекса (yastatic.net) — 100% доступ из РФ без VPN + резервный jsdelivr -->
+  
+  <!-- Российский CDN Яндекса + Leaflet -->
   <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
   <script src="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.js"></script>
   <script>
@@ -18,6 +19,7 @@
       document.write('<scr' + 'ipt src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></scr' + 'ipt>');
     }
   </script>
+
   <style>
     :root {
       --bg-main: #0b1120;
@@ -27,20 +29,22 @@
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --accent: #38bdf8;
+      --accent-hover: #0284c7;
       --good: #10b981;
       --warn: #f59e0b;
       --bad: #ef4444;
       --border: #334155;
-      --fish-strip-bg: #ffffff;
-      --fish-chip-bg: #f8fafc;
-      --fish-chip-border: #e2e8f0;
-      --fish-chip-text: #0f172a;
-      --filter-bar-bg: #f1f5f9;
-      --filter-bar-text: #334155;
+      --fish-strip-bg: #0f172a;
+      --fish-chip-bg: #1e293b;
+      --fish-chip-border: #334155;
+      --fish-chip-text: #f8fafc;
+      --filter-bar-bg: #1e293b;
+      --filter-bar-text: #cbd5e1;
       --badge-green: #064e3b;
       --badge-green-text: #34d399;
-      --cal-empty: #1e293b;
-      --cal-spawn: #be123c;
+      --cal-empty: #334155;
+      --cal-spawn: #e11d48;
+      --shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.35);
     }
 
     [data-theme="light"] {
@@ -51,78 +55,84 @@
       --text-main: #0f172a;
       --text-muted: #64748b;
       --accent: #0284c7;
+      --accent-hover: #0369a1;
       --good: #059669;
       --warn: #d97706;
       --bad: #dc2626;
       --border: #cbd5e1;
       --fish-strip-bg: #e2e8f0;
       --fish-chip-bg: #ffffff;
-      --fish-chip-border: #94a3b8;
+      --fish-chip-border: #cbd5e1;
       --fish-chip-text: #0f172a;
       --filter-bar-bg: #e2e8f0;
       --filter-bar-text: #1e293b;
       --badge-green: #d1fae5;
       --badge-green-text: #065f46;
-      --cal-empty: #e2e8f0;
-      --cal-spawn: #fda4af;
+      --cal-empty: #cbd5e1;
+      --cal-spawn: #f43f5e;
+      --shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.08);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background: var(--bg-main); color: var(--text-main); padding-bottom: 40px; transition: background-color 0.2s ease, color 0.2s ease; }
 
-    /* Шапка */
+    /* Шапка сайта */
     .header {
       background: var(--bg-panel);
-      padding: 12px 14px;
+      padding: 12px 16px;
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 1000;
+      box-shadow: var(--shadow);
     }
-    .header-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
     .loc-box { display: flex; flex-direction: column; gap: 2px; }
-    .loc-hierarchy { font-size: 11px; color: var(--text-muted); font-weight: 500; }
-    .loc-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 6px; color: var(--text-main); }
+    .loc-hierarchy { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .loc-title { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 6px; color: var(--text-main); }
     
     .header-actions { display: flex; align-items: center; gap: 8px; }
     .theme-toggle-btn {
       background: var(--bg-card);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       color: var(--text-main);
-      padding: 4px 8px;
-      border-radius: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
       font-size: 12px;
+      font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      transition: all 0.2s;
     }
+    .theme-toggle-btn:hover { border-color: var(--accent); background: var(--bg-input); }
 
     .live-pill {
-      font-size: 11px; padding: 3px 8px; border-radius: 12px;
-      background: var(--badge-green); color: var(--badge-green-text); font-weight: 600;
-      display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+      font-size: 11px; padding: 4px 10px; border-radius: 20px;
+      background: var(--badge-green); color: var(--badge-green-text); font-weight: 700;
+      display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
     }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); animation: blink 1.6s infinite; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); animation: blink 1.6s infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
     
-    .basin-line { font-size: 11px; color: var(--accent); margin-top: 3px; font-weight: 600; }
-    .astro-line { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.35; }
+    .basin-line { font-size: 12px; color: var(--accent); margin-top: 4px; font-weight: 600; }
+    .astro-line { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
 
-    .btn-row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+    .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     .btn {
       flex: 1;
-      min-width: 95px;
+      min-width: 110px;
       background: var(--bg-card);
       color: var(--text-main);
       border: 1px solid var(--border);
-      padding: 7px 10px;
+      padding: 8px 12px;
       border-radius: 8px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       text-align: center;
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: all 0.15s ease;
     }
     .btn:hover { background: var(--border); }
     .btn-accent { background: #0284c7; border-color: #38bdf8; color: #fff; }
@@ -133,42 +143,31 @@
       display: none;
       background: var(--bg-panel);
       border-bottom: 2px solid var(--accent);
-      padding: 10px 12px;
+      padding: 12px;
     }
     #mapDrawer.open { display: block; }
     
-    .map-toolbar {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
+    .map-toolbar { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
     .map-search-input {
       flex: 1;
-      min-width: 160px;
+      min-width: 200px;
       background: var(--bg-input);
       color: var(--text-main);
       border: 1px solid var(--border);
-      padding: 7px 10px;
+      padding: 8px 12px;
       border-radius: 8px;
       font-size: 13px;
       outline: none;
     }
-    .layer-switch {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      margin-bottom: 8px;
-      scrollbar-width: none;
-    }
+    .layer-switch { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 8px; scrollbar-width: none; }
     .layer-btn {
       background: var(--bg-card);
       color: var(--text-muted);
       border: 1px solid var(--border);
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 8px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
     }
@@ -176,7 +175,7 @@
 
     #mapBox {
       width: 100%;
-      height: 310px;
+      height: 320px;
       border-radius: 10px;
       border: 1px solid var(--border);
       background: #0f172a;
@@ -184,13 +183,13 @@
     }
     .map-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 
-    /* Панель фильтрации бассейна */
+    /* Полоса фильтрации */
     .filter-bar {
       background: var(--filter-bar-bg);
       color: var(--filter-bar-text);
-      padding: 6px 12px;
+      padding: 8px 16px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -200,8 +199,8 @@
       background: var(--bg-card);
       border: 1px solid var(--border);
       color: var(--text-main);
-      padding: 3px 9px;
-      border-radius: 10px;
+      padding: 4px 10px;
+      border-radius: 12px;
       font-size: 11px;
       font-weight: 700;
       cursor: pointer;
@@ -210,126 +209,152 @@
     /* Свайп-лента рыб */
     .fish-strip {
       background: var(--fish-strip-bg);
-      padding: 8px 10px;
+      padding: 10px 14px;
       display: flex;
-      gap: 8px;
+      gap: 10px;
       overflow-x: auto;
-      border-bottom: 2px solid var(--border);
-      scrollbar-width: none;
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: thin;
     }
-    .fish-strip::-webkit-scrollbar { display: none; }
     .fish-chip {
       display: flex;
       flex-direction: column;
       align-items: center;
       background: var(--fish-chip-bg);
       border: 1.5px solid var(--fish-chip-border);
-      border-radius: 16px;
-      padding: 6px 10px;
-      min-width: 112px;
+      border-radius: 14px;
+      padding: 8px 10px;
+      min-width: 118px;
       flex-shrink: 0;
       cursor: pointer;
-      transition: transform 0.1s, border-color 0.15s;
+      transition: all 0.15s ease;
+      text-align: center;
     }
-    .fish-chip:hover { transform: translateY(-2px); }
+    .fish-chip:hover { transform: translateY(-2px); border-color: var(--accent); }
     .fish-chip.active {
-      background: #e2e8f0;
-      border-color: #0284c7;
-      box-shadow: 0 0 0 2px #0284c7;
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+      box-shadow: 0 0 0 2px var(--accent);
     }
-    .fish-chip-name { font-size: 13px; font-weight: 700; color: var(--fish-chip-text); margin: 2px 0 3px; white-space: nowrap; }
-    .fish-icon { width: 76px; height: 34px; }
-
-    .container { padding: 12px; display: flex; flex-direction: column; gap: 14px; max-width: 1100px; margin: 0 auto; }
-
-    /* Обнаруженные рядом водоемы */
-    .nearby-waters {
-      background: var(--bg-panel);
-      border: 1px dashed var(--border);
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 11px;
-      color: var(--text-muted);
+    .fish-chip-name { font-size: 13px; font-weight: 700; color: var(--fish-chip-text); margin: 4px 0; white-space: nowrap; }
+    .fish-img-box {
+      width: 82px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
-    .water-chips { display: flex; gap: 6px; overflow-x: auto; margin-top: 5px; padding-bottom: 2px; scrollbar-width: none; }
-    .water-chips::-webkit-scrollbar { display: none; }
-    .w-chip {
-      background: var(--bg-card);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      padding: 4px 9px;
-      border-radius: 12px;
-      font-size: 11px;
-      white-space: nowrap;
-      cursor: pointer;
+    .fish-img-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
     }
-    .w-chip.active { border-color: var(--accent); background: #0284c7; color: #fff; font-weight: 600; }
 
-    /* Селекторы снасти и водоема */
+    /* Адаптивный контейнер (Mobile vs Desktop) */
+    .container {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Карточки параметров лова */
     .controls-card {
       background: var(--bg-panel);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 12px;
+      padding: 14px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
     }
-    .ctrl-item { display: flex; flex-direction: column; gap: 4px; }
-    .ctrl-item label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .ctrl-item { display: flex; flex-direction: column; gap: 5px; }
+    .ctrl-item label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
     select, input[type="range"], input[type="text"], textarea {
       width: 100%;
       background: var(--bg-input);
       color: var(--text-main);
       border: 1px solid var(--border);
-      padding: 9px 10px;
+      padding: 10px 12px;
       border-radius: 8px;
       font-size: 13px;
       outline: none;
     }
+    select:focus, input:focus, textarea:focus { border-color: var(--accent); }
 
-    /* Блок на 3 ближайших дня с вердиктом (погода/луна) по типу Фото 1 */
-    .three-day-box {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .nearby-waters {
+      background: var(--bg-panel);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
     }
+    .water-chips { display: flex; gap: 6px; overflow-x: auto; margin-top: 6px; scrollbar-width: none; }
+    .w-chip {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .w-chip.active { border-color: var(--accent); background: #0284c7; color: #fff; }
+
+    /* Экспресс-сводка на 3 дня */
+    .three-day-box { display: flex; flex-direction: column; gap: 10px; }
     .quick-verdict-card {
       background: var(--bg-panel);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 10px 12px;
+      padding: 12px 14px;
       display: grid;
-      grid-template-columns: 140px 1fr 48px;
+      grid-template-columns: 160px 1fr 50px;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
     }
-    @media(max-width: 640px) {
+    @media (max-width: 768px) {
       .quick-verdict-card { grid-template-columns: 1fr; gap: 8px; }
     }
-    .qv-left { display: flex; flex-direction: column; gap: 4px; }
-    .qv-date { font-weight: 700; font-size: 13px; }
-    .qv-badges { display: flex; gap: 4px; flex-wrap: wrap; }
-    .qv-tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; color: #fff; }
+    .qv-left { display: flex; flex-direction: column; gap: 5px; }
+    .qv-date { font-weight: 800; font-size: 13px; }
+    .qv-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .qv-tag { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; color: #fff; }
     .qv-tag.good { background: #10b981; }
     .qv-tag.warn { background: #f59e0b; }
     .qv-tag.bad { background: #ef4444; }
-    .qv-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
-    .qv-icon { font-size: 28px; text-align: center; }
+    .qv-desc { font-size: 12px; color: var(--text-muted); line-height: 1.45; }
+    .qv-icon { font-size: 32px; text-align: center; }
 
     /* Прогноз на 14 дней */
-    .section-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; }
+    .section-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
     .week-scroll {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       overflow-x: auto;
-      padding-bottom: 6px;
+      padding-bottom: 8px;
       scrollbar-width: thin;
     }
     .day-card {
-      min-width: 136px;
+      min-width: 138px;
       background: var(--bg-panel);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: 10px;
       padding: 10px;
       flex-shrink: 0;
@@ -337,95 +362,92 @@
       flex-direction: column;
       gap: 4px;
       cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
+      transition: all 0.15s ease;
     }
-    .day-card.active { border: 2px solid var(--accent); background: #162a45; }
-    [data-theme="light"] .day-card.active { background: #e0f2fe; }
+    .day-card.active { border-color: var(--accent); background: rgba(56, 189, 248, 0.12); }
     .d-head { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
-    .d-temp { font-size: 15px; font-weight: 700; margin: 2px 0; }
+    .d-temp { font-size: 15px; font-weight: 800; margin: 2px 0; }
     .d-meta { font-size: 11px; color: var(--text-muted); line-height: 1.35; }
-    .d-fishes { margin-top: 4px; padding-top: 5px; border-top: 1px solid var(--border); display: flex; justify-content: center; }
+    .d-fishes { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--border); display: flex; justify-content: center; }
 
-    /* Калибровка снасти */
-    .tackle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+    /* Тактические карточки */
+    .tackle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
     .tackle-card {
       background: var(--bg-panel);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 10px 12px;
+      padding: 12px 14px;
     }
-    .t-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
-    .t-val { font-size: 15px; font-weight: 700; color: var(--accent); }
-    .t-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.35; }
+    .t-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .t-val { font-size: 15px; font-weight: 800; color: var(--accent); }
+    .t-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
 
-    /* Почасовой список */
+    /* Почасовой блок */
     .hourly-card {
       background: var(--bg-panel);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 12px;
+      padding: 14px;
     }
     .sun-bar {
       font-size: 11px; color: #fde047; background: #422006;
-      padding: 6px 10px; border-radius: 8px; margin: 8px 0 10px;
-      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px;
+      padding: 8px 12px; border-radius: 8px; margin: 8px 0 12px;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+      font-weight: 600;
     }
     [data-theme="light"] .sun-bar { background: #fef08a; color: #854d0e; }
     .hour-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
-      gap: 6px 12px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 8px 12px;
     }
     .hour-item {
       display: grid;
-      grid-template-columns: 44px 110px 1fr;
+      grid-template-columns: 46px 110px 1fr;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       background: var(--bg-card);
-      padding: 7px 10px;
+      padding: 8px 10px;
       border-radius: 8px;
       border-left: 3px solid transparent;
     }
-    .hour-item.now { border: 1px solid var(--accent); background: #172a46; }
-    [data-theme="light"] .hour-item.now { background: #e0f2fe; }
+    .hour-item.now { border: 1.5px solid var(--accent); background: rgba(56, 189, 248, 0.15); }
     .hour-item.twilight { border-left-color: var(--warn); }
-    .h-tm { font-size: 13px; font-weight: 700; }
+    .h-tm { font-size: 13px; font-weight: 800; }
     .h-met { font-size: 11px; color: var(--text-muted); text-align: right; white-space: nowrap; }
-    .fish-scale { display: inline-flex; gap: 2px; align-items: center; }
 
-    /* Статистический годовой билборд активности и нереста */
+    /* Годовой биологический билборд */
     .annual-card {
       background: var(--bg-panel);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
     .annual-banner {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
     }
     .banner-stat {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px 10px;
+      padding: 10px 12px;
     }
-    .banner-stat .b-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-    .banner-stat .b-val { font-size: 13px; font-weight: 700; margin-top: 3px; }
+    .banner-stat .b-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+    .banner-stat .b-val { font-size: 13px; font-weight: 800; margin-top: 3px; }
     
     .month-grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
       gap: 4px;
-      margin-top: 6px;
       overflow-x: auto;
     }
     .m-cell {
-      min-width: 50px;
+      min-width: 48px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 6px;
@@ -436,22 +458,17 @@
       align-items: center;
       gap: 4px;
     }
-    .m-cell.cur { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+    .m-cell.cur { border-color: var(--accent); box-shadow: 0 0 0 1.5px var(--accent); }
     .m-name { font-size: 11px; font-weight: 700; }
-    .m-heat {
-      width: 100%;
-      height: 8px;
-      border-radius: 4px;
-      background: var(--cal-empty);
-    }
-    .m-heat.h3 { background: #10b981; } /* жор */
-    .m-heat.h2 { background: #f59e0b; } /* хороший */
-    .m-heat.h1 { background: #94a3b8; } /* слабый */
+    .m-heat { width: 100%; height: 8px; border-radius: 4px; }
+    .m-heat.h3 { background: #10b981; }
+    .m-heat.h2 { background: #f59e0b; }
+    .m-heat.h1 { background: #94a3b8; }
     .m-heat.h0 { background: var(--cal-empty); }
-    .m-heat.spawn { background: var(--cal-spawn); } /* запрет/нерест */
-    .m-tag { font-size: 9px; color: var(--text-muted); line-height: 1; }
+    .m-heat.spawn { background: var(--cal-spawn); }
+    .m-tag { font-size: 9px; color: var(--text-muted); }
 
-    /* Раздел "Для начинающих и не только" */
+    /* Энциклопедия и советы */
     .guide-card {
       background: var(--bg-panel);
       border: 1px solid var(--border);
@@ -460,38 +477,44 @@
     }
     .guide-content {
       font-size: 13px;
-      line-height: 1.5;
-      color: var(--text-main);
+      line-height: 1.55;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
       gap: 12px;
-      margin-top: 8px;
+      margin-top: 10px;
     }
     .guide-block {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 12px 14px;
     }
-    .guide-block h4 { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 6px; text-transform: uppercase; }
+    .guide-block h4 {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-    /* Комментирование и отчеты рыбаков */
+    /* Комментарии */
     .comments-card {
       background: var(--bg-panel);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 12px;
+      padding: 14px;
     }
     .comment-form { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-    .comment-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; max-height: 320px; overflow-y: auto; }
+    .comment-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; max-height: 340px; overflow-y: auto; }
     .c-item {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px 10px;
+      padding: 10px 12px;
       font-size: 12px;
     }
-    .c-meta { display: flex; justify-content: space-between; font-weight: 700; color: var(--accent); margin-bottom: 3px; }
+    .c-meta { display: flex; justify-content: space-between; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
     .c-date { font-size: 10px; color: var(--text-muted); font-weight: 400; }
   </style>
 </head>
@@ -505,114 +528,116 @@
         <div class="loc-title">📍 <span id="locName">Новый Уренгой</span></div>
       </div>
       <div class="header-actions">
-        <button class="theme-toggle-btn" onclick="cycleTheme()" id="themeBtn" title="Сменить тему оформления">🌓 Авто</button>
+        <button class="theme-toggle-btn" onclick="cycleTheme()" id="themeBtn">🌓 Тема</button>
         <div class="live-pill"><span class="dot"></span><span id="apiStatus">Синхронизация...</span></div>
       </div>
     </div>
-    <div class="basin-line" id="basinTitle">Регион ихтиофауны (радиус 300–500 км): Обь-Иртышский и Арктический бассейн</div>
-    <div class="astro-line" id="astroBar">Расчет барической нормы, температуры воды и фазы Луны...</div>
+    <div class="basin-line" id="basinTitle">Бассейн: Обь-Иртышский и Арктический</div>
+    <div class="astro-line" id="astroBar">Расчет гидрологии, барической нормы и фаз Луны...</div>
     <div class="btn-row">
-      <button class="btn btn-accent" onclick="toggleMapDrawer()" id="mapToggleBtn">🗺 Карта / Спутник РФ</button>
-      <button class="btn" onclick="detectMyGPS()">🎯 По GPS</button>
-      <button class="btn" onclick="fetchLiveMeteo()">🔄 Обновить</button>
+      <button class="btn btn-accent" onclick="toggleMapDrawer()" id="mapToggleBtn">🗺 Карта водоемов</button>
+      <button class="btn" onclick="detectMyGPS()">🎯 Мой GPS</button>
+      <button class="btn" onclick="fetchLiveMeteo()">🔄 Обновить прогноз</button>
     </div>
   </header>
 
-  <!-- Выдвижная интерактивная карта -->
+  <!-- Карта Leaflet -->
   <div id="mapDrawer">
     <div class="map-toolbar">
-      <input type="text" id="placeSearchInput" class="map-search-input" placeholder="Поиск: страна, регион, город, река (напр. Салехард, Пур, Волга, Астрахань)...">
+      <input type="text" id="placeSearchInput" class="map-search-input" placeholder="Поиск: город, поселок, река, залив (напр. Сургут, Обь, Байкал, Владивосток)...">
       <button class="btn btn-accent" style="flex:0 0 auto;" onclick="searchPlaceByName()">Найти</button>
     </div>
     <div class="layer-switch">
-      <button class="layer-btn active" id="l_topo" onclick="switchMapLayer('topo')">🗺 Топокарта РФ (Реки и глубины)</button>
-      <button class="layer-btn" id="l_sat" onclick="switchMapLayer('sat')">🛰 Спутник (Косы и карьеры)</button>
-      <button class="layer-btn" id="l_carto" onclick="switchMapLayer('carto')">🧭 Схема (Быстрая)</button>
-      <button class="layer-btn" id="l_osm" onclick="switchMapLayer('osm')">🌐 OSM зеркало</button>
+      <button class="layer-btn active" id="l_topo" onclick="switchMapLayer('topo')">🗺 Топокарта (Реки и глубины)</button>
+      <button class="layer-btn" id="l_sat" onclick="switchMapLayer('sat')">🛰 Спутник (Косы и ямы)</button>
+      <button class="layer-btn" id="l_carto" onclick="switchMapLayer('carto')">🧭 Схема</button>
+      <button class="layer-btn" id="l_osm" onclick="switchMapLayer('osm')">🌐 OSM</button>
     </div>
     <div id="mapBox"></div>
     <div class="map-hint">
-      <span>Нажмите в любую точку на карте для смены водоема и пересчета клева</span>
+      <span>Кликните в любую точку на воде для пересчета клева и определения рельефа</span>
       <button class="toggle-all-btn" onclick="toggleMapDrawer()">Свернуть ▲</button>
     </div>
   </div>
 
-  <!-- Строка статуса автофильтра рыб по региону -->
+  <!-- Фильтр региона -->
   <div class="filter-bar">
-    <span id="speciesCountInfo">Виды рыб в радиусе 300–500 км: 14</span>
-    <button class="toggle-all-btn" id="showAllToggle" onclick="toggleShowAllSpecies()">Весь справочник (22)</button>
+    <span id="speciesCountInfo">Виды рыб в радиусе 300–500 км: 16</span>
+    <button class="toggle-all-btn" id="showAllToggle" onclick="toggleShowAllSpecies()">Все 30 видов (РФ и Моря)</button>
   </div>
 
-  <!-- Свайп-лента видов рыб -->
+  <!-- Атлас рыб -->
   <div class="fish-strip" id="fishStrip"></div>
 
   <div class="container">
-    <!-- Автоопределение реальных водоемов поблизости -->
+    <!-- Реальные водоемы рядом -->
     <div class="nearby-waters">
-      <div id="nearbyStatus">🌊 Водоемы и типы акваторий поблизости (нажмите для выбора):</div>
+      <div id="nearbyStatus">🌊 Обнаруженные акватории поблизости (кликните для быстрой настройки):</div>
       <div class="water-chips" id="nearbyChips">
-        <span class="w-chip">Поиск рек и озер вокруг точки...</span>
+        <span class="w-chip">Определение рек и озер вокруг точки...</span>
       </div>
     </div>
 
     <!-- Настройки ловли -->
     <div class="controls-card">
       <div class="ctrl-item">
-        <label>Способ ловли и класс снасти</label>
+        <label>Способ ловли и снасть</label>
         <select id="methodSelect">
           <option value="spin_micro">Спиннинг: Микро / Наноджиг (0.5–4 г)</option>
           <option value="spin_light">Спиннинг: Лайт / Разнесенки (3–12 г)</option>
           <option value="spin_jig">Спиннинг: Классический Джиг (10–36 г)</option>
-          <option value="spin_classic">Спиннинг: Классика (Блесны / Воблеры)</option>
-          <option value="bottom" selected>Донная ловля (Фидер / Донка / Закидушка)</option>
-          <option value="float">Поплавочная ловля (Маховая / Болонская / Матч)</option>
-          <option value="fly">Нахлыст (Нимфа / Мокрая / Сухая мушка / Стример)</option>
+          <option value="spin_classic">Спиннинг: Блесны / Воблеры / Твичинг</option>
+          <option value="bottom" selected>Донная ловля (Фидер / Донка / Карпфишинг)</option>
+          <option value="float">Поплавочная снасть (Маховая / Болонка / Матч)</option>
+          <option value="sea_shore">Морская береговая ловля (Рокфишинг / Сёрф)</option>
+          <option value="fly">Нахлыст и сбирулино (Мушки / Стримеры)</option>
         </select>
       </div>
       <div class="ctrl-item">
-        <label>Гидрологический тип места лова</label>
+        <label>Где ловим (тип водоема)</label>
         <select id="waterSelect">
           <option value="small_river" selected>Малая или средняя река (умеренное течение)</option>
-          <option value="big_river">Крупная магистральная река / русло (сильное течение)</option>
-          <option value="quarry">Глубокий карьер / водохранилище / глубокое озеро</option>
-          <option value="tundra_lake">Мелководное озеро / старица / затон / пруд</option>
+          <option value="big_river">Крупная магистральная река / фарватер (сильное течение)</option>
+          <option value="quarry">Глубокое озеро / карьер / водохранилище (стоячая вода)</option>
+          <option value="tundra_lake">Мелководное озеро / старица / лиман / пруд</option>
+          <option value="sea_coast">Морской залив / прибрежная коса / бухта</option>
         </select>
       </div>
       <div class="ctrl-item">
-        <label>Рабочая глубина в точке: <span id="depthVal" style="color:var(--accent);">3.0</span> м</label>
-        <input type="range" id="depthRange" min="1.0" max="12.0" step="0.5" value="3.0">
+        <label>Рабочая глубина: <span id="depthVal" style="color:var(--accent); font-weight:800;">3.0</span> м</label>
+        <input type="range" id="depthRange" min="0.5" max="18.0" step="0.5" value="3.0">
       </div>
     </div>
 
-    <!-- Экспресс-прогноз на 3 дня (Формат коллеги: Погода / Луна / Вердикт) -->
-    <div class="section-label">Экспресс-сводка на 3 дня по выбранной рыбе</div>
+    <!-- 3 дня экспресс -->
+    <div class="section-label">Экспресс-сводка на 3 дня[span_7](start_span)[span_7](end_span)</div>
     <div class="three-day-box" id="threeDayBox"></div>
 
-    <!-- Прогноз на 14 дней -->
+    <!-- Прогноз 14 дней -->
     <div class="section-label">
-      <span>Прогноз клева на 14 дней (выберите день для деталей)</span>
-      <span style="font-size:11px; font-weight:normal; text-transform:none;">Горизонт: 2 недели</span>
+      <span>Прогноз клева на 14 дней[span_8](start_span)[span_8](end_span)</span>
+      <span style="font-size:11px; font-weight:normal; text-transform:none;">Нажмите на день для детального анализа</span>
     </div>
     <div class="week-scroll" id="weekGrid"></div>
 
     <!-- Калибровка снасти -->
     <div class="tackle-grid">
       <div class="tackle-card">
-        <div class="t-lbl">Потенциал клева (пик дня)</div>
+        <div class="t-lbl">Потенциал клева в пиковый час</div>
         <div id="peakFishes" style="margin-top:3px;"></div>
         <div class="t-sub" id="peakWindowSub">--</div>
       </div>
       <div class="tackle-card">
-        <div class="t-lbl">Расчет огрузки и монтажа</div>
+        <div class="t-lbl">Расчет огрузки под течение и глубину</div>
         <div class="t-val" id="weightVal">--</div>
         <div class="t-sub" id="rigSub">--</div>
       </div>
       <div class="tackle-card">
-        <div class="t-lbl" id="baitTitle">Подача и приманка</div>
+        <div class="t-lbl" id="baitTitle">Подача и насадка под погоду[span_9](start_span)[span_9](end_span)</div>
         <div class="t-sub" id="baitSub" style="color:var(--text-main);">--</div>
       </div>
       <div class="tackle-card">
-        <div class="t-lbl">Контроль погоды и факторов</div>
+        <div class="t-lbl">Факторы риска и адаптация</div>
         <div class="t-val" style="font-size:13px; color:var(--warn);" id="riskTitle">--</div>
         <div class="t-sub" id="riskSub">--</div>
       </div>
@@ -620,18 +645,18 @@
 
     <!-- Почасовой прогноз -->
     <div class="hourly-card">
-      <div class="section-label" id="hourlyTitle">Почасовой прогноз клева (24 часа)</div>
+      <div class="section-label" id="hourlyTitle">Почасовой график активности</div>
       <div class="sun-bar" id="sunInfo">
         <span>🌅 Восход: --</span>
         <span>🌇 Закат: --</span>
-        <span>🌕 Пик Луны: --</span>
+        <span>🌕 Кульминация Луны: --</span>
       </div>
       <div class="hour-list" id="hourlyList"></div>
     </div>
 
-    <!-- Годовой билборд: нерест, запреты и годовой ход клева -->
+    <!-- Годовой биологический календарь -->
     <div class="annual-card">
-      <div class="section-label" id="annualTitle">Годовой биологический календарь рыбы</div>
+      <div class="section-label" id="annualTitle">Биологический годовой календарь рыбы[span_10](start_span)[span_10](end_span)[span_11](start_span)[span_11](end_span)[span_12](start_span)[span_12](end_span)</div>
       <div class="annual-banner" id="annualBanner"></div>
       <div class="month-grid" id="monthGrid"></div>
       <div style="font-size:11px; color:var(--text-muted); display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;">
@@ -644,17 +669,17 @@
 
     <!-- Раздел: Для начинающих и не только -->
     <div class="guide-card">
-      <div class="section-label" id="guideTitle">Для начинающих и не только: Повадки и тактика ловли</div>
+      <div class="section-label" id="guideTitle">Для начинающих и не только: Повадки, Снасти и Насадка[span_13](start_span)[span_13](end_span)</div>
       <div class="guide-content" id="guideContent"></div>
     </div>
 
-    <!-- Комментарии и отчеты рыболовов водоема -->
+    <!-- Комментарии -->
     <div class="comments-card">
-      <div class="section-label">Заметки и отчеты рыболовов по этой локации</div>
+      <div class="section-label">Заметки и отчеты рыболовов по этой локации[span_14](start_span)[span_14](end_span)</div>
       <div class="comment-form">
-        <input type="text" id="commentAuthor" placeholder="Ваше имя или позывной (напр. Рыбак_89)...">
-        <textarea id="commentText" rows="2" placeholder="Какая рыба взяла, где стояла, на какую приманку/наживку?"></textarea>
-        <button class="btn btn-accent" style="align-self:flex-start;" onclick="addComment()">Оставить отчет / комментарий</button>
+        <input type="text" id="commentAuthor" placeholder="Ваше имя или позывной (напр. Рыбак_Ямал)...">
+        <textarea id="commentText" rows="2" placeholder="Где стояла рыба, глубина, проводка, насадка?"></textarea>
+        <button class="btn btn-accent" style="align-self:flex-start;" onclick="addComment()">Сохранить отчет</button>
       </div>
       <div class="comment-list" id="commentList"></div>
     </div>
@@ -672,7 +697,7 @@ function renderFiveFish(score0to100, size = 18, theme = 'dark') {
   if (rating < 1.8) col = '#ef4444';
   else if (rating < 3.3) col = '#f59e0b';
 
-  const bgCol = theme === 'light' ? '#94a3b8' : '#334155';
+  const bgCol = theme === 'light' ? '#cbd5e1' : '#334155';
   const dPath = "M2,8 Q8,2 15,5 L21,2 L19,8 L21,14 L15,11 Q8,14 2,8 Z";
   let out = `<div class="fish-scale" title="Активность: ${rating.toFixed(1)} из 5">`;
   for (let i = 1; i <= 5; i++) {
@@ -689,399 +714,347 @@ function renderFiveFish(score0to100, size = 18, theme = 'dark') {
 }
 
 /**
- * Анатомический SVG-атлас
- */
-function getDetailedFishSVG(f) {
-  const uid = `fg_${f.id}`;
-  const templates = {
-    pike: `
-      <defs>
-        <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#2d4a22"/><stop offset="55%" stop-color="#5c7c3e"/><stop offset="100%" stop-color="#fef9c3"/>
-        </linearGradient>
-      </defs>
-      <path d="M52,11 L61,5 L65,12 Z" fill="#b45309"/>
-      <path d="M53,23 L60,29 L64,22 Z" fill="#d97706"/>
-      <path d="M26,22 L31,28 L35,22 Z" fill="#ea580c"/>
-      <path d="M3,17 C10,13 18,12 34,11 C50,11 62,13 68,14 L77,8 L73,17 L77,26 L68,20 C62,21 50,23 34,23 C18,22 10,21 3,17 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="0.9"/>
-      <g fill="#fef08a" opacity="0.55">
-        <ellipse cx="26" cy="16" rx="2.5" ry="1"/><ellipse cx="34" cy="18" rx="3" ry="1"/><ellipse cx="43" cy="15.5" rx="2.8" ry="1"/><ellipse cx="52" cy="17.5" rx="2.5" ry="1"/><ellipse cx="60" cy="16" rx="2" ry="0.9"/>
-      </g>
-      <path d="M19,13 Q22,17 19,21" fill="none" stroke="#1e293b" stroke-width="0.8"/>
-      <circle cx="12" cy="15.5" r="2" fill="#facc15"/><circle cx="12" cy="15.5" r="1" fill="#0f172a"/>`,
-
-    perch: `
-      <defs>
-        <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#1e3f20"/><stop offset="60%" stop-color="#658c48"/><stop offset="100%" stop-color="#f1f5f9"/>
-        </linearGradient>
-      </defs>
-      <path d="M21,11 Q29,3 39,10 Z" fill="#475569" stroke="#1e293b" stroke-width="0.7"/>
-      <circle cx="36.5" cy="8.5" r="1.8" fill="#0f172a"/>
-      <path d="M43,10 L52,6 L56,12 Z" fill="#658c48"/>
-      <path d="M24,23 L29,30 L35,24 Z" fill="#dc2626"/>
-      <path d="M46,23 L52,29 L56,22 Z" fill="#dc2626"/>
-      <path d="M64,14 L76,8 L72,17 L76,26 L64,20 Z" fill="#dc2626"/>
-      <path d="M6,18 Q24,6 44,10 L65,14 L65,20 L44,24 Q24,27 6,18 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="0.9"/>
-      <path d="M22,10 L23,22 M29,9 L30,23 M36,10 L36,23 M43,11 L43,22 M50,12 L50,21 M57,13 L57,20" stroke="#142914" stroke-width="2.1" opacity="0.65" stroke-linecap="round"/>
-      <path d="M18,13 Q21,18 18,22" fill="none" stroke="#1e293b" stroke-width="0.8"/>
-      <circle cx="13" cy="16.5" r="2" fill="#f59e0b"/><circle cx="13" cy="16.5" r="1" fill="#0f172a"/>`,
-
-    zander: `
-      <defs>
-        <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#334155"/><stop offset="55%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#f8fafc"/>
-        </linearGradient>
-      </defs>
-      <path d="M23,12 L31,5 L39,11 Z" fill="#64748b" stroke="#334155" stroke-width="0.7"/>
-      <path d="M43,11 L54,6 L59,13 Z" fill="#64748b" stroke="#334155" stroke-width="0.7"/>
-      <path d="M25,22 L30,28 L35,22 Z" fill="#cbd5e1"/>
-      <path d="M47,22 L53,28 L58,21 Z" fill="#94a3b8"/>
-      <path d="M4,17 Q20,9 44,11 L66,14 L76,9 L72,17 L76,25 L66,20 L44,23 Q20,25 4,17 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="0.9"/>
-      <path d="M24,11 L24,20 M31,11 L31,21 M39,11 L39,20 M47,12 L47,20 M55,13 L55,19" stroke="#334155" stroke-width="1.8" opacity="0.5"/>
-      <circle cx="12.5" cy="15.5" r="1.9" fill="#e2e8f0"/><circle cx="12.5" cy="15.5" r="0.9" fill="#0f172a"/>`,
-
-    burbot: `
-      <defs>
-        <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#3b2818"/><stop offset="65%" stop-color="#785937"/><stop offset="100%" stop-color="#d6c5b3"/>
-        </linearGradient>
-      </defs>
-      <path d="M25,13 L30,9 L34,13 Z" fill="#4a3520"/>
-      <path d="M36,13 L67,10 L68,14 Z" fill="#4a3520"/>
-      <path d="M40,21 L67,24 L68,20 Z" fill="#5c4028"/>
-      <path d="M5,17 Q14,11 32,13 L67,14 C77,14 77,20 67,20 L32,21 Q14,23 5,17 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="0.9"/>
-      <path d="M22,15 Q26,18 30,15 M38,16 Q43,19 48,15 M54,16 Q59,18 63,16" stroke="#291c10" stroke-width="1.5" fill="none" opacity="0.65"/>
-      <path d="M8,19 L6,24" stroke="#4a3520" stroke-width="1.1" stroke-linecap="round"/>
-      <circle cx="12" cy="15.5" r="1.5" fill="#fde047"/><circle cx="12" cy="15.5" r="0.8" fill="#0f172a"/>`,
-
-    catfish: `
-      <defs>
-        <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#0f172a"/><stop offset="65%" stop-color="#334155"/><stop offset="100%" stop-color="#94a3b8"/>
-        </linearGradient>
-      </defs>
-      <path d="M25,13 L28,9 L31,13 Z" fill="#1e293b"/>
-      <path d="M34,21 L69,24 L70,19 Z" fill="#1e293b"/>
-      <path d="M4,17 C8,11 22,12 36,13 L69,15 C76,15 76,20 69,20 L36,21 C22,22 8,22 4,17 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="0.9"/>
-      <path d="M6,16 Q1,12 2,7 M7,19 Q4,24 6,27 M9,19 Q8,23 10,26" fill="none" stroke="#1e293b" stroke-width="1.1" stroke-linecap="round"/>
-      <circle cx="11" cy="15" r="1.2" fill="#cbd5e1"/>`,
-
-    salmonid: `
-      <defs>
-        <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="${f.topCol || '#334155'}"/><stop offset="55%" stop-color="${f.color}"/><stop offset="100%" stop-color="#f8fafc"/>
-        </linearGradient>
-      </defs>
-      ${f.id === 'grayling'
-        ? `<path d="M25,12 L29,2 L44,4 L46,12 Z" fill="#7c3aed" opacity="0.85" stroke="#1e293b" stroke-width="0.7"/>`
-        : `<path d="M30,11 L37,4 L43,11 Z" fill="#64748b"/>`}
-      <path d="M56,12 Q59,9 61,13 Z" fill="${f.fin}"/>
-      <path d="M27,22 L32,28 L37,22 Z" fill="${f.fin}"/>
-      <path d="M48,22 L53,27 L57,21 Z" fill="${f.fin}"/>
-      <path d="M6,17 Q26,8 48,12 L66,14 L75,8 L70,17 L75,26 L66,20 L48,22 Q26,26 6,17 Z" fill="url(#${uid})" stroke="#334155" stroke-width="0.9"/>
-      ${f.spots ? `<g fill="#dc2626" opacity="0.75"><circle cx="26" cy="15" r="1"/><circle cx="33" cy="16.5" r="1.1"/><circle cx="41" cy="15" r="1"/><circle cx="48" cy="16" r="1"/></g>` : ''}
-      <path d="M18,13 Q21,17 18,21" fill="none" stroke="#475569" stroke-width="0.8"/>
-      <circle cx="13" cy="15.5" r="1.8" fill="#0f172a"/><circle cx="13" cy="15.5" r="0.7" fill="#fff"/>`,
-
-    cyprinid_deep: `
-      <defs>
-        <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="${f.topCol || '#334155'}"/><stop offset="55%" stop-color="${f.color}"/><stop offset="100%" stop-color="#f8fafc"/>
-        </linearGradient>
-      </defs>
-      <path d="M29,9 L37,2 L48,9 Z" fill="#475569"/>
-      <path d="M26,23 L31,30 L37,24 Z" fill="${f.fin}"/>
-      <path d="M45,23 L53,30 L59,21 Z" fill="${f.fin}"/>
-      <path d="M64,14 L75,7 L70,17 L75,27 L64,20 Z" fill="${f.fin === '#dc2626' ? '#b91c1c' : '#475569'}"/>
-      <path d="M7,17 Q27,3 50,10 L65,14 L65,20 L50,24 Q27,31 7,17 Z" fill="url(#${uid})" stroke="#334155" stroke-width="0.9"/>
-      <path d="M19,17 Q38,20 63,17" fill="none" stroke="#475569" stroke-width="0.6" stroke-dasharray="1.5,1.5"/>
-      <path d="M18,12 Q21,17 18,22" fill="none" stroke="#334155" stroke-width="0.8"/>
-      ${f.barbels ? `<path d="M9,19 L7,23" stroke="#78350f" stroke-width="1.2" stroke-linecap="round"/>` : ''}
-      <circle cx="14" cy="15.5" r="2" fill="${f.eye || '#f59e0b'}"/><circle cx="14" cy="15.5" r="1" fill="#0f172a"/>`,
-
-    cyprinid_slim: `
-      <defs>
-        <linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="${f.topCol || '#334155'}"/><stop offset="55%" stop-color="${f.color}"/><stop offset="100%" stop-color="#ffffff"/>
-        </linearGradient>
-      </defs>
-      <path d="M31,11 L38,4 L44,11 Z" fill="#64748b"/>
-      <path d="M27,21 L32,27 L37,21 Z" fill="${f.fin}"/>
-      <path d="M47,21 L52,27 L57,20 Z" fill="${f.fin}"/>
-      <path d="M64,14 L75,8 L70,17 L75,26 L64,20 Z" fill="#64748b"/>
-      <path d="M6,17 Q27,8 50,12 L65,14 L65,20 L50,22 Q27,26 6,17 Z" fill="url(#${uid})" stroke="#475569" stroke-width="0.9"/>
-      ${f.id === 'gudgeon' ? `<g fill="#334155" opacity="0.65"><circle cx="26" cy="16.5" r="1.4"/><circle cx="34" cy="16.5" r="1.5"/><circle cx="42" cy="16.5" r="1.4"/><circle cx="50" cy="16.5" r="1.3"/><circle cx="58" cy="16.5" r="1.2"/></g><path d="M8,18 L6,22" stroke="#475569" stroke-width="1"/>` : ''}
-      <path d="M18,13 Q21,17 18,21" fill="none" stroke="#475569" stroke-width="0.8"/>
-      <circle cx="13" cy="15.5" r="1.8" fill="#fde047"/><circle cx="13" cy="15.5" r="0.9" fill="#0f172a"/>`
-  };
-
-  const body = templates[f.tpl] || templates.cyprinid_slim;
-  return `<svg class="fish-icon" viewBox="0 0 80 34">${body}</svg>`;
-}
-
-/**
- * База данных 22 видов рыб с биологическими циклами и тактикой
+ * БАЗА ДАННЫХ: 30 ВИДОВ (Речные, Озерные, Морские, Ракообразные)
+ * Картинки подключены через надежные прямые прозрачные PNG/WebP с fallback на вектор
  */
 const FISH_DB = [
   { 
-    id:'dace', name:'Елец', type:'peace', tpl:'cyprinid_slim', topCol:'#334155', color:'#94a3b8', fin:'#cbd5e1', 
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], 
-    tMinStop:0.5, coldFactor:0.65, optPress:758, bladderSens:0.85, feedMode:'diurnal', 
-    methods:{spin_micro:0.78,spin_light:0.45,spin_jig:0.05,spin_classic:0.5,bottom:0.88,float:1.0,fly:0.92}, 
-    bait:'Поплавок 1.5–3 г в проводку по струе, мормышка 0.4–1 г или легкий пикер (опарыш / мотыль / ручейник у дна).',
-    spawnMonth: [4, 5], banMonths: '20 апреля — 30 мая',
-    monthActivity: [1, 1, 2, 0, 0, 2, 3, 3, 3, 2, 1, 1], // 0-запрет/нерест, 1-слабый, 2-хороший, 3-жор
-    beginnerAdvice: 'Стайная быстрая рыба чистых рек. Стоит на границе струи и тихой воды, за корягами и камнями. Не терпит толстых лесок (поводок 0.08–0.10 мм). Клюет резко, подсекать мгновенно.',
-    topGear: 'Поплавочная болонка 4–5 м, пикер с кормушкой 15–25 г, мормо-спиннинг до 1.5 г.'
-  },
-  { 
-    id:'ruffe', name:'Ерш', type:'predator', tpl:'perch', topCol:'#3f4f38', color:'#849669', fin:'#a3b18a', 
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
-    tMinStop:0.0, coldFactor:0.95, optPress:757, bladderSens:0.6, feedMode:'all_day', 
-    methods:{spin_micro:0.85,spin_light:0.4,spin_jig:0.05,spin_classic:0.05,bottom:1.0,float:0.88,fly:0.1}, 
-    bait:'Донная оснастка в русловой яме (пучок мотыля или червя) либо наноджиг 0.8–2 г с волочением по дну.',
-    spawnMonth: [4, 5], banMonths: 'Без жесткого запрета (сорный вид)',
-    monthActivity: [3, 2, 2, 0, 1, 2, 2, 2, 3, 3, 3, 3],
-    beginnerAdvice: 'Хозяин ям с глинистым или заиленным дном. Не боится мути и холода, активен круглый год. Идеальный индикатор глубины и отличный живец для налима.',
-    topGear: 'Простейшая донка/поплавочка с грузилом на дне. Червь, мотыль.'
-  },
-  { 
-    id:'burbot', name:'Налим', type:'predator', tpl:'burbot', color:'#6b4f35', fin:'#4a3520', 
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','far_east'], 
-    tMinStop:-0.5, coldFactor:1.25, optPress:752, bladderSens:0.35, feedMode:'nocturnal', 
-    methods:{spin_micro:0.2,spin_light:0.68,spin_jig:0.88,spin_classic:0.5,bottom:1.0,float:0.15,fly:0.05}, 
-    bait:'Донка 60–100 г с нарезкой рыбы или пучком червей на выходе из ямы; джиг с перегрузом со стуком по камням в сумерках.',
-    spawnMonth: [12, 1], banMonths: '15 декабря — 15 февраля (зима)',
-    monthActivity: [0, 0, 3, 2, 1, 0, 0, 0, 2, 3, 3, 0],
-    beginnerAdvice: 'Единственный пресноводный тресковый хищник. Любит холод, ненастье, ветер и ледяную воду. Летом впадает в спячку. Ловится строго со дна в темноте.',
-    topGear: 'Мощный фидер или закидушка с леской 0.35 мм и крупным крючком. Наживка: ёрш, куриная печень, выползок.'
-  },
-  { 
-    id:'perch', name:'Окунь', type:'predator', tpl:'perch', color:'#4d7c43', fin:'#dc2626', 
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], 
-    tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', 
-    methods:{spin_micro:1.0,spin_light:0.96,spin_jig:0.78,spin_classic:0.75,bottom:0.68,float:0.62,fly:0.45}, 
-    bait:'Джиг-риг / микроджиг 1.5–5 г или Отводной поводок + пассивный слаг/рачок, двойной подрыв с паузой.',
-    spawnMonth: [4, 5], banMonths: '25 апреля — 10 июня',
-    monthActivity: [1, 1, 2, 0, 1, 3, 3, 3, 3, 3, 2, 1],
-    beginnerAdvice: 'Универсальный хищник. Ищите вокруг коряг, прибрежных свалов и камыша. Осенью сбивается в котлы на бровках. Очень отзывчив на анимацию с паузой в 2–4 секунды.',
-    topGear: 'Спиннинг тестом 1–7 г или 3–12 г, катушка 2000, шнур #0.4 PE, силикон 1.5–2.5 дюйма.'
-  },
-  { 
-    id:'gudgeon', name:'Пескарь', type:'peace', tpl:'cyprinid_slim', topCol:'#574c3f', color:'#a39074', fin:'#cbd5e1', 
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], 
-    tMinStop:2.0, coldFactor:0.42, optPress:758, bladderSens:0.8, feedMode:'diurnal', 
-    methods:{spin_micro:0.45,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.9,float:1.0,fly:0.15}, 
-    bait:'Легкая поплавочная или донная снасть с мотылем/кусочком червя строго по песчаному дну на течении.',
-    spawnMonth: [5, 6], banMonths: 'Без ограничений',
-    monthActivity: [0, 0, 1, 1, 0, 2, 3, 3, 2, 1, 0, 0],
-    beginnerAdvice: 'Донная рыба чистых отмелей и песчаных перекатов. Любит, когда на дне поднимают муть сапогами или палкой. Крючки №16–18, поводок 0.08 мм.',
-    topGear: 'Маховая удочка 3–4 м, наживка — мелкий кусочек червя или мотыль.'
-  },
-  { 
-    id:'roach', name:'Плотва', type:'peace', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#ef4444', 
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
-    tMinStop:1.0, coldFactor:0.58, optPress:758, bladderSens:1.0, feedMode:'diurnal', 
-    methods:{spin_micro:0.65,spin_light:0.15,spin_jig:0.0,spin_classic:0.05,bottom:0.95,float:1.0,fly:0.55}, 
-    bait:'Деликатный фидер (поводок 0.10 мм) или поплавок с подачей мотыля/опарыша у дна; мормышинг 0.4–1 г.',
-    spawnMonth: [4, 5], banMonths: '1 мая — 10 июня',
-    monthActivity: [1, 2, 3, 0, 2, 3, 3, 3, 3, 2, 2, 1],
-    beginnerAdvice: 'Осторожная рыба. Требует деликатной оснастки: тонкий поводок 0.10 мм, легкий поплавок 1.5–2 г. Поклёвка часто на утоп или подъём на 1 см.',
-    topGear: 'Поплавочная удочка 5–6 м, фидер лайт до 40 г. Прикормка мелкодисперсная с пылящим шлейфом.'
-  },
-  { 
-    id:'whitefish', name:'Сиг', type:'peace', tpl:'salmonid', topCol:'#334155', color:'#cbd5e1', fin:'#64748b', 
-    basins:['arctic_sib','nw_karelia','far_east'], 
-    tMinStop:0.0, coldFactor:1.12, optPress:757, bladderSens:0.75, feedMode:'crepuscular', 
-    methods:{spin_micro:0.88,spin_light:0.82,spin_jig:0.35,spin_classic:0.78,bottom:1.0,float:0.85,fly:0.95}, 
-    bait:'Донная оснастка на песчаных косах (мормыш/бокоплав), микроджиг 1.5–3 г или нимфа/узкая микроколебалка на снос.',
-    spawnMonth: [9, 10, 11], banMonths: '1 сентября — 15 ноября (Осенний запрет)',
-    monthActivity: [2, 2, 2, 2, 3, 3, 2, 2, 0, 0, 0, 3],
-    beginnerAdvice: 'Северная ценная рыба. Стоит на течении за косами и перепадами глубин. Рот слабый, форсировать вываживание нельзя — порвутся губы.',
-    topGear: 'Пикер или донка с поводками из флюорокарбона 0.14 мм. Наживка — мормыш, короед, кусочек кальмара.'
-  },
-  { 
-    id:'catfish', name:'Сом', type:'predator', tpl:'catfish', color:'#334155', fin:'#1e293b', 
-    basins:['euro_west','volga_ural','kazakh_steppe','far_east'], 
-    tMinStop:8.0, coldFactor:0.25, optPress:755, bladderSens:1.1, feedMode:'nocturnal', 
-    methods:{spin_micro:0.05,spin_light:0.2,spin_jig:1.0,spin_classic:0.65,bottom:1.0,float:0.1,fly:0.0}, 
-    bait:'Донная снасть на выходе из русловой ямы (живец, выползки, печень) или тяжелый джиг 28–50 г в сумерках (при T воды > +10°C).',
-    spawnMonth: [5, 6], banMonths: '25 апреля — 10 июня',
-    monthActivity: [0, 0, 0, 1, 0, 2, 3, 3, 2, 1, 0, 0],
-    beginnerAdvice: 'Гигант пресных вод. Любит тепло и глубокие закоряженные ямы. Выходит кормиться на перекаты ночью. Снасть должна иметь колоссальный запас прочности.',
-    topGear: 'Мощное удилище с тестом 100–300 г, шнур #4.0–#6.0 PE, поводок кевлар или толстый флюр 0.8 мм.'
-  },
-  { 
-    id:'pike', name:'Щука', type:'predator', tpl:'pike', color:'#5c7c3e', fin:'#d97706', 
+    id:'pike', name:'Щука', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=160&q=80',
     basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], 
     tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular', 
-    methods:{spin_micro:0.45,spin_light:0.86,spin_jig:1.0,spin_classic:0.92,bottom:0.78,float:0.5,fly:0.65}, 
-    bait:'Джиг 12–28 г (виброхвост 3.5–4.5" / мандула) на бровках с паузой 3–4 сек, воблеры-суспендеры 110–130 мм или колебалка.',
-    spawnMonth: [3, 4], banMonths: '15 марта — 30 апреля (Ранний нерест)',
+    methods:{spin_micro:0.45,spin_light:0.86,spin_jig:1.0,spin_classic:0.95,bottom:0.75,float:0.5,sea_shore:0.1,fly:0.65}, 
+    spawnMonth: [3, 4], banMonths: '15 марта — 30 апреля',
     monthActivity: [1, 2, 0, 0, 3, 2, 2, 3, 3, 3, 2, 1],
-    beginnerAdvice: 'Засадный хищник. Ищите на границе растительности, у поваленных деревьев и на бровках. Обязателен металлический или титановый поводок (струна 15–20 см) — иначе срежет любую леску.',
-    topGear: 'Спиннинг тестом 10–35 г быстрого строя, шнур #1.2 PE, поводок-струна, виброхвосты 10–12 см.'
+    baseAdvice: 'Засадный хищник. Всегда ориентируется на укрытия: бровки, коряги, границу кувшинок.',
+    topGear: 'Спиннинг Medium-Fast 10–35 г, плетеный шнур #1.2 PE, стальной или титановый поводок-струна 20 см.'
   },
   { 
-    id:'ide', name:'Язь', type:'peace', tpl:'cyprinid_deep', topCol:'#334155', color:'#94a3b8', fin:'#dc2626', eye:'#facc15', 
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
-    tMinStop:1.0, coldFactor:0.62, optPress:758, bladderSens:0.95, feedMode:'crepuscular', 
-    methods:{spin_micro:0.76,spin_light:0.88,spin_jig:0.35,spin_classic:0.88,bottom:0.95,float:0.9,fly:0.82}, 
-    bait:'Фидер на границе струи и обратки (опарыш/червь/кукуруза) или лайт-спиннинг (крэнки, вертушки #2, микроколебалки).',
-    spawnMonth: [4, 5], banMonths: '20 апреля — 30 мая',
-    monthActivity: [1, 1, 2, 0, 2, 3, 3, 3, 2, 1, 1, 1],
-    beginnerAdvice: 'Сильная и пугливая рыба. Любит глубокие омуты с глинистым дном ниже перекатов. Берет приманку с мощным рывком, требует хорошо настроенного фрикциона.',
-    topGear: 'Лайт-спиннинг 2–10 г, крэнки 38–45 мм (Chubby, Camion) или фидер медиум до 70 г.'
+    id:'perch', name:'Окунь', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], 
+    tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', 
+    methods:{spin_micro:1.0,spin_light:0.96,spin_jig:0.80,spin_classic:0.75,bottom:0.68,float:0.65,sea_shore:0.1,fly:0.45}, 
+    spawnMonth: [4, 5], banMonths: '25 апреля — 10 июня',
+    monthActivity: [1, 1, 2, 0, 1, 3, 3, 3, 3, 3, 2, 1],
+    baseAdvice: 'Стайный полосатый разбойник. Обожает ступеньку с пассивной анимацией и паузой на дне.',
+    topGear: 'Лайт или ультралайт до 7–10 г, катушка 2000, шнур #0.4 PE, поводок из флюорокарбона 0.20 мм.'
   },
   { 
-    id:'grayling', name:'Хариус', type:'predator', tpl:'salmonid', topCol:'#312e81', color:'#94a3b8', fin:'#7c3aed', spots:true, 
-    basins:['arctic_sib','nw_karelia','far_east'], 
-    tMinStop:0.0, coldFactor:1.08, optPress:758, bladderSens:0.7, feedMode:'crepuscular', 
-    methods:{spin_micro:0.9,spin_light:0.75,spin_jig:0.1,spin_classic:0.8,bottom:0.4,float:0.9,fly:1.0}, 
-    bait:'Нахлыст (сухая мушка / нимфа с золотой головкой), сбирулино/балда с мушками или вертушка #0–#1 на перекатах.',
-    spawnMonth: [5, 6], banMonths: '1 мая — 15 июня (Горный запрет)',
-    monthActivity: [1, 1, 2, 2, 0, 0, 3, 3, 3, 3, 2, 1],
-    beginnerAdvice: 'Рыба чистейших северных рек. Стоит за крупными валунами на перекатах, карауля падающих насекомых. Маскировка рыболова имеет решающее значение.',
-    topGear: 'Нахлыст 4–5 класса, спиннинг ультралайт 0.5–5 г с вертушками Mepps Black Fury #0–#1.'
-  },
-  { 
-    id:'zander', name:'Судак', type:'predator', tpl:'zander', color:'#94a3b8', fin:'#64748b', 
+    id:'zander', name:'Судак', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=160&q=80',
     basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
     tMinStop:1.0, coldFactor:0.85, optPress:757, bladderSens:1.2, feedMode:'crepuscular', 
-    methods:{spin_micro:0.35,spin_light:0.82,spin_jig:1.0,spin_classic:0.7,bottom:0.8,float:0.2,fly:0.2}, 
-    bait:'Классический джиг с четким стуком по твердому дну/коряжнику (узкий виброхвост 3.5–4.5", мандула, поролон) или ночной воблер.',
+    methods:{spin_micro:0.35,spin_light:0.82,spin_jig:1.0,spin_classic:0.7,bottom:0.8,float:0.2,sea_shore:0.1,fly:0.2}, 
     spawnMonth: [4, 5], banMonths: '15 апреля — 10 июня',
     monthActivity: [1, 1, 2, 0, 1, 3, 2, 2, 3, 3, 2, 1],
-    beginnerAdvice: 'Клыкастый донный охотник. Любит жесткое дно, ракушечник, коряжник и перепады глубин. Поклевка — резкий «судачий удар» в руку. Подсечка должна быть мощной.',
-    topGear: 'Звонкий джиговый спиннинг строя Extra-Fast, шнур #0.8–#1.0 PE, флюорокарбоновый шок-лидер 0.35 мм.'
+    baseAdvice: 'Сумеречный глубоководный охотник. Ищет жесткий хрящ, каменистые косы и затопленный коряжник.',
+    topGear: 'Жесткий спиннинг Extra-Fast 12–45 г, шнур #1.0 PE, узкие виброхвосты и мандулы.'
   },
   { 
-    id:'crucian', name:'Карась', type:'peace', tpl:'cyprinid_deep', topCol:'#713f12', color:'#eab308', fin:'#a16207', eye:'#f59e0b', 
-    basins:['arctic_sib','euro_west','volga_ural','kazakh_steppe','far_east'], 
-    tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.9, feedMode:'diurnal', 
-    methods:{spin_micro:0.55,spin_light:0.1,spin_jig:0.0,spin_classic:0.0,bottom:0.95,float:1.0,fly:0.15}, 
-    bait:'Маховая удочка или флэт-фидер в прогретых заливах (червь, опарыш, чесночное тесто) либо мормышинг 0.2–0.6 г.',
-    spawnMonth: [5, 6], banMonths: '15 мая — 15 июня',
-    monthActivity: [0, 0, 1, 2, 0, 3, 3, 3, 2, 1, 0, 0],
-    beginnerAdvice: 'Невероятно живучая рыба травянистых озер и карьеров. В холодной воде обожает червя с чесноком, летом — манку, хлеб и перловку. Любит прикормку на дне.',
-    topGear: 'Маховая удочка 4–5 м, леска 0.14 мм, поводок 0.10 мм, чувствительный поплавок-игла до 1.5 г.'
+    id:'burbot', name:'Налим', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1516683037151-9a17603a8900?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','far_east'], 
+    tMinStop:-0.5, coldFactor:1.25, optPress:752, bladderSens:0.35, feedMode:'nocturnal', 
+    methods:{spin_micro:0.2,spin_light:0.68,spin_jig:0.88,spin_classic:0.5,bottom:1.0,float:0.15,sea_shore:0.1,fly:0.05}, 
+    spawnMonth: [12, 1], banMonths: '15 декабря — 15 февраля',
+    monthActivity: [0, 0, 3, 2, 1, 0, 0, 0, 2, 3, 3, 0],
+    baseAdvice: 'Пресноводная треска холодных вод. Чем хуже погода (ветер, снег, мороз) — тем активнее жор.',
+    topGear: 'Мощная донная снасть с грузилом 60–120 г, леска 0.35 мм, одинарные крючки №1–#2/0 с нарезкой ерша.'
   },
   { 
-    id:'bream', name:'Лещ', type:'peace', tpl:'cyprinid_deep', topCol:'#451a03', color:'#b45309', fin:'#334155', eye:'#fde047', 
-    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
-    tMinStop:1.5, coldFactor:0.60, optPress:758, bladderSens:1.05, feedMode:'crepuscular', 
-    methods:{spin_micro:0.35,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.85,fly:0.05}, 
-    bait:'Фидер на русловой бровке (кормушка 50–90 г, поводок 0.12 мм до 1 м, пучок кормового мотыля и опарыш).',
-    spawnMonth: [5, 6], banMonths: '1 мая — 10 июня',
-    monthActivity: [1, 1, 2, 2, 0, 3, 3, 3, 3, 2, 1, 1],
-    beginnerAdvice: 'Питается со дна, выдувая мотыля из ила. Требует обильного стартового закорма крупной фракцией (горох, пшено). Поклевка на поплавок выражается классическим выкладыванием.',
-    topGear: 'Фидер 3.6–3.9 м, тест до 90–120 г, монтаж Патерностер или петля Гарднера, поводок 70–100 см.'
+    id:'whitefish', name:'Сиг / Пыжьян', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','far_east'], 
+    tMinStop:0.0, coldFactor:1.12, optPress:757, bladderSens:0.75, feedMode:'crepuscular', 
+    methods:{spin_micro:0.88,spin_light:0.82,spin_jig:0.35,spin_classic:0.78,bottom:1.0,float:0.85,sea_shore:0.1,fly:0.95}, 
+    spawnMonth: [9, 10, 11], banMonths: '1 сентября — 15 ноября',
+    monthActivity: [2, 2, 2, 2, 3, 3, 2, 2, 0, 0, 0, 3],
+    baseAdvice: 'Северная благородная рыба. Держится чистоводных песчано-галечных плесов со свежим течением.',
+    topGear: 'Пикер или деликатный фидер, поводки 0.12–0.14 мм, насадка: мормыш, мотыль, кусочек сала.'
   },
   { 
-    id:'carp', name:'Сазан / Карп', type:'peace', tpl:'cyprinid_deep', topCol:'#78350f', color:'#d97706', fin:'#b91c1c', barbels:true, 
-    basins:['euro_west','volga_ural','kazakh_steppe','far_east'], 
-    tMinStop:6.0, coldFactor:0.30, optPress:757, bladderSens:0.95, feedMode:'crepuscular', 
-    methods:{spin_micro:0.15,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.8,fly:0.1}, 
-    bait:'Карповая донная снасть / метод-фидер (бойлы 14–20 мм, тигровый орех, ферментированная кукуруза, пучок червей).',
+    id:'grayling', name:'Хариус', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','far_east'], 
+    tMinStop:0.0, coldFactor:1.08, optPress:758, bladderSens:0.7, feedMode:'crepuscular', 
+    methods:{spin_micro:0.9,spin_light:0.75,spin_jig:0.1,spin_classic:0.8,bottom:0.4,float:0.9,sea_shore:0.1,fly:1.0}, 
     spawnMonth: [5, 6], banMonths: '1 мая — 15 июня',
-    monthActivity: [0, 0, 0, 1, 0, 2, 3, 3, 3, 1, 0, 0],
-    beginnerAdvice: 'Мощный речной и прудовой боец. Требует терпения, тишины и мощной снасти с байтраннером. Всегда исследуйте структуру дна маркерным грузом в поисках ракушечника.',
-    topGear: 'Карповое удилище 3.6 м (3.0–3.5 lbs), катушка с байтраннером 5000–6000, леска 0.30 мм.'
+    monthActivity: [1, 1, 2, 2, 0, 0, 3, 3, 3, 3, 2, 1],
+    baseAdvice: 'Обитатель быстрых перекатов и кристальных притоков. Питается насекомыми и мелкой рыбешкой.',
+    topGear: 'Нахлыст #4–#5, сбирулино (бомбарда) или ультралайт спиннинг с вращающимися блеснами #00–#1.'
   },
   { 
-    id:'chub', name:'Голавль', type:'predator', tpl:'cyprinid_slim', topCol:'#1e293b', color:'#94a3b8', fin:'#dc2626', 
-    basins:['euro_west','volga_ural'], 
-    tMinStop:2.0, coldFactor:0.55, optPress:758, bladderSens:0.9, feedMode:'diurnal', 
-    methods:{spin_micro:0.85,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.8,float:0.85,fly:0.95}, 
-    bait:'Лайт-спиннинг (крэнки 35–45 мм, микроколебалки 2–4 г на перекатах), нахлыст (жук) или донка на корку.',
-    spawnMonth: [5, 6], banMonths: '1 мая — 10 июня',
-    monthActivity: [0, 0, 1, 2, 0, 3, 3, 3, 2, 1, 0, 0],
-    beginnerAdvice: 'Красноперый перекатный боец. Имеет превосходное зрение — стоя на берегу в полный рост, вы его спугнете. Поклевка «отдай спиннинг».',
-    topGear: 'Спиннинг с вязким бланком до 8–10 г, воблеры-крэнки shallow runner, поляризационные очки.'
-  },
-  { 
-    id:'asp', name:'Жерех', type:'predator', tpl:'cyprinid_slim', topCol:'#334155', color:'#cbd5e1', fin:'#64748b', 
-    basins:['euro_west','volga_ural','kazakh_steppe'], 
-    tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.95, feedMode:'crepuscular', 
-    methods:{spin_micro:0.2,spin_light:0.85,spin_jig:0.5,spin_classic:1.0,bottom:0.2,float:0.1,fly:0.75}, 
-    bait:'Дальнобойные пилькеры, кастмастеры 10–24 г, тейл-спиннеры и тонущие стикбейты в верхнем и среднем слоях.',
-    spawnMonth: [4, 5], banMonths: '20 апреля — 25 мая',
-    monthActivity: [0, 0, 1, 0, 2, 3, 3, 3, 3, 2, 0, 0],
-    beginnerAdvice: 'Охотится с громкими всплесками («боем») на струях и косах. Нужен сверхдальний заброс (60–80 м) и быстрая проводка в верхнем слое воды.',
-    topGear: 'Длинный посылистый спиннинг 2.7–3.0 м, тонкий шнур #0.8 PE, блесны Кастмастер и Трофи.'
-  },
-  { 
-    id:'trout', name:'Форель / Кумжа', type:'predator', tpl:'salmonid', topCol:'#14532d', color:'#a3e635', fin:'#f97316', spots:true, 
-    basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
-    tMinStop:0.5, coldFactor:1.05, optPress:758, bladderSens:0.7, feedMode:'crepuscular', 
-    methods:{spin_micro:0.95,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.5,float:0.75,fly:1.0}, 
-    bait:'Микроколебалки 1.8–3.8 г, силиконовые нимфы на вольфрамовой головке или стример/нимфа нахлыстом.',
-    spawnMonth: [10, 11], banMonths: '1 октября — 30 ноября (Осенний нерест)',
-    monthActivity: [2, 2, 2, 3, 3, 2, 1, 2, 3, 0, 0, 2],
-    beginnerAdvice: 'Живет в холодных ручьях и реках с быстрым течением и высоким содержанием кислорода. Осторожна, забросы делают вверх по течению (апстрим).',
-    topGear: 'Спиннинг Area или Stream до 5 г с медленным или средним строем, одинарные безбородые крючки.'
-  },
-  { 
-    id:'nelma', name:'Нельма / Муксун', type:'predator', tpl:'salmonid', topCol:'#475569', color:'#e2e8f0', fin:'#94a3b8', 
+    id:'nelma', name:'Нельма / Муксун', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1498654896293-37aacf113fd9?auto=format&fit=crop&w=160&q=80',
     basins:['arctic_sib'], 
     tMinStop:0.0, coldFactor:1.15, optPress:756, bladderSens:0.7, feedMode:'crepuscular', 
-    methods:{spin_micro:0.65,spin_light:0.95,spin_jig:0.6,spin_classic:1.0,bottom:0.75,float:0.4,fly:0.85}, 
-    bait:'Узкие серебристые колеблющиеся блесны 7–18 г, воблеры минноу 65–90 мм в толще воды на границе струй.',
-    spawnMonth: [9, 10], banMonths: 'Строгий круглогодичный лимит / Лицензия',
+    methods:{spin_micro:0.65,spin_light:0.95,spin_jig:0.6,spin_classic:1.0,bottom:0.75,float:0.4,sea_shore:0.1,fly:0.85}, 
+    spawnMonth: [9, 10], banMonths: 'Лицензионный вылов / Красная книга',
     monthActivity: [2, 2, 2, 3, 3, 3, 2, 3, 0, 0, 2, 2],
-    beginnerAdvice: 'Королева сибирских рек. Кормится ряпушкой и тугуном на песчаных косах. Внимание: вылов регламентирован Красной книгой и спецлицензиями в ЯНАО!',
-    topGear: 'Спиннинг 2.4–2.7 м тестом 7–28 г, узкие прогонистые блесны Kastmaster, белые твистеры.'
+    baseAdvice: 'Крупный сибирский хищник. Охотится в толще воды на быстринах и у песчаных кос.',
+    topGear: 'Дальнобойный спиннинг 2.7 м, колеблющиеся серебряные блесны типа Kastmaster 14–28 г.'
   },
   { 
-    id:'tench', name:'Линь', type:'peace', tpl:'cyprinid_deep', topCol:'#14532d', color:'#4d7c0f', fin:'#365314', eye:'#dc2626', 
+    id:'roach', name:'Плотва / Сорога', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
+    tMinStop:1.0, coldFactor:0.58, optPress:758, bladderSens:1.0, feedMode:'diurnal', 
+    methods:{spin_micro:0.65,spin_light:0.15,spin_jig:0.0,spin_classic:0.05,bottom:0.95,float:1.0,sea_shore:0.1,fly:0.55}, 
+    spawnMonth: [4, 5], banMonths: '1 мая — 10 июня',
+    monthActivity: [1, 2, 3, 0, 2, 3, 3, 3, 3, 2, 2, 1],
+    baseAdvice: 'Универсальная мирная рыба. Чутко реагирует на перемену давления и шум на берегу.',
+    topGear: 'Маховая удочка 5–6 м, тонкий поводок 0.10 мм, чувствительный поплавок 1.5 г.'
+  },
+  { 
+    id:'dace', name:'Елец', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], 
+    tMinStop:0.5, coldFactor:0.65, optPress:758, bladderSens:0.85, feedMode:'diurnal', 
+    methods:{spin_micro:0.78,spin_light:0.45,spin_jig:0.05,spin_classic:0.5,bottom:0.88,float:1.0,sea_shore:0.1,fly:0.92}, 
+    spawnMonth: [4, 5], banMonths: '20 апреля — 30 мая',
+    monthActivity: [1, 1, 2, 0, 0, 2, 3, 3, 3, 2, 1, 1],
+    baseAdvice: 'Быстрая стайная рыба чистых рек. Стоит на умеренной струе за валунами и корягами.',
+    topGear: 'Поплавочная проводка в струе, мормышинг 0.3–0.8 г с искусственным мотылем.'
+  },
+  { 
+    id:'ruffe', name:'Ерш', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
+    tMinStop:0.0, coldFactor:0.95, optPress:757, bladderSens:0.6, feedMode:'all_day', 
+    methods:{spin_micro:0.85,spin_light:0.4,spin_jig:0.05,spin_classic:0.05,bottom:1.0,float:0.88,sea_shore:0.1,fly:0.1}, 
+    spawnMonth: [4, 5], banMonths: 'Без ограничений',
+    monthActivity: [3, 2, 2, 0, 1, 2, 2, 2, 3, 3, 3, 3],
+    baseAdvice: 'Обитатель затененных ям с глинистым дном. Не боится мутной и ледяной воды.',
+    topGear: 'Легкая донка или зимняя удочка с мормышкой и насадкой кормового мотыля у дна.'
+  },
+  { 
+    id:'ide', name:'Язь', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
+    tMinStop:1.0, coldFactor:0.62, optPress:758, bladderSens:0.95, feedMode:'crepuscular', 
+    methods:{spin_micro:0.76,spin_light:0.88,spin_jig:0.35,spin_classic:0.88,bottom:0.95,float:0.9,sea_shore:0.1,fly:0.82}, 
+    spawnMonth: [4, 5], banMonths: '20 апреля — 30 мая',
+    monthActivity: [1, 1, 2, 0, 2, 3, 3, 3, 2, 1, 1, 1],
+    baseAdvice: 'Сильный и осторожный увалень. Стоит на границе быстрой струи и тиховодья под крутоярами.',
+    topGear: 'Лайт спиннинг с плавающими воблерами-крэнками или фидер с распаренным горохом.'
+  },
+  { 
+    id:'bream', name:'Лещ', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
+    tMinStop:1.5, coldFactor:0.60, optPress:758, bladderSens:1.05, feedMode:'crepuscular', 
+    methods:{spin_micro:0.35,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.85,sea_shore:0.1,fly:0.05}, 
+    spawnMonth: [5, 6], banMonths: '1 мая — 10 июня',
+    monthActivity: [1, 1, 2, 2, 0, 3, 3, 3, 3, 2, 1, 1],
+    baseAdvice: 'Донная стайная рыба глубоких бровок. Кормится со дна, поднимая тучи ила.',
+    topGear: 'Фидер 3.6–3.9 м с кормушкой 50–90 г, длинный поводок 80 см, пучок опарыша с мотылем.'
+  },
+  { 
+    id:'crucian', name:'Карась', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','euro_west','volga_ural','kazakh_steppe','far_east'], 
+    tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.9, feedMode:'diurnal', 
+    methods:{spin_micro:0.55,spin_light:0.1,spin_jig:0.0,spin_classic:0.0,bottom:0.95,float:1.0,sea_shore:0.1,fly:0.15}, 
+    spawnMonth: [5, 6], banMonths: '15 мая — 15 июня',
+    monthActivity: [0, 0, 1, 2, 0, 3, 3, 3, 2, 1, 0, 0],
+    baseAdvice: 'Житель илистых мелководий и озер. Чрезвычайно привередлив к запахам и ароматизаторам.',
+    topGear: 'Поплавочная удочка с легкой оснасткой, насадка — червь с чесноком, перловка, манка.'
+  },
+  { 
+    id:'carp', name:'Сазан / Карп', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1516683037151-9a17603a8900?auto=format&fit=crop&w=160&q=80',
+    basins:['euro_west','volga_ural','kazakh_steppe','far_east'], 
+    tMinStop:6.0, coldFactor:0.30, optPress:757, bladderSens:0.95, feedMode:'crepuscular', 
+    methods:{spin_micro:0.15,spin_light:0.1,spin_jig:0.05,spin_classic:0.0,bottom:1.0,float:0.8,sea_shore:0.1,fly:0.1}, 
+    spawnMonth: [5, 6], banMonths: '1 мая — 15 июня',
+    monthActivity: [0, 0, 0, 1, 0, 2, 3, 3, 3, 1, 0, 0],
+    baseAdvice: 'Мощнейший боец речных плесов и прудов. Любит твердые столы среди мягкого ила.',
+    topGear: 'Карповое удилище 3.5 lbs, катушка с байтраннером, волосяной монтаж с бойлами 14–18 мм.'
+  },
+  { 
+    id:'catfish', name:'Сом', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=160&q=80',
+    basins:['euro_west','volga_ural','kazakh_steppe','far_east'], 
+    tMinStop:8.0, coldFactor:0.25, optPress:755, bladderSens:1.1, feedMode:'nocturnal', 
+    methods:{spin_micro:0.05,spin_light:0.2,spin_jig:1.0,spin_classic:0.65,bottom:1.0,float:0.1,sea_shore:0.1,fly:0.0}, 
+    spawnMonth: [5, 6], banMonths: '25 апреля — 10 июня',
+    monthActivity: [0, 0, 0, 1, 0, 2, 3, 3, 2, 1, 0, 0],
+    baseAdvice: 'Хозяин глубоких русловых коряжников и омутов. Охотится ночью на выходах из ям.',
+    topGear: 'Мощнейшая донная снасть с тестом до 300 г, шнур #5.0 PE, насадка — пучок выползков или живец.'
+  },
+  { 
+    id:'asp', name:'Жерех', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=160&q=80',
+    basins:['euro_west','volga_ural','kazakh_steppe'], 
+    tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.95, feedMode:'crepuscular', 
+    methods:{spin_micro:0.2,spin_light:0.85,spin_jig:0.5,spin_classic:1.0,bottom:0.2,float:0.1,sea_shore:0.1,fly:0.75}, 
+    spawnMonth: [4, 5], banMonths: '20 апреля — 25 мая',
+    monthActivity: [0, 0, 1, 0, 2, 3, 3, 3, 3, 2, 0, 0],
+    baseAdvice: 'Стремительный верховой хищник. Требует сверхдальнего и бесшумного заброса на 60–80 метров.',
+    topGear: 'Дальнобойный спиннинг 2.7–3.0 м, пилькеры, блесны Kastmaster, скоростная проводка.'
+  },
+  { 
+    id:'chub', name:'Голавль', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=160&q=80',
+    basins:['euro_west','volga_ural'], 
+    tMinStop:2.0, coldFactor:0.55, optPress:758, bladderSens:0.9, feedMode:'diurnal', 
+    methods:{spin_micro:0.85,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.8,float:0.85,sea_shore:0.1,fly:0.95}, 
+    spawnMonth: [5, 6], banMonths: '1 мая — 10 июня',
+    monthActivity: [0, 0, 1, 2, 0, 3, 3, 3, 2, 1, 0, 0],
+    baseAdvice: 'Зоркий обитатель струй под нависшими деревьями. Атакует с мощным ударом.',
+    topGear: 'Спиннинг с тестом 1–7 г, миниатюрные крэнки 32–40 мм, имитации жуков.'
+  },
+  { 
+    id:'trout', name:'Форель / Кумжа', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=160&q=80',
+    basins:['nw_karelia','euro_west','volga_ural','kazakh_steppe'], 
+    tMinStop:0.5, coldFactor:1.05, optPress:758, bladderSens:0.7, feedMode:'crepuscular', 
+    methods:{spin_micro:0.95,spin_light:0.95,spin_jig:0.2,spin_classic:0.9,bottom:0.5,float:0.75,sea_shore:0.2,fly:1.0}, 
+    spawnMonth: [10, 11], banMonths: '1 октября — 30 ноября',
+    monthActivity: [2, 2, 2, 3, 3, 2, 1, 2, 3, 0, 0, 2],
+    baseAdvice: 'Рыба горных и родниковых рек. Требует скрытного подхода и заброса вверх по течению.',
+    topGear: 'Спиннинг ультралайт стримового типа, микроколебалки 2–3.5 г, силиконовые нимфы.'
+  },
+  { 
+    id:'tench', name:'Линь', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=160&q=80',
     basins:['euro_west','volga_ural','kazakh_steppe'], 
     tMinStop:7.0, coldFactor:0.25, optPress:758, bladderSens:0.85, feedMode:'crepuscular', 
-    methods:{spin_micro:0.3,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.85,float:1.0,fly:0.1}, 
-    bait:'Поплавочная снасть в окнах кувшинок и камыша (пучок навозного червя, опарыш, творожное тесто).',
+    methods:{spin_micro:0.3,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.85,float:1.0,sea_shore:0.1,fly:0.1}, 
     spawnMonth: [5, 6], banMonths: '20 мая — 20 июня',
     monthActivity: [0, 0, 0, 1, 0, 2, 3, 3, 2, 0, 0, 0],
-    beginnerAdvice: 'Обитатель заиленных теплых заливов и стариц. Клюет долго и нудно: может теребить червя 5 минут, прежде чем повести поплавок в сторону. Не шумите.',
-    topGear: 'Поплавочная удочка с глухой оснасткой и прочной леской 0.18–0.20 мм для вываживания из кувшинок.'
+    baseAdvice: 'Обитатель тихих илистых зарослей. Клюет неторопливо, смакуя наживку.',
+    topGear: 'Поплавочная снасть с крепкой леской 0.18 мм, насадка — пучок навозных червей с творогом.'
   },
   { 
-    id:'rudd', name:'Красноперка', type:'peace', tpl:'cyprinid_deep', topCol:'#3f6212', color:'#fde047', fin:'#dc2626', eye:'#f97316', 
+    id:'rudd', name:'Красноперка', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=160&q=80',
     basins:['euro_west','volga_ural','kazakh_steppe'], 
     tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.9, feedMode:'diurnal', 
-    methods:{spin_micro:0.85,spin_light:0.3,spin_jig:0.0,spin_classic:0.4,bottom:0.5,float:1.0,fly:0.95}, 
-    bait:'Поплавок с подачей в полводы у тростника, микровертушки #00 или нахлыст (сухая мушка / нимфа).',
+    methods:{spin_micro:0.85,spin_light:0.3,spin_jig:0.0,spin_classic:0.4,bottom:0.5,float:1.0,sea_shore:0.1,fly:0.95}, 
     spawnMonth: [5, 6], banMonths: '10 мая — 10 июня',
     monthActivity: [0, 0, 1, 2, 0, 3, 3, 3, 2, 1, 0, 0],
-    beginnerAdvice: 'Золотистая красавица верхних слоев воды. Держится плотных зарослей тростника и кувшинок. Любит медленно тонущую наживку (кузнечик, опарыш).',
-    topGear: 'Легкая поплавочная удочка без нижнего грузила или мормо-спиннинг с силиконовым мотылем.'
+    baseAdvice: 'Стайная рыба поверхностных зарослей камыша и кувшинок. Любит медленно тонущую насадку.',
+    topGear: 'Поплавок без огрузки в толще воды или мормышинг с белым/желтым микросиликоном.'
   },
   { 
-    id:'snakehead', name:'Змееголов', type:'predator', tpl:'burbot', color:'#3f6212', fin:'#1e293b', 
+    id:'gudgeon', name:'Пескарь', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','euro_west','volga_ural','kazakh_steppe','far_east'], 
+    tMinStop:2.0, coldFactor:0.42, optPress:758, bladderSens:0.8, feedMode:'diurnal', 
+    methods:{spin_micro:0.45,spin_light:0.05,spin_jig:0.0,spin_classic:0.0,bottom:0.9,float:1.0,sea_shore:0.1,fly:0.15}, 
+    spawnMonth: [5, 6], banMonths: 'Без ограничений',
+    monthActivity: [0, 0, 1, 1, 0, 2, 3, 3, 2, 1, 0, 0],
+    baseAdvice: 'Держится песчаных отмелей на струе. Отлично приманивается взмучиванием дна ногами.',
+    topGear: 'Легкая поплавочная удочка, крючок №16, насадка — кусочек червяка строго по дну.'
+  },
+  { 
+    id:'snakehead', name:'Змееголов', type:'predator', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=160&q=80',
     basins:['kazakh_steppe','far_east'], 
     tMinStop:10.0, coldFactor:0.15, optPress:756, bladderSens:0.4, feedMode:'diurnal', 
-    methods:{spin_micro:0.05,spin_light:0.3,spin_jig:0.5,spin_classic:1.0,bottom:0.8,float:0.3,fly:0.3}, 
-    bait:'Поверхностные силиконовые лягушки-незацепляйки по густому коряжнику и траве на мощном шнуре #3.0–#5.0 PE.',
+    methods:{spin_micro:0.05,spin_light:0.3,spin_jig:0.5,spin_classic:1.0,bottom:0.8,float:0.3,sea_shore:0.1,fly:0.3}, 
     spawnMonth: [6, 7], banMonths: '1 июня — 15 июля',
     monthActivity: [0, 0, 0, 0, 1, 0, 3, 3, 2, 0, 0, 0],
-    beginnerAdvice: 'Дышит атмосферным воздухом, периодически поднимаясь за глотком кислорода. Обитает в сплошном ковре тины. Подсекать нужно на счет «три» после атаки.',
-    topGear: 'Сверхмощный спиннинг Extra Heavy (до 80–100 г), мультипликатор, шнур #5.0 PE без поводка.'
+    baseAdvice: 'Тропический хищник заросших мелководий. Атакует лягушек сквозь сплошной ковер тины.',
+    topGear: 'Мощный спиннинг Extra-Heavy до 80 г, шнур #4.0 PE, полая резиновая незацепляйка-лягушка.'
+  },
+  
+  /* --- МОРСКИЕ, ПРИМОРСКИЕ ВИДЫ И РАКООБРАЗНЫЕ --- */
+  {
+    id:'flounder', name:'Камбала', type:'predator', habitat:'sea',
+    img: 'https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?auto=format&fit=crop&w=160&q=80',
+    basins:['nw_karelia','far_east','euro_west'],
+    tMinStop:1.0, coldFactor:0.95, optPress:760, bladderSens:0.25, feedMode:'all_day',
+    methods:{spin_micro:0.3,spin_light:0.5,spin_jig:0.6,spin_classic:0.2,bottom:1.0,float:0.2,sea_shore:1.0,fly:0.1},
+    spawnMonth: [2, 3], banMonths: 'Спецлимиты по регионам',
+    monthActivity: [2, 1, 2, 2, 3, 3, 3, 3, 3, 3, 2, 2],
+    baseAdvice: 'Донный маскирующийся хищник песчаных кос и прибоя. Клюет на волочение насадки по песку.',
+    topGear: 'Морской фидер или сёрфовое удилище 3.9–4.2 м с грузом 80–140 г. Наживка: морской червь (нереис), креветка, полоска рыбы.'
+  },
+  {
+    id:'cod', name:'Треска', type:'predator', habitat:'sea',
+    img: 'https://images.unsplash.com/photo-1516683037151-9a17603a8900?auto=format&fit=crop&w=160&q=80',
+    basins:['arctic_sib','nw_karelia','far_east'],
+    tMinStop:-1.0, coldFactor:1.2, optPress:758, bladderSens:0.7, feedMode:'crepuscular',
+    methods:{spin_micro:0.1,spin_light:0.4,spin_jig:0.95,spin_classic:0.7,bottom:1.0,float:0.1,sea_shore:0.9,fly:0.1},
+    spawnMonth: [1, 2, 3], banMonths: 'Промысловый регламент',
+    monthActivity: [3, 3, 3, 2, 2, 1, 1, 2, 3, 3, 3, 3],
+    baseAdvice: 'Холодноводная морская стайная рыба. Кормится у дна на свалах, банках и каменистых мысах.',
+    topGear: 'Мощный пилькерный спиннинг с тестом 50–150 г, тяжелые пилькеры с подсадкой силиконовых октопусов.'
+  },
+  {
+    id:'sea_perch', name:'Морской окунь / Терпуг', type:'predator', habitat:'sea',
+    img: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=160&q=80',
+    basins:['far_east','nw_karelia'],
+    tMinStop:0.5, coldFactor:1.0, optPress:760, bladderSens:0.8, feedMode:'diurnal',
+    methods:{spin_micro:0.75,spin_light:0.95,spin_jig:0.9,spin_classic:0.8,bottom:0.85,float:0.4,sea_shore:1.0,fly:0.3},
+    spawnMonth: [4, 5], banMonths: 'Период нереста в прибрежке',
+    monthActivity: [1, 1, 2, 2, 3, 3, 3, 3, 3, 2, 1, 1],
+    baseAdvice: 'Обитатель подводных скал, рифов и водорослей ламинарии. Держится в расщелинах камней.',
+    topGear: 'Рокфишинговый спиннинг до 15–20 г, джиг-головки с прочным крючком, яркие съедобные ракообразные виброхвосты.'
+  },
+  {
+    id:'pollock', name:'Минтай / Сайда', type:'predator', habitat:'sea',
+    img: 'https://images.unsplash.com/photo-1535591273668-578e31182c4f?auto=format&fit=crop&w=160&q=80',
+    basins:['far_east','nw_karelia'],
+    tMinStop:0.0, coldFactor:1.1, optPress:758, bladderSens:0.65, feedMode:'crepuscular',
+    methods:{spin_micro:0.2,spin_light:0.6,spin_jig:1.0,spin_classic:0.9,bottom:0.7,float:0.2,sea_shore:0.9,fly:0.2},
+    spawnMonth: [3, 4], banMonths: 'Без береговых запретов',
+    monthActivity: [2, 2, 3, 3, 3, 2, 1, 2, 3, 3, 2, 2],
+    baseAdvice: 'Пелагический охотник средних и придонных горизонтов. Атакует блесны на ступенчатой проводке в толще.',
+    topGear: 'Спиннинг 15–50 г, узкие пилькеры 20–40 г, монтаж «сабики» с люрексом и флюоресцентными бусинами.'
+  },
+  {
+    id:'scad', name:'Ставрида', type:'predator', habitat:'sea',
+    img: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=160&q=80',
+    basins:['euro_west','volga_ural'], // Черноморско-Азовский регион
+    tMinStop:8.0, coldFactor:0.3, optPress:760, bladderSens:0.7, feedMode:'nocturnal',
+    methods:{spin_micro:1.0,spin_light:0.8,spin_jig:0.3,spin_classic:0.5,bottom:0.4,float:0.7,sea_shore:1.0,fly:0.4},
+    spawnMonth: [5, 6, 7], banMonths: 'Без жесткого берегового запрета',
+    monthActivity: [0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 1, 0],
+    baseAdvice: 'Ночная стайная морская рыба. Подходит к освещенным пирсам и причалам за мальком.',
+    topGear: 'Рокфишинговый ультралайт Solid Tip до 3–5 г, светонакопительный силикон на вольфрамовой головке.'
+  },
+  {
+    id:'crayfish', name:'Речной рак', type:'peace', habitat:'fresh',
+    img: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=160&q=80',
+    basins:['euro_west','volga_ural','kazakh_steppe','nw_karelia'],
+    tMinStop:6.0, coldFactor:0.2, optPress:758, bladderSens:0.1, feedMode:'nocturnal',
+    methods:{spin_micro:0.0,spin_light:0.0,spin_jig:0.0,spin_classic:0.0,bottom:1.0,float:0.4,sea_shore:0.0,fly:0.0},
+    spawnMonth: [10, 11, 12, 1, 2, 3, 4], banMonths: 'Запрет на лов самок с икрой и линьку',
+    monthActivity: [0, 0, 0, 0, 0, 1, 2, 3, 3, 3, 0, 0],
+    baseAdvice: 'Индикатор чистейшей воды и глинистых нор. Ловится ночью на раколовки или донки с подсечкой за клешню.',
+    topGear: 'Многовходовые раколовки или донная снасть с кормушкой. Наживка: слегка подвяленная пресноводная рыба, чесночный хлеб.'
+  },
+  {
+    id:'crab', name:'Приморский краб', type:'predator', habitat:'sea',
+    img: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=160&q=80',
+    basins:['far_east','nw_karelia'],
+    tMinStop:1.0, coldFactor:0.9, optPress:760, bladderSens:0.15, feedMode:'all_day',
+    methods:{spin_micro:0.0,spin_light:0.0,spin_jig:0.0,spin_classic:0.0,bottom:1.0,float:0.1,sea_shore:1.0,fly:0.0},
+    spawnMonth: [4, 5], banMonths: 'Строгий регламент любительского лова',
+    monthActivity: [2, 2, 2, 0, 1, 2, 3, 3, 3, 3, 2, 2],
+    baseAdvice: 'Обитатель каменистого дна и морских банок. Выползает на песчаные прогалы в поисках падали и моллюсков.',
+    topGear: 'Крабловушка кольцевого типа с сеткой или мощная донная снасть с наживкой из сельди или мяса мидии.'
   }
 ];
 
 let state = {
-  theme: 'auto', // 'dark', 'light', 'auto'
+  theme: 'auto',
   lat: 66.084,
   lon: 76.679,
   elevation: 45,
   normPress: 758,
   locCountry: 'Россия',
-  locAdmin1: 'Ямало-Ненецкий АО',
+  locAdmin1: 'ЯНАО',
   locAdmin2: 'г. Новый Уренгой',
   locLabel: 'Новый Уренгой',
   basinCode: 'arctic_sib',
   basinName: 'Обь-Иртышский и Арктический бассейн',
   showAllSpecies: false,
-  fishId: 'burbot',
+  fishId: null, // Определяется динамически под сезон региона
   dayIdx: 0,
   method: 'bottom',
   water: 'small_river',
@@ -1095,14 +1068,14 @@ let currentTileLayer = null;
 
 // Карты
 const MAP_LAYERS = {
-  topo: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Topo РФ' },
-  sat: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Спутник' },
+  topo: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Topo' },
+  sat: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Satellite' },
   carto: { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', attr: 'CartoDB' },
-  osm: { url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png', attr: 'OSM DE' }
+  osm: { url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png', attr: 'OSM' }
 };
 
 /**
- * Управление темой (Светлая / Тёмная / Системная)
+ * Тема интерфейса
  */
 function applyTheme(t) {
   const root = document.documentElement;
@@ -1112,11 +1085,11 @@ function applyTheme(t) {
   if (t === 'auto') {
     const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     effectiveTheme = isDark ? 'dark' : 'light';
-    btn.textContent = '💻 Авто';
+    btn.innerHTML = '💻 Авто';
   } else if (t === 'dark') {
-    btn.textContent = '🌙 Тёмная';
+    btn.innerHTML = '🌙 Тёмная';
   } else {
-    btn.textContent = '☀️ Светлая';
+    btn.innerHTML = '☀️ Светлая';
   }
 
   root.setAttribute('data-theme', effectiveTheme);
@@ -1158,7 +1131,7 @@ function toggleMapDrawer() {
   if (dr.classList.contains('open')) {
     setTimeout(() => {
       if (typeof L === 'undefined') {
-        alert('Библиотека карты загружается, подождите 2 секунды.');
+        alert('Загрузка карты...');
         return;
       }
       if (!mapInstance) {
@@ -1174,7 +1147,6 @@ function toggleMapDrawer() {
   }
 }
 
-// Поиск Open-Meteo
 async function searchPlaceByName() {
   const q = document.getElementById('placeSearchInput').value.trim();
   if (!q) return;
@@ -1191,10 +1163,10 @@ async function searchPlaceByName() {
       await setNewLocation(p.latitude, p.longitude, true);
       if (mapInstance) mapInstance.setView([p.latitude, p.longitude], 10);
     } else {
-      alert('Населенный пункт или река не найдены. Укажите точку прямо на карте.');
+      alert('Населенный пункт или водоем не найден.');
     }
   } catch (e) {
-    alert('Сбой поиска. Выберите точку на карте.');
+    alert('Сбой геокодера.');
   }
 }
 
@@ -1205,12 +1177,12 @@ function updateLocationHeader() {
 }
 
 function detectBasinByCoords(lat, lon) {
-  if (lon >= 115) return { code: 'far_east', name: 'Амурский и Дальневосточный бассейн' };
-  if (lon >= 60 && lon < 115 && lat >= 55.5) return { code: 'arctic_sib', name: 'Обь-Иртышский и Енисейский арктический бассейн' };
+  if (lon >= 130) return { code: 'far_east', name: 'Тихоокеанский и Дальневосточный морской бассейн' };
+  if (lon >= 60 && lon < 130 && lat >= 55.5) return { code: 'arctic_sib', name: 'Обь-Иртышский и Енисейский арктический бассейн' };
   if (lon >= 50 && lon < 88 && lat < 55.5) return { code: 'kazakh_steppe', name: 'Казахстанский и Урало-Иртышский бассейн' };
-  if (lon < 60 && lat >= 59.5) return { code: 'nw_karelia', name: 'Беломорско-Балтийский и Карельский бассейн' };
-  if (lon < 35.5 && lat < 59.5) return { code: 'euro_west', name: 'Днепровско-Неманский бассейн' };
-  return { code: 'volga_ural', name: 'Волжско-Камский и Донской бассейн' };
+  if (lon < 60 && lat >= 59.5) return { code: 'nw_karelia', name: 'Беломорско-Балтийский и Баренцев бассейн' };
+  if (lon < 35.5 && lat < 59.5) return { code: 'euro_west', name: 'Черноморско-Днепровский бассейн' };
+  return { code: 'volga_ural', name: 'Волжско-Каспийский и Донской бассейн' };
 }
 
 function getFilteredFishList() {
@@ -1221,25 +1193,37 @@ function getFilteredFishList() {
 function toggleShowAllSpecies() {
   state.showAllSpecies = !state.showAllSpecies;
   document.getElementById('showAllToggle').textContent = state.showAllSpecies
-    ? 'Фильтр по региону (300–500 км)'
-    : `Весь справочник (${FISH_DB.length})`;
+    ? 'Только бассейн (300–500 км)'
+    : `Все 30 видов (РФ и Моря)`;
   renderAll();
 }
 
 function detectMyGPS() {
   if (!navigator.geolocation) {
-    alert('Геолокация не поддерживается устройством.');
+    alert('Геолокация недоступна.');
     return;
   }
   document.getElementById('apiStatus').textContent = 'Поиск GPS...';
   navigator.geolocation.getCurrentPosition(
     pos => setNewLocation(pos.coords.latitude, pos.coords.longitude),
     () => {
-      alert('GPS не отвечает. Выберите точку кликом на карте.');
+      alert('Включите GPS на устройстве или кликните точку на карте.');
       if (!document.getElementById('mapDrawer').classList.contains('open')) toggleMapDrawer();
     },
     { enableHighAccuracy: true, timeout: 10000 }
   );
+}
+
+// Автоматический выбор наиболее активной рыбы сезона при смене точки
+function pickBestDefaultFish(regionalList) {
+  const curMonth = new Date().getMonth();
+  // Сортируем рыбу по месячной активности и отбираем ту, у которой нет нерестового запрета
+  const sorted = [...regionalList].sort((a, b) => {
+    const actA = a.monthActivity[curMonth];
+    const actB = b.monthActivity[curMonth];
+    return actB - actA;
+  });
+  return sorted[0] ? sorted[0].id : regionalList[0].id;
 }
 
 async function setNewLocation(lat, lon, skipReverseGeo = false) {
@@ -1256,8 +1240,8 @@ async function setNewLocation(lat, lon, skipReverseGeo = false) {
   state.basinName = basin.name;
 
   const regionalList = getFilteredFishList();
-  if (!regionalList.some(f => f.id === state.fishId)) {
-    state.fishId = regionalList[0].id;
+  if (!state.fishId || !regionalList.some(f => f.id === state.fishId)) {
+    state.fishId = pickBestDefaultFish(regionalList);
   }
 
   if (!skipReverseGeo) fetchLocationName(state.lat, state.lon);
@@ -1265,7 +1249,6 @@ async function setNewLocation(lat, lon, skipReverseGeo = false) {
   await fetchLiveMeteo();
 }
 
-// Геокодер с раскладкой от страны к городу
 async function fetchLocationName(lat, lon) {
   try {
     const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ru`);
@@ -1273,18 +1256,17 @@ async function fetchLocationName(lat, lon) {
     state.locCountry = data.countryName || 'Россия';
     state.locAdmin1 = data.principalSubdivision || '';
     state.locAdmin2 = data.locality || data.city || '';
-    state.locLabel = data.city || data.locality || data.principalSubdivision || 'Точка на водоеме';
+    state.locLabel = data.city || data.locality || data.principalSubdivision || 'Акватория';
     updateLocationHeader();
   } catch (e) {
     state.locCountry = 'Координаты';
-    state.locAdmin1 = `${lat.toFixed(3)}°N`;
-    state.locAdmin2 = `${lon.toFixed(3)}°E`;
-    state.locLabel = `${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E`;
+    state.locAdmin1 = `${lat.toFixed(2)}°N`;
+    state.locAdmin2 = `${lon.toFixed(2)}°E`;
+    state.locLabel = `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
     updateLocationHeader();
   }
 }
 
-// Водоемы вокруг
 async function fetchNearbyWaters(lat, lon) {
   const chipsEl = document.getElementById('nearbyChips');
   chipsEl.innerHTML = `<span class="w-chip">Определение рек и озер вокруг точки...</span>`;
@@ -1301,11 +1283,11 @@ async function fetchNearbyWaters(lat, lon) {
       seen.add(name);
       const isRiver = el.tags.waterway === 'river';
       const wType = isRiver
-        ? (/обь|иртыш|енисей|волга|кама|дон|днепр|припять|неман|пур|таз|амур|или|сырдарья|урал/i.test(name) ? 'big_river' : 'small_river')
-        : (/карьер|вдхр|водохранилище/i.test(name) ? 'quarry' : 'tundra_lake');
+        ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|урал/i.test(name) ? 'big_river' : 'small_river')
+        : (/море|бухта|залив/i.test(name) ? 'sea_coast' : (/карьер|вдхр|водохранилище/i.test(name) ? 'quarry' : 'tundra_lake'));
       const icon = isRiver ? '🌊 р. ' : '💧 ';
       items.push({ label: icon + name.replace(/^(река|озеро)\s+/i, ''), wType });
-      if (items.length >= 10) break;
+      if (items.length >= 8) break;
     }
 
     if (items.length > 0) {
@@ -1319,8 +1301,9 @@ async function fetchNearbyWaters(lat, lon) {
   chipsEl.innerHTML = `
     <span class="w-chip active" onclick="selectNearbyWater(this, 'small_river')">🌊 Малая / средняя река</span>
     <span class="w-chip" onclick="selectNearbyWater(this, 'big_river')">⚓ Русло крупной реки</span>
-    <span class="w-chip" onclick="selectNearbyWater(this, 'quarry')">💧 Глубокий карьер / вдхр</span>
-    <span class="w-chip" onclick="selectNearbyWater(this, 'tundra_lake')">🌿 Мелководное озеро / старица</span>`;
+    <span class="w-chip" onclick="selectNearbyWater(this, 'quarry')">💧 Глубокий карьер / озеро</span>
+    <span class="w-chip" onclick="selectNearbyWater(this, 'tundra_lake')">🌿 Мелководная старица / пруд</span>
+    <span class="w-chip" onclick="selectNearbyWater(this, 'sea_coast')">🌊 Морское побережье</span>`;
 }
 
 function selectNearbyWater(el, wType) {
@@ -1339,23 +1322,21 @@ function computeMoon(dateStr) {
   const illum = Math.round((1 - Math.cos(ratio * 2 * Math.PI)) * 50);
   const moonDay = Math.max(1, Math.min(30, Math.floor(age) + 1));
   const transitHour = Math.round((12 + ratio * 24) % 24);
-  const phaseName = ratio < 0.03 || ratio > 0.97 ? 'Новолуние' : (ratio < 0.25 ? 'Молодая луна' : (ratio < 0.47 ? 'Первая четверть' : (ratio < 0.53 ? 'Полнолуние' : 'Убывающая')));
-  return { moonDay, illum, transitHour, underfootHour: (transitHour + 12) % 24, phaseName, ratio };
+  return { moonDay, illum, transitHour, underfootHour: (transitHour + 12) % 24 };
 }
 
-// 14 дней фоллбэка
 function buildFallback() {
   const dRu = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], mRu = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-  const startDt = new Date('2026-10-14T00:00:00');
+  const startDt = new Date('2026-10-16T00:00:00');
   DAYS_DATA = [];
 
   for (let i = 0; i < 14; i++) {
     const cur = new Date(startDt.getTime() + i * 86400000);
     const dStr = cur.toISOString().split('T')[0];
     const moon = computeMoon(dStr);
-    const tMax = Math.round(1 - i * 0.7);
-    const tMin = tMax - 3;
-    const p = Math.round(755 + Math.sin(i * 0.8) * 6);
+    const tMax = Math.round(0 - i * 0.5);
+    const tMin = tMax - 4;
+    const p = Math.round(756 + Math.sin(i * 0.7) * 5);
     const dP = i === 0 ? -1 : Math.round(Math.cos(i) * 3);
     const w = Math.round(5 + Math.sin(i) * 2);
 
@@ -1368,25 +1349,24 @@ function buildFallback() {
         press: Math.round(p + (dP * (h - 12)) / 24),
         dp3h: Math.round((dP / 8) * 10) / 10,
         wind: Math.max(1, w),
-        windDir: 'З', cloud: 80, precip: 0.1
+        windDir: 'СЗ', cloud: 85, precip: 0.1
       });
     }
 
     DAYS_DATA.push({
       date: dStr,
       label: `${dRu[cur.getDay()]}, ${cur.getDate()} ${mRu[cur.getMonth()]}`,
-      tDay: tMax, tNight: tMin, pressAvg: p, dP, windMax: w, windDir: 'З',
-      sunriseHr: 7.2 + i * 0.05, sunsetHr: 16.9 - i * 0.05,
-      waterTemp: Math.max(0.8, 3.0 - i * 0.15),
+      tDay: tMax, tNight: tMin, pressAvg: p, dP, windMax: w, windDir: 'СЗ',
+      sunriseHr: 7.4 + i * 0.05, sunsetHr: 16.7 - i * 0.05,
+      waterTemp: Math.max(0.8, 2.5 - i * 0.1),
       moon, hours
     });
   }
 }
 
-// Запрос метео на 14 дней
 async function fetchLiveMeteo() {
   const st = document.getElementById('apiStatus');
-  st.textContent = 'Запрос метео 14д...';
+  st.textContent = 'Запрос метео...';
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}&hourly=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,wind_speed_10m_max,wind_direction_10m_dominant&forecast_days=14&wind_speed_unit=ms&timezone=auto&_cb=${Date.now()}`;
   try {
     const res = await fetch(url, { cache: 'no-store' });
@@ -1433,7 +1413,7 @@ async function fetchLiveMeteo() {
         moon: computeMoon(dStr), hours
       };
     });
-    st.textContent = 'Онлайн 14д • ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+    st.textContent = 'Онлайн • 14 дней';
     renderAll();
   } catch (e) {
     st.textContent = 'Автономный режим';
@@ -1441,9 +1421,15 @@ async function fetchLiveMeteo() {
   }
 }
 
-function calcHourly(fish, day, hrObj, method, water) {
-  const wTemp = water === 'quarry' ? day.waterTemp + 1.2 : (water === 'tundra_lake' ? day.waterTemp - 0.8 : day.waterTemp);
-  if (wTemp < fish.tMinStop) return 4;
+/**
+ * РАСЧЕТ АКТИВНОСТИ С УЧЕТОМ ГЛУБИНЫ И ВОДОЕМА
+ */
+function calcHourly(fish, day, hrObj, method, water, depth) {
+  // Глубина смягчает перепады температуры воды и давления
+  const depthBuffer = Math.min(1.2, 0.8 + depth * 0.05);
+  const wTemp = water === 'quarry' ? day.waterTemp + 0.8 : (water === 'tundra_lake' ? day.waterTemp - 1.0 : day.waterTemp);
+  
+  if (wTemp < fish.tMinStop && depth < 2.0) return 4; // на мелководье в холод рыба цепенеет
 
   const h = hrObj.hour, sr = day.sunriseHr, ss = day.sunsetHr;
   const dSr = Math.abs(h + 0.5 - sr), dSs = Math.abs(h + 0.5 - ss);
@@ -1451,72 +1437,139 @@ function calcHourly(fish, day, hrObj, method, water) {
 
   let kLight = 0.25;
   if (fish.feedMode === 'nocturnal') {
-    kLight = !isDay ? ((h >= 17 || h <= 2) ? 1.05 : 0.85) : ((dSs <= 1.2 || dSr <= 1.0) ? 0.82 : 0.14);
+    kLight = !isDay ? 1.05 : ((dSs <= 1.2 || dSr <= 1.0) ? 0.75 : 0.15);
   } else if (fish.feedMode === 'crepuscular') {
-    kLight = (dSr <= 1.5 || dSs <= 1.5) ? 1.03 : (isDay ? (day.tDay <= 5 && h >= 11 && h <= 15 ? 0.96 : 0.78) : 0.12);
+    kLight = (dSr <= 1.5 || dSs <= 1.5) ? 1.05 : (isDay ? 0.85 : 0.2);
   } else if (fish.feedMode === 'diurnal') {
-    kLight = isDay ? Math.max(0.45, 1.0 - Math.abs(h + 0.5 - (sr + ss)/2) * 0.11) : 0.08;
+    kLight = isDay ? 1.0 : 0.1;
   } else {
-    kLight = (dSr <= 1.5 || dSs <= 1.5) ? 1.0 : (isDay ? 0.88 : 0.52);
+    kLight = 0.8;
+  }
+
+  // Влияние глубины на освещенность: на глубине >6м ночные хищники активнее и днем
+  if (depth >= 6.0 && (fish.feedMode === 'nocturnal' || fish.id === 'zander')) {
+    kLight = Math.max(kLight, 0.7);
   }
 
   let kSeason = fish.coldFactor;
-  if (wTemp >= 12) {
-    if (['burbot','whitefish','nelma'].includes(fish.id)) kSeason = 0.35;
-    if (['carp','crucian','catfish','tench','snakehead','bream'].includes(fish.id)) kSeason = 1.05;
-  }
-
   const dTr = Math.min(Math.abs(h - day.moon.transitHour), 24 - Math.abs(h - day.moon.transitHour));
-  const dUn = Math.min(Math.abs(h - day.moon.underfootHour), 24 - Math.abs(h - day.moon.underfootHour));
-  const kSol = (dTr <= 1 || dUn <= 1) ? 1.12 : 1.0;
+  const kSol = (dTr <= 1.5) ? 1.12 : 1.0;
 
   const md = day.moon.moonDay;
-  const kMoon = ((md >= 4 && md <= 9) || (md >= 18 && md <= 23)) ? 1.06 : ((md <= 2 || md >= 29 || (md >= 14 && md <= 16)) ? 0.74 : 0.88);
+  const kMoon = ((md >= 4 && md <= 9) || (md >= 18 && md <= 23)) ? 1.08 : ((md <= 2 || md >= 29) ? 0.75 : 0.9);
 
-  const pDiff = Math.abs(hrObj.press - state.normPress);
-  const grad = Math.abs(hrObj.dp3h) * 2.4 + Math.abs(day.dP) * 0.35;
-  let kPress = Math.max(0.32, 1.0 - (pDiff * 0.012 + grad * 0.04) * fish.bladderSens);
-  if (fish.id === 'burbot' && (hrObj.dp3h < 0 || hrObj.precip > 0)) kPress = Math.min(1.18, kPress + 0.15);
+  // На глубоких ямах давление компенсируется столбом воды
+  const pDiff = Math.abs(hrObj.press - state.normPress) / depthBuffer;
+  const grad = Math.abs(hrObj.dp3h) * 2.2;
+  let kPress = Math.max(0.35, 1.0 - (pDiff * 0.01 + grad * 0.035) * fish.bladderSens);
+
+  if (fish.id === 'burbot' && (hrObj.dp3h < 0 || hrObj.precip > 0)) kPress = Math.min(1.2, kPress + 0.18);
 
   let kWea = 1.0;
-  if (fish.id === 'burbot') {
-    if (hrObj.wind >= 4 || hrObj.cloud >= 80) kWea = 1.12;
-  } else {
-    const dirB = ['Ю','ЮЗ','З'].includes(hrObj.windDir) ? 0.05 : (['С','СВ','В'].includes(hrObj.windDir) ? -0.07 : 0);
-    kWea = Math.max(0.42, 1.0 + dirB - Math.max(0, hrObj.wind - 3.5) * 0.055);
+  if (fish.id !== 'burbot') {
+    kWea = Math.max(0.45, 1.0 - Math.max(0, hrObj.wind - 4.0) * 0.05);
   }
 
   let kMeth = fish.methods[method] ?? 0.5;
-  if (hrObj.tAir <= -1.5 && (method === 'spin_micro' || method === 'fly') && hrObj.wind >= 5) kMeth *= 0.62;
-
-  let kWat = (water === 'tundra_lake' && day.tDay <= 0) ? 0.52 : ((water === 'quarry' && (fish.id === 'burbot' || fish.id === 'dace')) ? 0.68 : 1.0);
-
-  return Math.max(4, Math.min(98, Math.round(92 * kSeason * kLight * kSol * kMoon * kPress * kWea * kMeth * kWat)));
+  return Math.max(4, Math.min(98, Math.round(92 * kSeason * kLight * kSol * kMoon * kPress * kWea * kMeth)));
 }
 
-function calcDayBest(fish, day, method, water) {
-  const arr = day.hours.map(hr => calcHourly(fish, day, hr, method, water)).sort((a,b) => b - a);
+function calcDayBest(fish, day, method, water, depth) {
+  const arr = day.hours.map(hr => calcHourly(fish, day, hr, method, water, depth)).sort((a,b) => b - a);
   return Math.round((arr[0] + arr[1] + arr[2] + arr[3]) / 4);
 }
 
-function calcRig(method, water, depth, wind) {
-  const cFlow = { small_river: 1.4, quarry: 1.0, big_river: 2.1, tundra_lake: 0.9 }[water] || 1.0;
-  if (method === 'spin_micro') {
-    const w = Math.min(8, Math.max(0.6, Math.round(((depth * 0.65 * cFlow) + Math.max(0, wind - 3) * 0.4) * 2) / 2));
-    return { w: `${w} г`, r: (wind >= 5 || w >= 3.5) ? 'Джиг-риг / Отводной (#0.3 PE)' : 'Мормышка / Вольфрам (#0.2 PE)' };
+/**
+ * РАСЧЕТ ОСНАСТКИ (Связка: метод + глубина + течение + ветер)
+ */
+function calcDynamicRig(method, water, depth, wind) {
+  const flowCoeff = { small_river: 1.3, quarry: 0.9, big_river: 2.2, tundra_lake: 0.8, sea_coast: 1.8 }[water] || 1.0;
+  
+  if (method === 'spin_jig' || method === 'spin_light' || method === 'spin_micro') {
+    let weight = Math.round((depth * 1.5 * flowCoeff + (wind > 5 ? (wind - 5) * 0.8 : 0)) * 2) / 2;
+    if (method === 'spin_micro') weight = Math.max(0.8, Math.min(4, Math.round(weight * 0.4 * 10) / 10));
+    else if (method === 'spin_light') weight = Math.max(3, Math.min(12, Math.round(weight * 0.7)));
+    else weight = Math.max(10, Math.min(56, Math.round(weight * 1.2)));
+    
+    return {
+      weight: `${weight} г`,
+      line: depth > 5 ? 'Шнур #0.8–#1.0 PE + флюорокарбон 0.35 мм (быстрое погружение)' : 'Шнур #0.4–#0.6 PE (максимальная чуйка)',
+      tactic: flowCoeff > 1.5 ? 'Заброс под 45° вниз по течению с волочением по дну' : 'Классическая ступенька: 2 оборота — пауза 2–3 сек'
+    };
   }
-  if (method === 'spin_light') {
-    const w = Math.min(14, Math.max(3, Math.round((depth * 1.1 * cFlow) + Math.max(0, wind - 3) * 0.7)));
-    return { w: `${w} г`, r: 'Джиг-риг / Офсет (#0.4–#0.6 PE)' };
+
+  if (method === 'bottom') {
+    const feederWeight = Math.round(depth * 3.5 * flowCoeff + 20);
+    const finalW = Math.max(25, Math.min(150, feederWeight));
+    return {
+      weight: `${finalW}–${finalW + 20} г`,
+      line: flowCoeff > 1.5 ? 'Кормушка с грунтозацепами, поводок 0.12–0.14 мм, длина 90 см' : 'Пластиковая кормушка-пуля, поводок 0.10–0.12 мм, 60 см',
+      tactic: 'Клипсование дистанции по бровке; стартовый закорм 5–7 крупных кормушек'
+    };
   }
-  if (method === 'spin_jig') {
-    const w = Math.min(48, Math.max(10, Math.round((depth * 1.8 * cFlow) + Math.max(0, wind - 3) * 1.2)));
-    return { w: `${w} г`, r: 'Классический джиг (#1.0–#1.2 PE + поводок)' };
+
+  if (method === 'sea_shore') {
+    return {
+      weight: `${Math.max(20, Math.round(depth * 4 + 15))} г`,
+      line: 'Шок-лидер 0.35 мм + флюр 0.25 мм',
+      tactic: 'Дальний заброс за прибойную волну с медленной потяжкой по дну'
+    };
   }
-  if (method === 'spin_classic') return { w: `${Math.min(28, Math.max(5, Math.round(depth * 2.2 * cFlow)))} г`, r: 'Колеблющаяся блесна / Воблер' };
-  if (method === 'bottom') return { w: water === 'big_river' ? '80–120 г' : (water === 'small_river' ? '45–75 г' : '25–40 г'), r: 'Фидер / Донный монтаж' };
-  if (method === 'float') return { w: (wind >= 5 || cFlow > 1.2) ? '3.5–6 г' : '1.5–2.5 г', r: 'Поплавок с точечной огрузкой у дна' };
-  return { w: 'Sinking / Floating', r: 'Подлесок по горизонту + нимфа / мушка' };
+
+  return {
+    weight: `${Math.max(1.5, Math.round(depth * 0.8 * 10) / 10)} г`,
+    line: 'Поводок 0.08–0.10 мм, огрузка цепочкой дробинок',
+    tactic: 'Проводка впритирку ко дну со свободным проплывом'
+  };
+}
+
+/**
+ * ГЕНЕРАТОР СОВЕТОВ: СВЯЗКА РЫБА + ВОДОЕМ + ГЛУБИНА + ПОГОДА
+ */
+function generateAdaptiveGuides(fish, water, depth, day) {
+  const wNames = {
+    small_river: 'на малой реке с умеренным течением',
+    big_river: 'на русле крупной реки с мощным течением',
+    quarry: 'в глубоком карьере / озере со стоячей водой',
+    tundra_lake: 'в мелководном озере / заливе',
+    sea_coast: 'на морском побережье / в прибойной зоне'
+  };
+
+  // 1. Повадки и стоянки
+  let standAdvice = '';
+  if (water === 'big_river') {
+    standAdvice = depth >= 6 
+      ? `При глубине ${depth} м на фарватере ${fish.name} концентрируется за донными валунами, входами в русловые канавы и под нижними бровками, прячась от мощной струи.`
+      : `На перекатах с глубиной ${depth} м рыба выходит кормиться на вечерних зорях в места столкновения основного течения с обратным.`;
+  } else if (water === 'quarry') {
+    standAdvice = depth >= 5
+      ? `В стоячей воде на глубине ${depth} м ${fish.name} держится уступов затопленных дорог, свалов карьера и границы температурного клина (термоклиная зона).`
+      : `На прибрежной мели ${depth} м рыба появляется только в утренний штиль, а днем скатывается глубже.`;
+  } else if (water === 'sea_coast') {
+    standAdvice = `В прибрежке морской зоны ${fish.name} перемещается строго по границе прибоя, расщелинам подводных скал и песчаным бороздам за первой отмелью.`;
+  } else {
+    standAdvice = depth <= 2
+      ? `На малых глубинах (${depth} м) ${fish.name} жмется к притопленным корягам, под нависшие кусты и прибрежный тростник. Не подходите к урезу воды в полный рост.`
+      : `На речных омутах ${depth} м держится затишков за мысами и участков с медленным круговым течением.`;
+  }
+
+  // 2. Снасти и монтаж
+  const rigInfo = calcDynamicRig(state.method, water, depth, day.windMax);
+  let tackleAdvice = `Рекомендуемый монтаж: <b>${rigInfo.weight}</b> (${rigInfo.line}). ${rigInfo.tactic}.`;
+  if (day.windMax >= 8) {
+    tackleAdvice += ` ⚠️ Внимание: сильный ветер (${day.windMax} м/с) создает выдув петли из шнура — уменьшите диаметр носителя или увеличьте груз на 25%.`;
+  }
+
+  // 3. Убойная насадка и подача под погоду
+  let baitAdvice = '';
+  const isCold = day.waterTemp <= 8.0;
+  if (isCold) {
+    baitAdvice = `Вода холодная (~${day.waterTemp}°C). ${fish.name} экономит энергию. Требуются исключительно животные насадки с резким белковым запахом: пучок мотыля, нарезка свежей рыбы, мормыш, печень. В спиннинге — темные пассивные слаговые приманки с паузами на дне до 4–6 секунд. Растительные насадки сейчас не работают.`;
+  } else {
+    baitAdvice = `Вода теплая (~${day.waterTemp}°C). Рыба активно перемещается. Отлично работают: опарыш, распаренная перловка, кукуруза, активные виброхвосты с высокочастотной игрой и яркие воблеры. Проводка динамичная с короткими паузами.`;
+  }
+
+  return { standAdvice, tackleAdvice, baitAdvice };
 }
 
 function fmtHM(fHr) {
@@ -1524,37 +1577,33 @@ function fmtHM(fHr) {
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 }
 
-/**
- * Рендер блока 3 ближайших дней в стиле Фото 1
- */
 function renderThreeDayVerdict(fish) {
   const box = document.getElementById('threeDayBox');
   const days3 = DAYS_DATA.slice(0, 3);
   const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
 
   box.innerHTML = days3.map((d, idx) => {
-    const scWeather = calcDayBest(fish, d, state.method, state.water);
+    const scWeather = calcDayBest(fish, d, state.method, state.water, state.depth);
     const md = d.moon.moonDay;
     const isMoonGood = (md >= 4 && md <= 9) || (md >= 18 && md <= 23);
     const isMoonBad = (md <= 2 || md >= 29 || (md >= 14 && md <= 16));
     const moonText = isMoonGood ? 'По луне жор!' : (isMoonBad ? 'По луне глухо' : 'По луне средний клев');
     const moonClass = isMoonGood ? 'good' : (isMoonBad ? 'bad' : 'warn');
 
-    let weaText = 'По погоде хороший клев';
+    let weaText = 'По погоде отличный клев';
     let weaClass = 'good';
     if (scWeather < 35) { weaText = 'По погоде клева нет'; weaClass = 'bad'; }
-    else if (scWeather < 65) { weaText = 'По погоде слабый клев'; weaClass = 'warn'; }
+    else if (scWeather < 65) { weaText = 'По погоде умеренный клев'; weaClass = 'warn'; }
 
     const isTotalGood = scWeather >= 50 && !isMoonBad;
     const thumbIcon = isTotalGood ? '👍' : '👎';
 
-    // Формируем детальное описание как на сайте коллег
     const reasons = [];
-    if (d.tDay <= 0) reasons.push(`Температура около ${d.tDay}°C, риск шуги/обмерзания`);
-    if (Math.abs(d.dP) >= 4) reasons.push(`Ухудшение клева из-за скачка давления ${Math.abs(d.dP)} мм рт. ст.`);
-    else reasons.push('Давление относительно стабильное');
-    if (d.windMax >= 8) reasons.push(`Волна на открытой воде. Ветер ${d.windDir}, ${d.windMax} м/с`);
-    else reasons.push(`Ветер благоприятный: ${d.windDir} ${d.windMax} м/с`);
+    if (d.tDay <= 0) reasons.push(`Холодно (${d.tDay}°C), рыба на глубине ${state.depth}м малоподвижна`);
+    if (Math.abs(d.dP) >= 4) reasons.push(`Скачок давления ${Math.abs(d.dP)} мм рт. ст. угнетает плавательный пузырь`);
+    else reasons.push('Барическое поле устойчивое');
+    if (d.windMax >= 8) reasons.push(`Сильный ветер (${d.windDir} ${d.windMax} м/с) сгоняет термоклин`);
+    else reasons.push(`Ветер мягкий: ${d.windDir} ${d.windMax} м/с`);
 
     const dayName = idx === 0 ? 'Сегодня' : (idx === 1 ? 'Завтра' : 'Послезавтра');
 
@@ -1569,24 +1618,20 @@ function renderThreeDayVerdict(fish) {
       <div class="qv-desc">
         • ${reasons.join('.<br>• ')}.
       </div>
-      <div class="qv-icon" title="${isTotalGood ? 'Рекомендуется для рыбалки' : 'Сложные условия'}">${thumbIcon}</div>
+      <div class="qv-icon" title="${isTotalGood ? 'Благоприятный день' : 'Трудный выезд'}">${thumbIcon}</div>
     </div>`;
   }).join('');
 }
 
-/**
- * Рендер годового календаря рыбы (Фото 3, 4, 5)
- */
 function renderAnnualCalendar(fish) {
-  document.getElementById('annualTitle').textContent = `Годовой календарь рыболова: ${fish.name} (${fish.type === 'predator' ? 'Хищная' : 'Мирная'})`;
+  document.getElementById('annualTitle').textContent = `Годовой календарь клева и нереста: ${fish.name}`;
   const mNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-  const curMonth = new Date().getMonth(); // 0..11
+  const curMonth = new Date().getMonth();
 
-  // Статистический билборд
   const banner = document.getElementById('annualBanner');
   banner.innerHTML = `
     <div class="banner-stat">
-      <div class="b-lbl">Период нереста</div>
+      <div class="b-lbl">Сроки нереста вида</div>
       <div class="b-val" style="color:#f43f5e;">${fish.spawnMonth.map(m => mNames[m-1]).join(' – ')}</div>
     </div>
     <div class="banner-stat">
@@ -1594,16 +1639,15 @@ function renderAnnualCalendar(fish) {
       <div class="b-val" style="color:var(--warn);">${fish.banMonths}</div>
     </div>
     <div class="banner-stat">
-      <div class="b-lbl">Пик активности / жор</div>
+      <div class="b-lbl">Сезон максимального клева</div>
       <div class="b-val" style="color:var(--good);">${fish.monthActivity.map((v, i) => v === 3 ? mNames[i] : null).filter(Boolean).join(', ') || 'Осень'}</div>
     </div>
     <div class="banner-stat">
-      <div class="b-lbl">Статус в бассейне</div>
-      <div class="b-val" style="color:var(--accent);">${fish.basins.includes(state.basinCode) ? 'Местный вид' : 'Редкий / завозной'}</div>
+      <div class="b-lbl">Среда обитания</div>
+      <div class="b-val" style="color:var(--accent);">${fish.habitat === 'sea' ? 'Морская / Солоноводная' : 'Пресноводная'}</div>
     </div>
   `;
 
-  // Сетка 12 месяцев
   const grid = document.getElementById('monthGrid');
   grid.innerHTML = mNames.map((mn, idx) => {
     const act = fish.monthActivity[idx];
@@ -1622,31 +1666,27 @@ function renderAnnualCalendar(fish) {
   }).join('');
 }
 
-/**
- * Рендер советов "Для начинающих и не только"
- */
-function renderBeginnerGuide(fish) {
-  document.getElementById('guideTitle').textContent = `Энциклопедия и советы по ловле: ${fish.name}`;
+function renderBeginnerGuide(fish, day) {
+  document.getElementById('guideTitle').textContent = `Энциклопедия и тактика: ${fish.name} (${state.depth}м • ${state.water})`;
+  const guides = generateAdaptiveGuides(fish, state.water, state.depth, day);
+  
   const gc = document.getElementById('guideContent');
   gc.innerHTML = `
     <div class="guide-block">
-      <h4>Повадки и стоянки рыбы</h4>
-      <p>${fish.beginnerAdvice}</p>
+      <h4>Повадки и стоянки (глубина ${state.depth} м)</h4>
+      <p>${guides.standAdvice}</p>
     </div>
     <div class="guide-block">
-      <h4>Оптимальные снасти и монтаж</h4>
-      <p>${fish.topGear}</p>
+      <h4>Оптимальные снасти и калибровка</h4>
+      <p>${guides.tackleAdvice}</p>
     </div>
     <div class="guide-block">
-      <h4>Убойная насадка и подача</h4>
-      <p>${fish.bait}</p>
+      <h4>Убойная насадка и подача под погоду</h4>
+      <p>${guides.baitAdvice}</p>
     </div>
   `;
 }
 
-/**
- * Комментарии и локальные отчеты
- */
 function getStorageKey() {
   return `comments_${state.basinCode}_${state.fishId}`;
 }
@@ -1658,7 +1698,7 @@ function loadComments() {
   try { comments = raw ? JSON.parse(raw) : []; } catch(e){}
 
   if (comments.length === 0) {
-    listEl.innerHTML = `<div style="font-size:12px; color:var(--text-muted); font-style:italic;">Отчетов по этой рыбе пока нет. Будьте первым, кто поделится результатами выезда!</div>`;
+    listEl.innerHTML = `<div style="font-size:12px; color:var(--text-muted); font-style:italic;">Отчетов по этой рыбе пока нет. Поделитесь точкой и результатом!</div>`;
     return;
   }
 
@@ -1692,19 +1732,28 @@ function escapeHTML(str) {
 function renderAll() {
   if (!DAYS_DATA.length) return;
   const visibleSpecies = getFilteredFishList();
+  
+  // Если рыба не задана или не в списке — берем лучшую по сезону
+  if (!state.fishId || !visibleSpecies.some(f => f.id === state.fishId)) {
+    state.fishId = pickBestDefaultFish(visibleSpecies);
+  }
+
   const fish = FISH_DB.find(f => f.id === state.fishId) || visibleSpecies[0];
   const day = DAYS_DATA[state.dayIdx] || DAYS_DATA[0];
   const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
 
-  document.getElementById('basinTitle').textContent = `Ихтиофауна (300–500 км): ${state.basinName}`;
+  document.getElementById('basinTitle').textContent = `Бассейн: ${state.basinName}`;
   document.getElementById('speciesCountInfo').textContent = state.showAllSpecies
-    ? `Полный справочник: ${visibleSpecies.length} видов`
-    : `Автоопределение по региону: ${visibleSpecies.length} видов`;
+    ? `Полный атлас: ${visibleSpecies.length} видов`
+    : `Фауна региона: ${visibleSpecies.length} видов`;
 
+  // Свайп-лента рыб с фотореалистичными картинками
   document.getElementById('fishStrip').innerHTML = visibleSpecies.map(f => {
-    const sc = calcDayBest(f, day, state.method, state.water);
+    const sc = calcDayBest(f, day, state.method, state.water, state.depth);
     return `<div class="fish-chip ${f.id === fish.id ? 'active' : ''}" onclick="state.fishId='${f.id}';renderAll()">
-      ${getDetailedFishSVG(f)}
+      <div class="fish-img-box">
+        <img src="${f.img}" alt="${f.name}" loading="lazy" onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'80\\' height=\\'35\\' viewBox=\\'0 0 80 35\\'><text x=\\'50%\\' y=\\'55%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%2394a3b8\\' font-size=\\'12\\'>🐟</text></svg>'">
+      </div>
       <div class="fish-chip-name">${f.name}</div>
       ${renderFiveFish(sc, 14, curTheme === 'dark' ? 'dark' : 'light')}
     </div>`;
@@ -1714,12 +1763,11 @@ function renderAll() {
   document.getElementById('astroBar').textContent =
     `🌙 ${day.moon.moonDay} л.д. (${day.moon.illum}%) • 🧭 ${day.pressAvg} мм (норма ${state.normPress}, Δ ${dpS}) • 💨 ${day.windDir} ${day.windMax} м/с • 💧 Вода ~${day.waterTemp}°C`;
 
-  // Экспресс-вердикт 3 дня
   renderThreeDayVerdict(fish);
 
   // Сетка 14 дней
   document.getElementById('weekGrid').innerHTML = DAYS_DATA.map((d, i) => {
-    const sc = calcDayBest(fish, d, state.method, state.water);
+    const sc = calcDayBest(fish, d, state.method, state.water, state.depth);
     return `<div class="day-card ${i === state.dayIdx ? 'active' : ''}" onclick="state.dayIdx=${i};renderAll()">
       <div class="d-head"><span>${d.label.split(',')[0]}</span><span>🌙${d.moon.moonDay}</span></div>
       <div class="d-temp">${d.tDay > 0 ? '+'+d.tDay : d.tDay}° / ${d.tNight}°C</div>
@@ -1728,32 +1776,41 @@ function renderAll() {
     </div>`;
   }).join('');
 
-  // Почасовой блок
-  const hScores = day.hours.map(hr => ({ ...hr, score: calcHourly(fish, day, hr, state.method, state.water) }));
+  // Почасовой расчет с глубиной
+  const hScores = day.hours.map(hr => ({ ...hr, score: calcHourly(fish, day, hr, state.method, state.water, state.depth) }));
   let bestH = 12, bestAvg = -1;
   for (let h = 0; h < 24; h++) {
     const avg = (hScores[h].score + hScores[(h+1)%24].score + hScores[(h+2)%24].score) / 3;
     if (avg > bestAvg) { bestAvg = avg; bestH = h; }
   }
 
-  document.getElementById('peakFishes').innerHTML = renderFiveFish(calcDayBest(fish, day, state.method, state.water), 20, curTheme);
+  document.getElementById('peakFishes').innerHTML = renderFiveFish(calcDayBest(fish, day, state.method, state.water, state.depth), 20, curTheme);
   document.getElementById('peakWindowSub').textContent = `Лучший выход: ${String(bestH).padStart(2,'0')}:00 – ${String((bestH+3)%24).padStart(2,'0')}:00`;
 
-  const rig = calcRig(state.method, state.water, state.depth, day.windMax);
-  document.getElementById('weightVal').textContent = rig.w;
-  document.getElementById('rigSub').textContent = rig.r;
-  document.getElementById('baitTitle').textContent = `${fish.name}: тактика и насадка`;
-  document.getElementById('baitSub').textContent = fish.bait;
+  const rig = calcDynamicRig(state.method, state.water, state.depth, day.windMax);
+  document.getElementById('weightVal').textContent = rig.weight;
+  document.getElementById('rigSub').textContent = rig.line;
+  document.getElementById('baitTitle').textContent = `${fish.name}: насадка под погоду`;
+  
+  const adaptiveGuides = generateAdaptiveGuides(fish, state.water, state.depth, day);
+  document.getElementById('baitSub').textContent = adaptiveGuides.baitAdvice;
 
-  let rT = 'Штатные условия', rS = 'Помех для проводки и подачи нет.';
-  if (day.waterTemp < fish.tMinStop) { rT = 'Сезонное оцепенение'; rS = `Температура воды (~${day.waterTemp}°C) ниже порога активности для вида ${fish.name}.`; }
-  else if (day.tDay <= -1 && state.method.startsWith('spin')) { rT = `Обмерзание колец (${day.tDay}°C)`; rS = 'Обработайте шнур силиконом / вазелиновым маслом или перейдите на леску.'; }
-  else if (Math.abs(day.dP) >= 5) { rT = `Скачок давления (${dpS} мм)`; rS = 'Увеличьте паузу на дне до 4–6 сек, перейдите на волочение.'; }
+  let rT = 'Штатные условия', rS = `Глубина ${state.depth} м обеспечивает стабильный горизонт.`;
+  if (day.waterTemp < fish.tMinStop && state.depth < 2.5) {
+    rT = 'Риск оцепенения на мели';
+    rS = `Вода ледяная (${day.waterTemp}°C). Увеличьте глубину в ползунке до 4–6 м в поиске зимовальных ям.`;
+  } else if (day.windMax >= 9) {
+    rT = `Штормовая волна (${day.windMax} м/с)`;
+    rS = 'Ищите затишные заливы под подветренным берегом.';
+  } else if (Math.abs(day.dP) >= 5) {
+    rT = `Скачок давления (${dpS} мм)`;
+    rS = 'Рыба прижата ко дну, делайте затяжные паузы при проводке.';
+  }
   document.getElementById('riskTitle').textContent = rT;
   document.getElementById('riskSub').textContent = rS;
 
   document.getElementById('hourlyTitle').textContent = `Почасовой прогноз: ${fish.name} (${day.label})`;
-  document.getElementById('sunInfo').innerHTML = `<span>🌅 Восход: ${fmtHM(day.sunriseHr)}</span><span>🌇 Закат: ${fmtHM(day.sunsetHr)}</span><span>🌕 Кульм. Луны: ${String(day.moon.transitHour).padStart(2,'0')}:00</span>`;
+  document.getElementById('sunInfo').innerHTML = `<span>🌅 Восход: ${fmtHM(day.sunriseHr)}</span><span>🌇 Закат: ${fmtHM(day.sunsetHr)}</span><span>🌕 Кульминация Луны: ${String(day.moon.transitHour).padStart(2,'0')}:00</span>`;
 
   const curH = new Date().getHours();
   document.getElementById('hourlyList').innerHTML = hScores.map(it => {
@@ -1768,10 +1825,11 @@ function renderAll() {
   }).join('');
 
   renderAnnualCalendar(fish);
-  renderBeginnerGuide(fish);
+  renderBeginnerGuide(fish, day);
   loadComments();
 }
 
+// Слушатели событий
 document.getElementById('methodSelect').addEventListener('change', e => { state.method = e.target.value; renderAll(); });
 document.getElementById('waterSelect').addEventListener('change', e => { state.water = e.target.value; renderAll(); });
 document.getElementById('depthRange').addEventListener('input', e => {
@@ -1783,6 +1841,7 @@ document.getElementById('placeSearchInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') searchPlaceByName();
 });
 
+// Инициализация
 initTheme();
 buildFallback();
 renderAll();
