@@ -1084,42 +1084,48 @@ function populateSeasonalMethods() {
   const prevVal = state.method;
   sel.innerHTML = '';
 
+  const isSea = (state.water === 'sea_gulf' || state.water === 'open_sea');
+  let options = [];
+
   if (state.iceState === 'ice_safe') {
-    const winterOptions = [
+    options = [
       { val: 'winter_jig', text: 'Зимняя мормышка / Безмотылка (мотыль, бокоплав)' },
       { val: 'winter_lure', text: 'Зимнее блеснение: Балансир / Виб / Вертикалка' },
       { val: 'winter_livebait', text: 'Жерлицы / Подледные поставуши на живца' },
       { val: 'winter_stuka', text: 'Тяжелая стукалка со дна (налим, треска)' },
       { val: 'winter_cisco', text: 'Гирлянда мормышек / Сабики (сиговые, корюшка)' }
     ];
-    winterOptions.forEach(opt => {
-      const el = document.createElement('option');
-      el.value = opt.val;
-      el.textContent = opt.text;
-      sel.appendChild(el);
-    });
-    if (!prevVal.startsWith('winter_')) state.method = 'winter_jig';
-    else state.method = prevVal;
   } else {
-    const summerOptions = [
+    options = [
       { val: 'spin_micro', text: 'Спиннинг: Микроджиг / Мормышинг / Нано (0.2–4 г)' },
       { val: 'spin_jig', text: 'Спиннинг: Джиг тяжелый / средний (10–45 г)' },
       { val: 'spin_lure', text: 'Спиннинг: Блесны (колебалки, вертушки, воблеры)' },
       { val: 'bottom', text: 'Донная снасть (Фидер / Пикер / Закидушка)' },
       { val: 'float', text: 'Поплавочная снасть (Мах / Болонка / Сбирулино)' },
-      { val: 'fly', text: 'Нахлыст: Сухие / мокрые мушки, стримеры' },
-      { val: 'sea_rock', text: 'Морской рокфишинг / Ajing / Дроп-шот' },
-      { val: 'sea_surf', text: 'Морской сёрфкастинг с берега (тяжелая донка)' },
-      { val: 'sea_boat', text: 'Морской отвесный лов с борта (пилькеры, сабики)' }
+      { val: 'fly', text: 'Нахлыст: Сухие / мокрые мушки, стримеры' }
     ];
-    summerOptions.forEach(opt => {
-      const el = document.createElement('option');
-      el.value = opt.val;
-      el.textContent = opt.text;
-      sel.appendChild(el);
-    });
-    if (prevVal.startsWith('winter_')) state.method = 'spin_micro';
-    else state.method = prevVal;
+    
+    if (isSea) {
+      options.push(
+        { val: 'sea_rock', text: 'Морской рокфишинг / Ajing / Дроп-шот' },
+        { val: 'sea_surf', text: 'Морской сёрфкастинг с берега (тяжелая донка)' },
+        { val: 'sea_boat', text: 'Морской отвесный лов с борта (пилькеры, сабики)' }
+      );
+    }
+  }
+
+  options.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt.val;
+    el.textContent = opt.text;
+    sel.appendChild(el);
+  });
+
+  const validVals = options.map(o => o.val);
+  if (validVals.includes(prevVal)) {
+    state.method = prevVal;
+  } else {
+    state.method = options[0].val;
   }
   sel.value = state.method;
 }
@@ -1403,6 +1409,7 @@ function selectNearbyWater(el, wType) {
   state.water = wType;
   document.getElementById('waterSelect').value = wType;
   syncDepthLimitsWithWater(wType);
+  populateSeasonalMethods();
   saveState();
   renderAll();
 }
@@ -2001,6 +2008,7 @@ document.getElementById('methodSelect').addEventListener('change', e => {
 document.getElementById('waterSelect').addEventListener('change', e => { 
   state.water = e.target.value; 
   syncDepthLimitsWithWater(state.water);
+  populateSeasonalMethods();
   saveState();
   renderAll(); 
 });
