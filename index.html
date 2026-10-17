@@ -1254,51 +1254,64 @@ async function fetchLocationName(lat, lon) {
   }
 }
 
-async function fetchNearbyWaters(lat, lon) {
-  const chipsEl = document.getElementById('nearbyChips');
-  chipsEl.innerHTML = `<span class="w-chip">Гидрологический поиск...</span>`;
-
-  let defaultWaters = [];
-  if (['black_azov', 'baltic', 'pacific_sea', 'barents_white'].includes(state.basinCode)) {
-    defaultWaters = [
+function getDefaultWatersByBasin(basin) {
+  if (['black_azov', 'baltic', 'pacific_sea', 'barents_white'].includes(basin)) {
+    return [
       { label: '🌊 Морская бухта / залив', wType: 'sea_gulf' },
       { label: '⚓ Открытое море / банка', wType: 'open_sea' },
       { label: '🌊 Приустьевой участок реки', wType: 'small_river' }
     ];
-  } else if (state.basinCode === 'arctic_ob_taz') {
-    defaultWaters = [
+  } else if (basin === 'arctic_ob_taz') {
+    return [
       { label: '🌊 р. Седе-Яха', wType: 'small_river' },
       { label: '🌊 р. Ево-Яха', wType: 'small_river' },
       { label: '⚓ р. Пур / Обь', wType: 'big_river' },
       { label: '🌿 Озеро тундровое (сор)', wType: 'tundra_lake' },
       { label: '💧 Песчаный карьер', wType: 'quarry' }
     ];
-  } else if (state.basinCode === 'baikal') {
-    defaultWaters = [
+  } else if (basin === 'baikal') {
+    return [
       { label: '⚓ Озеро Байкал (открытый)', wType: 'quarry' },
       { label: '🌊 Малое Море / залив', wType: 'tundra_lake' },
       { label: '🌊 р. Селенга / Ангара', wType: 'big_river' }
     ];
-  } else if (state.basinCode === 'volga_caspian') {
-    defaultWaters = [
+  } else if (basin === 'volga_caspian') {
+    return [
       { label: '⚓ Русло Волги / Камы / Дона', wType: 'big_river' },
       { label: '🌊 Протока / Ерик / Воложка', wType: 'small_river' },
       { label: '💧 Водохранилище', wType: 'quarry' },
       { label: '🌿 Ильмень / Затон', wType: 'tundra_lake' },
       { label: '⚡ Теплый сброс ГРЭС', wType: 'cooling_reservoir' }
     ];
-  } else {
-    defaultWaters = [
-      { label: '🌊 Малая / средняя река', wType: 'small_river' },
-      { label: '⚓ Магистральное русло', wType: 'big_river' },
-      { label: '💧 Карьер / водохранилище', wType: 'quarry' },
-      { label: '🌿 Озеро / старица', wType: 'tundra_lake' }
-    ];
+  }
+  return [
+    { label: '🌊 Малая / средняя река', wType: 'small_river' },
+    { label: '⚓ Магистральное русло', wType: 'big_river' },
+    { label: '💧 Карьер / водохранилище', wType: 'quarry' },
+    { label: '🌿 Озеро / старица', wType: 'tundra_lake' }
+  ];
+}
+
+async function fetchNearbyWaters(lat, lon) {
+  const chipsEl = document.getElementById('nearbyChips');
+  chipsEl.innerHTML = `<span class="w-chip" style="opacity:0.7;">🔍 Сканирование гидрографической сети...</span>`;
+
+  // Сетка кэширования с шагом 0.02° (~2.2 км) для исключения спама Overpass при микро-смещениях
+  const gridLat = (Math.round(lat * 50) / 50).toFixed(2);
+  const gridLon = (Math.round(lon * 50) / 50).toFixed(2);
+  const cacheKey = `nur_waters_${gridLat}_${gridLon}`;
+  
+  const defaultWaters = getDefaultWatersByBasin(state.basinCode);
+
+  const cached = sessionStorage.getItem(cacheKey);
+  if (cached) {
+    renderWaterChips(JSON.parse(cached));
+    return;
   }
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 1800);
-  const query = `[out:json][timeout:3];(way["waterway"="river"]["name"](around:25000,${lat},${lon});way["natural"="water"]["name"](around:25000,${lat},${lon}););out tags 10;`;
+  const timer = setTimeout(() => controller.abort(), 2500);
+  const query = `[out:json][timeout:2];(way["waterway"="river"]["name"](around:25000,${lat},${lon});way["natural"="water"]["name"](around:25000,${lat},${lon}););out tags 10;`;
 
   try {
     const res = await fetch('https://maps.mail.ru/osm/tools/overpass/api/interpreter?data=' + encodeURIComponent(query), { signal: controller.signal });
@@ -1321,17 +1334,28 @@ async function fetchNearbyWaters(lat, lon) {
     }
 
     if (items.length > 0) {
-      chipsEl.innerHTML = items.map((it, idx) =>
-        `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`
-      ).join('');
+      sessionStorage.setItem(cacheKey, JSON.stringify(items));
+      renderWaterChips(items);
       return;
     }
-  } catch (e) {}
+  } catch (e) {
+    clearTimeout(timer);
+  }
 
-  clearTimeout(timer);
-  chipsEl.innerHTML = defaultWaters.map((it, idx) =>
+  renderWaterChips(defaultWaters);
+}
+
+function renderWaterChips(items) {
+  const chipsEl = document.getElementById('nearbyChips');
+  chipsEl.innerHTML = items.map((it, idx) =>
     `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`
   ).join('');
+
+  if (items.length > 0 && document.getElementById('waterSelect').value !== items[0].wType) {
+    state.water = items[0].wType;
+    document.getElementById('waterSelect').value = items[0].wType;
+    syncDepthLimitsWithWater(items[0].wType);
+  }
 }
 
 function selectNearbyWater(el, wType) {
