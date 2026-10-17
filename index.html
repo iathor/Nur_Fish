@@ -1172,6 +1172,7 @@ function toggleMapDrawer() {
       }
       if (!mapInstance) {
         mapInstance = L.map('mapBox').setView([state.lat, state.lon], 9);
+        mapInstance.attributionControl.setPrefix(false);
         switchMapLayer('topo');
         mapMarker = L.marker([state.lat, state.lon]).addTo(mapInstance);
         mapInstance.on('click', e => setNewLocation(e.latlng.lat, e.latlng.lng));
