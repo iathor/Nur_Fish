@@ -8,6 +8,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Клев ПРО">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Прогноз клева • Атлас Ихтиофауны России (89 видов)</title>
   
   <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
@@ -169,6 +171,7 @@
       background: var(--bg-panel);
       border-bottom: 2px solid var(--accent);
       padding: 12px;
+      scroll-margin-top: 100px;
     }
     #mapDrawer.open { display: block; }
     
@@ -681,6 +684,7 @@
 
 <script>
 let clipSeq = 0;
+const CACHE_KEY = 'pro_fish_state_v3';
 
 const IMG_SEARCH_DIRS = ['assets/fish/', 'fish/', ''];
 
@@ -799,18 +803,14 @@ const BASIN_CONFIGS = {
   volga_caspian: { name: 'Волжско-Каспийский бассейн (Волга, Кама, Урал)', hasSea: false }
 };
 
-/**
- * ПОЛНЫЙ РЕЕСТР: 89 ВИДОВ ВОДНЫХ БИОРЕСУРСОВ РОССИИ
- */
 const FISH_DB = [
-  // --- БЛОК 1: Базовые пресноводные и хищные виды РФ (36 исходных) ---
   { id:'pike', name:'Щука', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','amur','baikal', 'black_azov'], waters:['small_river','big_river','quarry','tundra_lake', 'cooling_reservoir'], tWaterOpt:[8,16], tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.3,5.5], depthMax:12.0, spawnMonth:[4,5], banMonths:'Нерестовый весенний запрет', monthActivity:[1,2,0,0,3,2,2,3,3,3,2,1], baseAdvice:'У стен камыша, на бровках и свалах. На севере концентрируется у впадения ручьев.', topGear:'Спиннинг 7–28 г, поводок-струна, со льда — жерлицы.' },
   { id:'perch', name:'Окунь речной', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','baikal', 'black_azov'], waters:['small_river','big_river','quarry','tundra_lake','cooling_reservoir'], tWaterOpt:[10,18], tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', depthOpt:[0.3,4.5], depthMax:10.0, spawnMonth:[5,6], banMonths:'Период весеннего нереста', monthActivity:[2,2,2,0,1,3,3,3,3,3,2,2], baseAdvice:'Стайный хищник бровок и кос. Зимой отлично берет балансиры и безнасадки.', topGear:'Микроджиг 1–5 г, зимний удильник с балансиром 50 мм.' },
   { id:'zander', name:'Судак', type:'predator', habitat:'fresh', legal:'free', basins:['volga_caspian','nw_karelia','euro_west','black_azov','baltic'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[12,20], tMinStop:1.0, coldFactor:0.85, optPress:757, bladderSens:1.20, feedMode:'crepuscular', depthOpt:[3.0,12.0], depthMax:20.0, spawnMonth:[4,5], banMonths:'15 апреля — 10 июня', monthActivity:[1,1,2,0,1,3,2,2,3,3,2,1], baseAdvice:'Держится твердого дна, коряжников и русловых свалов.', topGear:'Джиг 14–36 г, судаковые вибы со льда.' },
   { id:'crucian', name:'Карась серебряный / золотой', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','volga_caspian','euro_west','amur', 'black_azov'], waters:['small_river','quarry','tundra_lake','cooling_reservoir'], tWaterOpt:[16,24], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.3,2.8], depthMax:5.0, spawnMonth:[5,6], banMonths:'15 мая — 15 июня', monthActivity:[0,0,1,2,0,3,3,3,2,1,0,0], baseAdvice:'Любит прогретый ил, старицы и окна водной растительности.', topGear:'Маховая удочка, флэт-фидер, мормышинг.' },
   { id:'carp', name:'Карп / Сазан', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov','amur'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[18,25], tMinStop:6.0, coldFactor:0.25, optPress:757, bladderSens:0.95, feedMode:'crepuscular', depthOpt:[1.5,8.0], depthMax:14.0, spawnMonth:[5,6], banMonths:'1 мая — 15 июня', monthActivity:[0,0,0,1,0,2,3,3,3,1,0,0], baseAdvice:'Держится глинистых бровок, коряжника и ракушечных столов.', topGear:'Карповый бланк 3.5 lbs, метод-фидер, волосяной монтаж.' },
-  { id:'bream', name:'Лещ', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','euro_west'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[14,20], tMinStop:1.5, coldFactor:0.60, optPress:758, bladderSens:1.05, feedMode:'crepuscular', depthOpt:[2.5,10.0], depthMax:16.0, spawnMonth:[5,6], banMonths:'1 мая — 10 июня', monthActivity:[1,1,2,2,0,3,3,3,3,2,1,1], baseAdvice:'Кормится со дна на русловых бровках, чувствителен к шлейфу прикорма.', topGear:'Фидер 3.6–3.9 м, зимняя поплавочная удочка с мотылем.' },
-  { id:'roach', name:'Плотва (Сорога)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west'], waters:['small_river','big_river','quarry','tundra_lake', 'cooling_reservoir'], tWaterOpt:[12,19], tMinStop:1.0, coldFactor:0.65, optPress:758, bladderSens:1.00, feedMode:'diurnal', depthOpt:[0.4,4.0], depthMax:8.0, spawnMonth:[5,6], banMonths:'Период весеннего хода', monthActivity:[2,2,3,0,2,3,3,3,3,2,2,2], baseAdvice:'Активна в протоках и у растительности, зимой уверенно берет на безмотылку.', topGear:'Поплавок, пикер, мормышка-гвоздешарик.' },
+  { id:'bream', name:'Лещ', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','euro_west', 'black_azov'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[14,20], tMinStop:1.5, coldFactor:0.60, optPress:758, bladderSens:1.05, feedMode:'crepuscular', depthOpt:[2.5,10.0], depthMax:16.0, spawnMonth:[5,6], banMonths:'1 мая — 10 июня', monthActivity:[1,1,2,2,0,3,3,3,3,2,1,1], baseAdvice:'Кормится со дна на русловых бровках, чувствителен к шлейфу прикорма.', topGear:'Фидер 3.6–3.9 м, зимняя поплавочная удочка с мотылем.' },
+  { id:'roach', name:'Плотва (Сорога)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west', 'black_azov'], waters:['small_river','big_river','quarry','tundra_lake', 'cooling_reservoir'], tWaterOpt:[12,19], tMinStop:1.0, coldFactor:0.65, optPress:758, bladderSens:1.00, feedMode:'diurnal', depthOpt:[0.4,4.0], depthMax:8.0, spawnMonth:[5,6], banMonths:'Период весеннего хода', monthActivity:[2,2,3,0,2,3,3,3,3,2,2,2], baseAdvice:'Активна в протоках и у растительности, зимой уверенно берет на безмотылку.', topGear:'Поплавок, пикер, мормышка-гвоздешарик.' },
   { id:'catfish', name:'Сом обыкновенный', type:'predator', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[18,26], tMinStop:8.0, coldFactor:0.20, optPress:755, bladderSens:1.10, feedMode:'nocturnal', depthOpt:[3.5,18.0], depthMax:30.0, spawnMonth:[5,6], banMonths:'25 апреля — 10 июня', monthActivity:[0,0,0,1,0,2,3,3,2,1,0,0], baseAdvice:'Днем залегает в глубоких ямах, ночью выходит на плесы и отмели.', topGear:'Ловля с квоком, донка со шнуром #5.0 PE, живец или пучок выползков.' },
   { id:'burbot', name:'Налим', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west'], waters:['small_river','big_river','quarry'], tWaterOpt:[0,8], tMinStop:-1.0, coldFactor:1.30, optPress:752, bladderSens:0.30, feedMode:'nocturnal', depthOpt:[1.5,12.0], depthMax:22.0, spawnMonth:[12,1,2], banMonths:'Зимний запрет в период нереста', monthActivity:[0,0,3,2,1,0,0,0,2,3,3,0], baseAdvice:'Холодноводный тресковый. Пик жора — в ненастье, метель и морозы со льда.', topGear:'Тяжелая блесна-стукалка, зимняя донка с ершом.' },
   { id:'tench', name:'Линь', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov'], waters:['small_river','quarry','tundra_lake'], tWaterOpt:[18,24], tMinStop:6.0, coldFactor:0.25, optPress:758, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.5,2.5], depthMax:4.5, spawnMonth:[5,6,7], banMonths:'15 мая — 30 июня', monthActivity:[0,0,0,1,2,0,3,3,2,0,0,0], baseAdvice:'Тихие илистые заводи, протоки с зарослями кувшинок и хвоща.', topGear:'Поплавочная глухая оснастка, пучок червей с творогом.' },
@@ -829,8 +829,8 @@ const FISH_DB = [
   { id:'ruffe', name:'Ёрш обыкновенный', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','euro_west'], waters:['small_river','big_river','quarry','tundra_lake', 'cooling_reservoir'], tWaterOpt:[4,14], tMinStop:0.0, coldFactor:0.95, optPress:757, bladderSens:0.60, feedMode:'all_day', depthOpt:[1.0,8.0], depthMax:14.0, spawnMonth:[5,6], banMonths:'Без ограничений', monthActivity:[3,3,2,0,1,2,2,2,3,3,3,3], baseAdvice:'Донный житель глинистых ям. Лучший живец на налима.', topGear:'Мормышка с мотылем у самого дна.' },
   { id:'trout', name:'Кумжа / Ручьевая форель', type:'predator', habitat:'fresh', legal:'license', basins:['nw_karelia','barents_white','baltic','black_azov'], waters:['small_river'], tWaterOpt:[6,14], tMinStop:0.5, coldFactor:1.05, optPress:758, bladderSens:0.75, feedMode:'crepuscular', depthOpt:[0.3,3.0], depthMax:7.0, spawnMonth:[9,10,11], banMonths:'Осенний нерестовый запрет', monthActivity:[1,1,2,3,3,3,2,3,0,0,0,1], baseAdvice:'Холодные порожистые реки. Стоит в приямках за камнями.', topGear:'Стримовый ультралайт, тонущие минноу 45–60 мм.' },
   { id:'goby', name:'Бычок-кругляк / мартовик', type:'predator', habitat:'sea', legal:'free', basins:['black_azov','volga_caspian','baltic'], waters:['sea_gulf'], tWaterOpt:[10,20], tMinStop:4.0, coldFactor:0.60, optPress:759, bladderSens:0.20, feedMode:'all_day', depthOpt:[0.3,6.0], depthMax:12.0, spawnMonth:[4,5,6], banMonths:'1 мая — 15 июня', monthActivity:[1,1,2,3,2,2,3,3,3,3,2,1], baseAdvice:'Каменистые россыпи, пирсы. Хватает любую наживку со дна.', topGear:'Дроп-шот, донка, кусочки червя или мидии.' },
-  { id:'bleak', name:'Уклейка', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia'], waters:['small_river','big_river','quarry', 'cooling_reservoir'], tWaterOpt:[14,22], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.1,1.5], depthMax:3.0, spawnMonth:[5,6], banMonths:'Без ограничений', monthActivity:[0,0,1,3,3,3,3,3,2,1,0,0], baseAdvice:'Поверхностный слой воды на слабом течении. Мгновенно собирается на пылящий прикорм.', topGear:'Легкий мах 3–4 м, поплавок 0.3–0.5 г, мелкий опарыш.' },
-  { id:'ide', name:'Язь', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','euro_west'], waters:['small_river','big_river','tundra_lake', 'cooling_reservoir'], tWaterOpt:[12,19], tMinStop:1.0, coldFactor:0.75, optPress:757, bladderSens:0.95, feedMode:'crepuscular', depthOpt:[0.5,5.0], depthMax:9.0, spawnMonth:[5,6], banMonths:'20 апреля — 25 мая', monthActivity:[1,1,2,0,3,3,3,3,3,2,1,1], baseAdvice:'Граница струи и обратки, яры. В сибирских реках достигает 3 кг.', topGear:'Спиннинг (крэнки, вертушки), фидер на горох и кукурузу.' },
+  { id:'bleak', name:'Уклейка', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia', 'black_azov'], waters:['small_river','big_river','quarry', 'cooling_reservoir'], tWaterOpt:[14,22], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.1,1.5], depthMax:3.0, spawnMonth:[5,6], banMonths:'Без ограничений', monthActivity:[0,0,1,3,3,3,3,3,2,1,0,0], baseAdvice:'Поверхностный слой воды на слабом течении. Мгновенно собирается на пылящий прикорм.', topGear:'Легкий мах 3–4 м, поплавок 0.3–0.5 г, мелкий опарыш.' },
+  { id:'ide', name:'Язь', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','euro_west', 'black_azov'], waters:['small_river','big_river','tundra_lake', 'cooling_reservoir'], tWaterOpt:[12,19], tMinStop:1.0, coldFactor:0.75, optPress:757, bladderSens:0.95, feedMode:'crepuscular', depthOpt:[0.5,5.0], depthMax:9.0, spawnMonth:[5,6], banMonths:'20 апреля — 25 мая', monthActivity:[1,1,2,0,3,3,3,3,3,2,1,1], baseAdvice:'Граница струи и обратки, яры. В сибирских реках достигает 3 кг.', topGear:'Спиннинг (крэнки, вертушки), фидер на горох и кукурузу.' },
   { id:'sterlet', name:'Стерлядь', type:'peace', habitat:'fresh', legal:'license', basins:['arctic_ob_taz','volga_caspian','yenisei_lena'], waters:['big_river'], tWaterOpt:[12,20], tMinStop:1.0, coldFactor:0.75, optPress:758, bladderSens:0.65, feedMode:'nocturnal', depthOpt:[3.0,14.0], depthMax:22.0, spawnMonth:[5,6], banMonths:'Строго по именным лицензиям / РПУ', monthActivity:[1,1,2,2,0,0,3,3,3,2,1,1], baseAdvice:'Русловые песчано-галечные борозды крупных рек. В Оби вылов жестко лимитирован.', topGear:'Фидер с пучком червя или мотыля.' },
   { id:'herring', name:'Сельдь атлантическая / тихоокеанская', type:'peace', habitat:'sea', legal:'free', basins:['pacific_sea','barents_white','baltic'], waters:['sea_gulf','open_sea'], tWaterOpt:[4,12], tMinStop:0.5, coldFactor:0.90, optPress:760, bladderSens:0.75, feedMode:'diurnal', depthOpt:[2.0,18.0], depthMax:35.0, spawnMonth:[4,5], banMonths:'Нерестовые лимиты', monthActivity:[2,2,3,3,2,1,1,2,3,3,2,2], baseAdvice:'Пелагические плотные косяки в толще прибрежных вод.', topGear:'Ставка-самодур с мобискином и золотыми крючками.' },
   { id:'mackerel', name:'Скумбрия атлантическая', type:'predator', habitat:'sea', legal:'free', basins:['black_azov','baltic','barents_white'], waters:['sea_gulf','open_sea'], tWaterOpt:[12,20], tMinStop:7.0, coldFactor:0.40, optPress:760, bladderSens:0.50, feedMode:'diurnal', depthOpt:[2.0,18.0], depthMax:35.0, spawnMonth:[5,6], banMonths:'Без жесткого запрета', monthActivity:[0,0,0,1,2,3,3,3,3,2,0,0], baseAdvice:'Быстрый стайный пелагик открытых заливов.', topGear:'Пилькеры 20–40 г, ярусные оснастки с перьями.' },
@@ -911,33 +911,14 @@ const FISH_DB = [
   { id:'starry_flounder', name:'Камбала звездчатая', type:'predator', habitat:'sea', legal:'free', basins:['pacific_sea'], waters:['sea_gulf'], tWaterOpt:[4,14], tMinStop:0.5, coldFactor:0.95, optPress:760, bladderSens:0.25, feedMode:'all_day', depthOpt:[1.5,20.0], depthMax:40.0, spawnMonth:[3,4], banMonths:'Морские правила', monthActivity:[2,1,2,3,3,3,3,3,3,2,2,2], baseAdvice:'Опесчаненные бухты и эстуарии рек Тихого океана.', topGear:'Сёрфовая снасть, нарезка рыбы, морской червь.' }
 ];
 
-const DEFAULT_STATE = {
-  theme: 'auto',
-  lat: 66.084,
-  lon: 76.679,
-  elevation: 45,
-  normPress: 758,
-  locCountry: 'Россия',
-  locAdmin1: 'ЯНАО',
-  locAdmin2: 'г. Новый Уренгой',
-  locLabel: 'Новый Уренгой',
-  basinCode: 'arctic_ob_taz',
-  basinName: 'Обь-Тазовский бассейн (ЯНАО, Пур, Таз, Обь)',
-  showAllSpecies: false,
-  fishId: 'chir',
-  dayIdx: 0,
-  method: 'winter_jig',
-  water: 'small_river',
-  depth: 1.2,
-  iceState: 'open_water',
-  iceThickness: 0
-};
-
 let state = { ...DEFAULT_STATE };
 try {
-  const savedState = localStorage.getItem('pro_fish_state');
+  const savedState = localStorage.getItem(CACHE_KEY);
   if (savedState) {
     state = { ...state, ...JSON.parse(savedState) };
+  } else {
+    localStorage.removeItem('pro_fish_state');
+    localStorage.removeItem('pro_fish_state_v2'); 
   }
 } catch(e) {
   console.warn('Ошибка чтения localStorage', e);
@@ -948,7 +929,7 @@ function saveState() {
     const s = { ...state };
     delete s.iceState; 
     delete s.iceThickness;
-    localStorage.setItem('pro_fish_state', JSON.stringify(s));
+    localStorage.setItem(CACHE_KEY, JSON.stringify(s));
   } catch(e) {}
 }
 
@@ -956,13 +937,6 @@ let DAYS_DATA = [];
 let mapInstance = null;
 let mapMarker = null;
 let currentTileLayer = null;
-
-const MAP_LAYERS = {
-  topo: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Topo' },
-  sat: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Satellite' },
-  carto: { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', attr: 'CartoDB' },
-  osm: { url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png', attr: 'OSM' }
-};
 
 function detectBasinByCoords(lat, lon) {
   if (lat >= 41.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) return 'black_azov';
@@ -1014,7 +988,7 @@ function getFilteredFishList() {
     const basinMatch = f.basins.includes(state.basinCode);
     
     let waterMatch = !f.waters || f.waters.includes(state.water);
-    if (!waterMatch && (state.water === 'tundra_lake' || state.water === 'quarry') && ['crucian', 'carp', 'silver_carp', 'grass_carp', 'perch', 'pike'].includes(f.id)) {
+    if (!waterMatch && (state.water === 'tundra_lake' || state.water === 'quarry') && ['crucian', 'carp', 'silver_carp', 'grass_carp', 'perch', 'pike', 'roach', 'bream'].includes(f.id)) {
       waterMatch = true; 
     }
 
@@ -1205,9 +1179,7 @@ function toggleMapDrawer() {
         mapInstance.invalidateSize();
         mapInstance.setView([state.lat, state.lon]);
       }
-      // Умный скролл с поправкой на шапку
-      const offset = dr.getBoundingClientRect().top + window.scrollY - 100;
-      window.scrollTo({ top: offset, behavior: 'smooth' });
+      dr.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 150);
   }
 }
@@ -1447,12 +1419,19 @@ function buildFallback() {
   DAYS_DATA = [];
   const temps = [];
 
+  const dayOfYear = Math.floor((startDt - new Date(startDt.getFullYear(), 0, 0)) / 86400000);
+  const seasonOffset = -Math.cos((dayOfYear + 10) / 365 * 2 * Math.PI);
+  const latBase = Math.abs(state.lat);
+  const meanT = 25 - (latBase - 40) * 0.8;
+  const amplitude = 10 + (latBase - 40) * 0.4;
+
   for (let i = 0; i < 14; i++) {
     const cur = new Date(startDt.getTime() + i * 86400000);
     const dStr = cur.toISOString().split('T')[0];
     const moon = computeMoon(dStr);
-    const tMax = Math.round(-6 - i * 0.7);
-    const tMin = tMax - 5;
+    
+    const tMax = Math.round(meanT + seasonOffset * amplitude - i * 0.2);
+    const tMin = tMax - 7;
     temps.push(tMax);
     const p = Math.round(756 + Math.sin(i * 0.7) * 4);
     const dP = i === 0 ? -1 : Math.round(Math.cos(i) * 3);
@@ -1467,19 +1446,30 @@ function buildFallback() {
         press: Math.round(p + (dP * (h - 12)) / 24),
         dp3h: Math.round((dP / 8) * 10) / 10,
         wind: Math.max(1, w),
-        windDir: 'СЗ', cloud: 85, precip: 0.1
+        windDir: ['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'][Math.floor(Math.random()*8)],
+        cloud: 85, precip: 0.1
       });
     }
 
     DAYS_DATA.push({
       date: dStr,
       label: `${dRu[cur.getDay()]}, ${cur.getDate()} ${mRu[cur.getMonth()]}`,
-      tDay: tMax, tNight: tMin, pressAvg: p, dP, windMax: w, windDir: 'СЗ',
+      tDay: tMax, tNight: tMin, pressAvg: p, dP, windMax: w, windDir: hours[12].windDir,
       sunriseHr: 7.4 + i * 0.05, sunsetHr: 16.7 - i * 0.05,
-      waterTemp: Math.max(0.1, 1.2 - i * 0.08),
+      waterTemp: 0, 
       moon, hours
     });
   }
+
+  const wtBase = Math.max(0.1, (meanT + seasonOffset * amplitude) * 0.6 + 2);
+  DAYS_DATA.forEach((d, i) => {
+      if (state.water === 'cooling_reservoir') {
+          d.waterTemp = Math.max(8, Math.min(30, Math.round((d.tDay * 0.2 + 18) * 10) / 10));
+      } else {
+          d.waterTemp = Math.max(0.1, Math.min(28, Math.round((wtBase - i * 0.1) * 10) / 10));
+      }
+  });
+
   evaluateIceCondition(temps, temps.map(t => t - 5), DAYS_DATA[0].waterTemp);
 }
 
@@ -1608,18 +1598,37 @@ function calcHourly(fish, day, hrObj, method, water, depth) {
   const kSol = (dTr <= 1.5) ? 1.12 : 1.0;
 
   const md = day.moon.moonDay;
-  const kMoon = ((md >= 4 && md <= 9) || (md >= 18 && md <= 23)) ? 1.08 : ((md <= 2 || md >= 29) ? 0.75 : 0.90);
+  let kMoon = 1.0;
+  if (md >= 28 || md <= 2 || (md >= 14 && md <= 17)) kMoon = 1.15;
+  else if ((md >= 6 && md <= 9) || (md >= 21 && md <= 24)) kMoon = 0.75;
+  else kMoon = 0.95;
 
+  const pDiff = Math.abs(hrObj.press - state.normPress);
   const depthBuffer = Math.min(1.4, 0.8 + depth * 0.05);
-  const pDiff = Math.abs(hrObj.press - state.normPress) / depthBuffer;
-  const grad = Math.abs(hrObj.dp3h) * 2.2;
-  let kPress = Math.max(0.35, 1.0 - (pDiff * 0.01 + grad * 0.035) * fish.bladderSens);
+  let staticPK = Math.max(0.7, 1.0 - (pDiff * 0.01 / depthBuffer) * fish.bladderSens);
+  
+  let dynPK = 1.0;
+  if (fish.type === 'predator') {
+    if (hrObj.dp3h < -1.0) dynPK = 1.25;
+    else if (hrObj.dp3h > 1.0) dynPK = 0.6;
+    else dynPK = 1.0;
+  } else {
+    if (hrObj.dp3h > 1.0) dynPK = 1.15;
+    else if (hrObj.dp3h < -1.0) dynPK = 0.7;
+    else dynPK = 1.05;
+  }
+  let kPress = staticPK * dynPK;
 
   if (fish.id === 'burbot' && (hrObj.dp3h < 0 || hrObj.precip > 0)) kPress = Math.min(1.2, kPress + 0.18);
 
   let kWea = 1.0;
   if (state.iceState !== 'ice_safe' && fish.id !== 'burbot') {
-    kWea = Math.max(0.45, 1.0 - Math.max(0, hrObj.wind - 4.0) * 0.05);
+    if (hrObj.wind < 1.0) kWea = 0.8;
+    else if (hrObj.wind > 6.0) kWea = 0.6;
+    else kWea = 1.1;
+
+    if (['С', 'СВ', 'В'].includes(hrObj.windDir)) kWea *= 0.8;
+    else if (['Ю', 'ЮЗ', 'З'].includes(hrObj.windDir)) kWea *= 1.15;
   }
 
   return Math.max(4, Math.min(98, Math.round(92 * kSeason * kLight * kSol * kMoon * kPress * kWea * kTempOver * methodFactor * depthFactor)));
@@ -1764,8 +1773,8 @@ function renderThreeDayVerdict(fish) {
   box.innerHTML = days3.map((d, idx) => {
     const scWeather = calcDayBest(fish, d, state.method, state.water, state.depth);
     const md = d.moon.moonDay;
-    const isMoonGood = (md >= 4 && md <= 9) || (md >= 18 && md <= 23);
-    const isMoonBad = (md <= 2 || md >= 29 || (md >= 14 && md <= 16));
+    const isMoonGood = (md >= 28 || md <= 2 || (md >= 14 && md <= 17));
+    const isMoonBad = ((md >= 6 && md <= 9) || (md >= 21 && md <= 24));
     const moonText = isMoonGood ? 'По луне жор' : (isMoonBad ? 'Лунный спад' : 'Умеренная луна');
     const moonClass = isMoonGood ? 'good' : (isMoonBad ? 'bad' : 'warn');
 
@@ -1790,8 +1799,13 @@ function renderThreeDayVerdict(fish) {
       else if (state.iceState === 'ice_danger') reasons.push(`Ледостав не сформирован (~${state.iceThickness} см), выход запрещен`);
       else reasons.push(`Открытая вода (~${d.waterTemp}°C), температура воздуха ${d.tDay}°C`);
 
-      if (Math.abs(d.dP) >= 4) reasons.push(`Барический перепад ${Math.abs(d.dP)} мм рт. ст.`);
-      else reasons.push('Стабильное барическое поле');
+      if (fish.type === 'predator') {
+          if (d.dP < -2) reasons.push(`Падение давления радует хищника`);
+          else if (d.dP > 2) reasons.push(`Рост давления угнетает хищника`);
+      } else {
+          if (d.dP > 2) reasons.push(`Рост давления активизирует белую рыбу`);
+          else if (d.dP < -2) reasons.push(`Падение давления угнетает бель`);
+      }
     }
 
     const dayName = idx === 0 ? 'Сегодня' : (idx === 1 ? 'Завтра' : 'Послезавтра');
