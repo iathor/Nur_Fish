@@ -7,7 +7,6 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Клев ПРО">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Прогноз клева • Атлас Ихтиофауны России (89 видов)</title>
   
   <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
@@ -350,6 +349,7 @@
       font-weight: 600;
       white-space: nowrap;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
     .w-chip.active { border-color: var(--accent); background: #0284c7; color: #fff; }
 
@@ -595,7 +595,7 @@
     <div class="nearby-waters">
       <div id="nearbyStatus">🌊 Гидрографическая сеть локации (кликните для быстрой смены биотопа):</div>
       <div class="water-chips" id="nearbyChips">
-        <span class="w-chip">Анализ рек, озер и заливов...</span>
+        <span class="w-chip" style="opacity:0.7;">🔍 Сканирование гидрографической сети...</span>
       </div>
     </div>
 
@@ -682,6 +682,9 @@
   </div>
 
 <script>
+// Принудительно чистим кэш водоемов при обновлении версии
+sessionStorage.clear();
+
 let clipSeq = 0;
 
 const IMG_SEARCH_DIRS = ['assets/fish/', 'fish/', ''];
@@ -787,11 +790,8 @@ const WATER_PROFILES = {
   open_sea:          { name: 'Открытое море / банка / шельф', minD: 2.0, maxD: 60.0, defD: 15.0, flow: 2.4 }
 };
 
-/**
- * ПОЛНЫЙ РЕЕСТР: 89 ВИДОВ ВОДНЫХ БИОРЕСУРСОВ РОССИИ
- */
 const FISH_DB = [
-  // --- БЛОК 1: Базовые пресноводные и хищные виды РФ (36 исходных) ---
+  // --- БЛОК 1: Базовые пресноводные и хищные виды РФ ---
   { id:'pike', name:'Щука', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','amur','baikal'], waters:['small_river','big_river','quarry','tundra_lake'], tWaterOpt:[8,16], tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.3,5.5], depthMax:12.0, spawnMonth:[4,5], banMonths:'Нерестовый весенний запрет', monthActivity:[1,2,0,0,3,2,2,3,3,3,2,1], baseAdvice:'У стен камыша, на бровках и свалах. На севере концентрируется у впадения ручьев.', topGear:'Спиннинг 7–28 г, поводок-струна, со льда — жерлицы.' },
   { id:'perch', name:'Окунь речной', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','baikal'], waters:['small_river','big_river','quarry','tundra_lake','cooling_reservoir'], tWaterOpt:[10,18], tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', depthOpt:[0.3,4.5], depthMax:10.0, spawnMonth:[5,6], banMonths:'Период весеннего нереста', monthActivity:[2,2,2,0,1,3,3,3,3,3,2,2], baseAdvice:'Стайный хищник бровок и кос. Зимой отлично берет балансиры и безнасадки.', topGear:'Микроджиг 1–5 г, зимний удильник с балансиром 50 мм.' },
   { id:'zander', name:'Судак', type:'predator', habitat:'fresh', legal:'free', basins:['volga_caspian','nw_karelia','euro_west','black_azov','baltic'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[12,20], tMinStop:1.0, coldFactor:0.85, optPress:757, bladderSens:1.20, feedMode:'crepuscular', depthOpt:[3.0,12.0], depthMax:20.0, spawnMonth:[4,5], banMonths:'15 апреля — 10 июня', monthActivity:[1,1,2,0,1,3,2,2,3,3,2,1], baseAdvice:'Держится твердого дна, коряжников и русловых свалов.', topGear:'Джиг 14–36 г, судаковые вибы со льда.' },
@@ -829,7 +829,7 @@ const FISH_DB = [
   { id:'crab', name:'Краб прибрежный / каменный', type:'predator', habitat:'sea', legal:'license', basins:['black_azov','barents_white','pacific_sea'], waters:['sea_gulf'], tWaterOpt:[12,20], tMinStop:2.0, coldFactor:0.75, optPress:760, bladderSens:0.15, feedMode:'nocturnal', depthOpt:[1.0,15.0], depthMax:30.0, spawnMonth:[5,6], banMonths:'Региональные запреты / выпуск самок', monthActivity:[1,1,1,2,0,0,3,3,3,3,2,1], baseAdvice:'Каменные гряды и волноломы морского побережья.', topGear:'Подъемник-хватка с рыбной насадкой.' },
   { id:'king_crab', name:'Камчатский краб', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea','barents_white'], waters:['open_sea'], tWaterOpt:[0,6], tMinStop:-0.5, coldFactor:1.10, optPress:760, bladderSens:0.15, feedMode:'all_day', depthOpt:[10.0,40.0], depthMax:80.0, spawnMonth:[4,5], banMonths:'Лов строго по разовым квотам', monthActivity:[2,2,2,0,0,2,3,3,3,3,2,2], baseAdvice:'Глубоководный донный гигант северных морей.', topGear:'Специализированная крабовая ловушка с сельдью.' },
 
-  // --- БЛОК 2: Тепловодные интродуценты, ГРЭС и аквакультура (Центр, Юг) ---
+  // --- БЛОК 2: Тепловодные интродуценты, ГРЭС и аквакультура ---
   { id:'silver_carp', name:'Толстолобик белый / пестрый', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov'], waters:['cooling_reservoir','quarry','big_river'], tWaterOpt:[20,28], tMinStop:8.0, coldFactor:0.15, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:8.0, spawnMonth:[6,7], banMonths:'Искусственное воспроизводство', monthActivity:[0,0,0,0,1,3,3,3,2,0,0,0], baseAdvice:'Фитопланктофаг. Кормится в верхних и средних слоях водоемов-охладителей ГРЭС и прудов.', topGear:'Специальная оснастка «палочка толстолобика» с технопланктоном.' },
   { id:'grass_carp', name:'Белый амур', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov','amur'], waters:['cooling_reservoir','quarry','big_river'], tWaterOpt:[18,26], tMinStop:7.0, coldFactor:0.20, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.5,3.5], depthMax:7.0, spawnMonth:[6,7], banMonths:'Прудовый и речной регламент', monthActivity:[0,0,0,0,1,3,3,3,2,0,0,0], baseAdvice:'Макрофитофаг. Выкашивает водную траву. Клюет на стебель камыша, огурец и водоросли.', topGear:'Мощный карповик, волосяной монтаж, плавающий бойл, пучок травы.' },
   { id:'channel_catfish', name:'Сомик канальный', type:'predator', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov'], waters:['cooling_reservoir','quarry'], tWaterOpt:[18,28], tMinStop:6.0, coldFactor:0.25, optPress:756, bladderSens:0.95, feedMode:'nocturnal', depthOpt:[1.0,6.0], depthMax:10.0, spawnMonth:[5,6], banMonths:'Без ограничений (аквакультура)', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Американский интродуцент. Активен на теплых сбросах ГРЭС и южных прудах.', topGear:'Донка, фидер, печень птицы, креветка, пучок червей.' },
@@ -899,40 +899,6 @@ const FISH_DB = [
   { id:'starry_flounder', name:'Камбала звездчатая', type:'predator', habitat:'sea', legal:'free', basins:['pacific_sea'], waters:['sea_gulf'], tWaterOpt:[4,14], tMinStop:0.5, coldFactor:0.95, optPress:760, bladderSens:0.25, feedMode:'all_day', depthOpt:[1.5,20.0], depthMax:40.0, spawnMonth:[3,4], banMonths:'Морские правила', monthActivity:[2,1,2,3,3,3,3,3,3,2,2,2], baseAdvice:'Опесчаненные бухты и эстуарии рек Тихого океана.', topGear:'Сёрфовая снасть, нарезка рыбы, морской червь.' }
 ];
 
-let state = {
-  theme: 'auto',
-  lat: 66.084,
-  lon: 76.679,
-  elevation: 45,
-  normPress: 758,
-  locCountry: 'Россия',
-  locAdmin1: 'ЯНАО',
-  locAdmin2: 'г. Новый Уренгой',
-  locLabel: 'Новый Уренгой',
-  basinCode: 'arctic_ob_taz',
-  basinName: 'Обь-Тазовский бассейн (ЯНАО, Обь, Пур, Таз)',
-  showAllSpecies: false,
-  fishId: 'chir',
-  dayIdx: 0,
-  method: 'winter_jig',
-  water: 'small_river',
-  depth: 1.2,
-  iceState: 'ice_safe',
-  iceThickness: 18
-};
-
-let DAYS_DATA = [];
-let mapInstance = null;
-let mapMarker = null;
-let currentTileLayer = null;
-
-const MAP_LAYERS = {
-  topo: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Topo' },
-  sat: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Satellite' },
-  carto: { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', attr: 'CartoDB' },
-  osm: { url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png', attr: 'OSM' }
-};
-
 function detectBasinByCoords(lat, lon) {
   // Черноморско-Азовский
   if (lat >= 43.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) return { code: 'black_azov', name: 'Черноморско-Азовский бассейн' };
@@ -950,11 +916,10 @@ function detectBasinByCoords(lat, lon) {
   // Восточная Сибирь (Енисей, Лена)
   if (lon >= 88.0 && lon < 135.0 && lat >= 52.0) return { code: 'yenisei_lena', name: 'Енисейско-Ленский бассейн' };
   
-  // ЯНАО и Арктическая Обь (Крайний Север) - жестко ограничиваем широту
+  // Крайний Север (ЯНАО, низовья Оби) - жестко ограничиваем широту
   if (lon >= 59.0 && lon < 88.0 && lat >= 62.0) return { code: 'arctic_ob_taz', name: 'Обь-Тазовский бассейн (Низовья Оби, ЯНАО)' };
   
   // Урал и Приуралье (Екатеринбург, Челябинск, Пермь, Уфа)
-  // Привязка к volga_caspian, т.к. ихтиофауна идентична (судак, лещ, голавль, чехонь)
   if (lat >= 51.0 && lat < 62.0 && lon >= 54.0 && lon < 65.0) return { code: 'volga_caspian', name: 'Урало-Камский и Исетский бассейн' };
   
   // Юг Западной Сибири (Тюмень, Омск, Новосибирск)
@@ -1292,9 +1257,9 @@ function getDefaultWatersByBasin(basinName) {
   } else if (basinName.includes('Волжско')) {
     return [
       { label: '⚓ Русло Волги / Камы / Дона', wType: 'big_river' },
-      { label: '🌊 Протока / Ерик / Воложка', wType: 'small_river' },
+      { label: '🌊 Протока / Ерик', wType: 'small_river' },
       { label: '💧 Водохранилище', wType: 'quarry' },
-      { label: '🌿 Ильмень / Затон', wType: 'tundra_lake' }
+      { label: '⚡ Теплый сброс ГРЭС', wType: 'cooling_reservoir' }
     ];
   }
   return [
@@ -1309,26 +1274,25 @@ async function fetchNearbyWaters(lat, lon) {
   const chipsEl = document.getElementById('nearbyChips');
   chipsEl.innerHTML = `<span class="w-chip" style="opacity:0.7;">🔍 Сканирование гидрографии...</span>`;
 
-  const defaultWaters = getDefaultWatersByBasin(state.basinCode);
+  const defaultWaters = getDefaultWatersByBasin(state.basinName);
   const cacheKey = `nur_waters_${(Math.round(lat * 50) / 50).toFixed(2)}_${(Math.round(lon * 50) / 50).toFixed(2)}`;
 
-  // Защита от падения в режиме Инкогнито / при блокировке cookies
   try {
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
       renderWaterChips(JSON.parse(cached));
       return;
     }
-  } catch (e) { /* Игнорируем ошибку приватности */ }
+  } catch (e) {}
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6000); // Увеличено до 6 секунд
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
   const query = `[out:json][timeout:4];(way["waterway"="river"]["name"](around:25000,${lat},${lon});way["natural"="water"]["name"](around:25000,${lat},${lon}););out tags 10;`;
 
   try {
     const res = await fetch('https://maps.mail.ru/osm/tools/overpass/api/interpreter?data=' + encodeURIComponent(query), { signal: controller.signal });
     clearTimeout(timeoutId);
-    if (!res.ok) throw new Error('API Error');
+    if (!res.ok) throw new Error();
     const data = await res.json();
     
     const seen = new Set();
@@ -1341,13 +1305,12 @@ async function fetchNearbyWaters(lat, lon) {
       
       const isRiver = el.tags.waterway === 'river';
       const wType = isRiver
-        ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена/i.test(name) ? 'big_river' : 'small_river')
-        : (/губа|море|бухта|залив/i.test(name) ? 'sea_gulf' : (/карьер|вдхр|водохранилище/i.test(name) ? 'quarry' : 'tundra_lake'));
-      
-      const isRiver = el.tags.waterway === 'river';
-      const wType = isRiver
         ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена|урал|исеть|тобол|тура|чусовая|белая|вятка|ока/i.test(name) ? 'big_river' : 'small_river')
         : (/губа|море|бухта|залив/i.test(name) ? 'sea_gulf' : (/карьер|вдхр|водохранилище/i.test(name) ? 'quarry' : 'tundra_lake'));
+      
+      const icon = isRiver ? '🌊 р. ' : '💧 ';
+      items.push({ label: icon + name.replace(/^(река|озеро)\s+/i, ''), wType });
+      if (items.length >= 6) break;
     }
 
     if (items.length > 0) {
@@ -1359,7 +1322,6 @@ async function fetchNearbyWaters(lat, lon) {
     clearTimeout(timeoutId);
   }
 
-  // Если API упало или ничего не нашло - мягко рисуем водоемы по умолчанию
   renderWaterChips(defaultWaters);
 }
 
@@ -1368,7 +1330,7 @@ function renderWaterChips(items) {
   chipsEl.innerHTML = items.map((it, idx) =>
     `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`
   ).join('');
-
+  
   if (items.length > 0 && document.getElementById('waterSelect').value !== items[0].wType) {
     state.water = items[0].wType;
     document.getElementById('waterSelect').value = items[0].wType;
@@ -1439,11 +1401,10 @@ function buildFallback() {
 }
 
 async function fetchLiveMeteo() {
-const st = document.getElementById('apiStatus');
+  const st = document.getElementById('apiStatus');
   st.textContent = 'Опрос метеосети...';
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}&hourly=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,wind_speed_10m_max,wind_direction_10m_dominant&forecast_days=14&wind_speed_unit=ms&timezone=auto&_cb=${Date.now()}`;
   try {
-    // УБРАНО { cache: 'no-store' } — это ломало API при активном Service Worker
     const res = await fetch(url);
     if (!res.ok) throw new Error();
     const data = await res.json();
@@ -1505,7 +1466,6 @@ function calcHourly(fish, day, hrObj, method, water, depth) {
   if (depth > fish.depthMax) return 4;
   if (state.iceState === 'ice_danger' && !method.startsWith('winter_')) return 8;
 
-  // Термический фактор воды: теплолюбивые виды впадают в оцепенение при T < tMinStop
   if (day.waterTemp < fish.tMinStop) return 5;
 
   let depthFactor = 1.0;
@@ -1964,5 +1924,16 @@ renderAll();
 fetchLiveMeteo();
 fetchNearbyWaters(state.lat, state.lon);
 </script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker зарегистрирован.', reg.scope))
+        .catch(err => console.error('Ошибка регистрации Service Worker:', err));
+    });
+  }
+</script>
+
 </body>
 </html>
