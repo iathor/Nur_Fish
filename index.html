@@ -239,7 +239,6 @@
       display: flex;
       gap: 10px;
       overflow-x: auto;
-      border-bottom: 1px solid var(--border);
       scrollbar-width: thin;
     }
     .fish-chip {
@@ -605,8 +604,6 @@
           <option value="quarry">Глубокое озеро / карьер / водохранилище (0.5–22 м)</option>
           <option value="tundra_lake">Тундровое термокарстовое озеро / старица / пруд (0.2–3.5 м)</option>
           <option value="cooling_reservoir">Теплый сброс ГРЭС/АЭС / Прудовое хозяйство (0.5–8 м)</option>
-          <option value="sea_gulf">Морская губа / эстуарий / лиман / прибой (0.5–15 м)</option>
-          <option value="open_sea">Открытое море / банка / шельф (до 60 м)</option>
         </select>
       </div>
       <div class="ctrl-item">
@@ -788,6 +785,20 @@ const WATER_PROFILES = {
   open_sea:          { name: 'Открытое море / банка / шельф', minD: 2.0, maxD: 60.0, defD: 15.0, flow: 2.4 }
 };
 
+const BASIN_CONFIGS = {
+  black_azov: { name: 'Черноморско-Азовский бассейн', hasSea: true },
+  baltic: { name: 'Балтийский морской бассейн', hasSea: true },
+  barents_white: { name: 'Баренцево-Беломорский арктический бассейн', hasSea: true },
+  nw_karelia: { name: 'Ладожско-Онежский и Карельский бассейн', hasSea: true },
+  pacific_sea: { name: 'Тихоокеанский бассейн', hasSea: true },
+  amur: { name: 'Амурский пресноводный бассейн', hasSea: false },
+  baikal: { name: 'Байкало-Ангарский бассейн', hasSea: false },
+  yenisei_lena: { name: 'Енисейско-Ленский бассейн', hasSea: true },
+  arctic_ob_taz: { name: 'Обь-Тазовский бассейн (ЯНАО, Пур, Таз, Обь)', hasSea: true },
+  euro_west: { name: 'Днепровско-Донской бассейн', hasSea: false },
+  volga_caspian: { name: 'Волжско-Каспийский бассейн (Волга, Кама, Урал)', hasSea: false }
+};
+
 /**
  * ПОЛНЫЙ РЕЕСТР: 89 ВИДОВ ВОДНЫХ БИОРЕСУРСОВ РОССИИ
  */
@@ -911,15 +922,15 @@ let state = {
   locAdmin2: 'г. Новый Уренгой',
   locLabel: 'Новый Уренгой',
   basinCode: 'arctic_ob_taz',
-  basinName: 'Обь-Тазовский бассейн (ЯНАО, Обь, Пур, Таз)',
+  basinName: 'Обь-Тазовский бассейн (ЯНАО, Пур, Таз, Обь)',
   showAllSpecies: false,
   fishId: 'chir',
   dayIdx: 0,
   method: 'winter_jig',
   water: 'small_river',
   depth: 1.2,
-  iceState: 'ice_safe',
-  iceThickness: 18
+  iceState: 'open_water',
+  iceThickness: 0
 };
 
 let DAYS_DATA = [];
@@ -934,38 +945,61 @@ const MAP_LAYERS = {
   osm: { url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png', attr: 'OSM' }
 };
 
+const BASIN_CONFIGS = {
+  black_azov: { name: 'Черноморско-Азовский бассейн', hasSea: true },
+  baltic: { name: 'Балтийский морской бассейн', hasSea: true },
+  barents_white: { name: 'Баренцево-Беломорский арктический бассейн', hasSea: true },
+  nw_karelia: { name: 'Ладожско-Онежский и Карельский бассейн', hasSea: true },
+  pacific_sea: { name: 'Тихоокеанский бассейн', hasSea: true },
+  amur: { name: 'Амурский пресноводный бассейн', hasSea: false },
+  baikal: { name: 'Байкало-Ангарский бассейн', hasSea: false },
+  yenisei_lena: { name: 'Енисейско-Ленский бассейн', hasSea: true },
+  arctic_ob_taz: { name: 'Обь-Тазовский бассейн (ЯНАО, Пур, Таз, Обь)', hasSea: true },
+  euro_west: { name: 'Днепровско-Донской бассейн', hasSea: false },
+  volga_caspian: { name: 'Волжско-Каспийский бассейн (Волга, Кама, Урал)', hasSea: false }
+};
+
 function detectBasinByCoords(lat, lon) {
-  if (lat >= 41.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) {
-    return { code: 'black_azov', name: 'Черноморско-Азовский бассейн' };
+  if (lat >= 41.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) return 'black_azov';
+  if (lat >= 54.0 && lat <= 60.5 && lon >= 19.0 && lon <= 31.0) return 'baltic';
+  if (lat >= 65.0 && lon >= 30.5 && lon <= 55.0) return 'barents_white';
+  if (lat >= 60.5 && lat < 66.5 && lon >= 29.0 && lon <= 38.0) return 'nw_karelia';
+  if (lon >= 130.0 && lat >= 42.0) return 'pacific_sea';
+  if (lon >= 118.0 && lon < 141.0 && lat >= 47.0 && lat < 55.5) return 'amur';
+  if (lat >= 51.0 && lat <= 56.5 && lon >= 103.0 && lon <= 112.0) return 'baikal';
+  if (lon >= 88.0 && lon < 135.0 && lat >= 52.0) return 'yenisei_lena';
+  if (lat >= 63.0 && lon >= 64.0 && lon < 88.0) return 'arctic_ob_taz';
+  if (lon < 37.0 && lat < 56.0) return 'euro_west';
+  return 'volga_caspian';
+}
+
+function updateWaterSelectOptions(basinCode) {
+  const hasSea = BASIN_CONFIGS[basinCode]?.hasSea || false;
+  const sel = document.getElementById('waterSelect');
+  const currentVal = sel.value;
+  
+  let html = `
+    <option value="small_river">Малая / средняя река (0.2–6 м)</option>
+    <option value="big_river">Крупная магистральная река / фарватер (0.5–18 м)</option>
+    <option value="quarry">Глубокое озеро / карьер / вдхр (0.5–22 м)</option>
+    <option value="tundra_lake">Озеро / старица / пруд (0.2–3.5 м)</option>
+    <option value="cooling_reservoir">Теплый сброс ГРЭС/АЭС / Прудхоз (0.5–8 м)</option>
+  `;
+  
+  if (hasSea) {
+    html += `
+      <option value="sea_gulf">Морская губа / эстуарий / лиман (0.5–15 м)</option>
+      <option value="open_sea">Открытое море / банка / шельф (до 60 м)</option>
+    `;
   }
-  if (lat >= 54.0 && lat <= 60.5 && lon >= 19.0 && lon <= 31.0) {
-    return { code: 'baltic', name: 'Балтийский морской бассейн' };
+  sel.innerHTML = html;
+
+  if (hasSea || (currentVal !== 'sea_gulf' && currentVal !== 'open_sea')) {
+    sel.value = currentVal || 'small_river';
+  } else {
+    sel.value = 'small_river';
+    state.water = 'small_river';
   }
-  if (lat >= 65.0 && lon >= 30.5 && lon <= 55.0) {
-    return { code: 'barents_white', name: 'Баренцево-Беломорский арктический бассейн' };
-  }
-  if (lat >= 60.5 && lat < 66.5 && lon >= 29.0 && lon <= 38.0) {
-    return { code: 'nw_karelia', name: 'Ладожско-Онежский и Карельский бассейн' };
-  }
-  if (lon >= 130.0 && lat >= 42.0) {
-    return { code: 'pacific_sea', name: 'Тихоокеанский бассейн' };
-  }
-  if (lon >= 118.0 && lon < 141.0 && lat >= 47.0 && lat < 55.5) {
-    return { code: 'amur', name: 'Амурский пресноводный бассейн' };
-  }
-  if (lat >= 51.0 && lat <= 56.5 && lon >= 103.0 && lon <= 112.0) {
-    return { code: 'baikal', name: 'Байкало-Ангарский бассейн' };
-  }
-  if (lon >= 88.0 && lon < 135.0 && lat >= 52.0) {
-    return { code: 'yenisei_lena', name: 'Енисейско-Ленский бассейн' };
-  }
-  if (lat >= 63.0 && lon >= 64.0 && lon < 88.0) {
-    return { code: 'arctic_ob_taz', name: 'Обь-Тазовский бассейн (ЯНАО, Пур, Таз, Обь)' };
-  }
-  if (lon < 37.0 && lat < 56.0) {
-    return { code: 'euro_west', name: 'Днепровско-Донской бассейн' };
-  }
-  return { code: 'volga_caspian', name: 'Волжско-Каспийский бассейн (Волга, Кама, Урал)' };
 }
 
 function getFilteredFishList() {
@@ -1234,9 +1268,10 @@ async function setNewLocation(lat, lon, skipReverseGeo = false) {
     mapInstance.panTo([state.lat, state.lon]);
   }
 
-  const basin = detectBasinByCoords(state.lat, state.lon);
-  state.basinCode = basin.code;
-  state.basinName = basin.name;
+  state.basinCode = detectBasinByCoords(state.lat, state.lon);
+  state.basinName = BASIN_CONFIGS[state.basinCode]?.name || 'Неизвестный бассейн';
+  
+  updateWaterSelectOptions(state.basinCode);
 
   const regionalList = getFilteredFishList();
   if (!state.fishId || !regionalList.some(f => f.id === state.fishId)) {
@@ -1268,14 +1303,13 @@ async function fetchLocationName(lat, lon) {
 
 async function fetchNearbyWaters(lat, lon) {
   const chipsEl = document.getElementById('nearbyChips');
-  chipsEl.innerHTML = `<span class="w-chip">Анализ гидросети (радиус 40–90 км)...</span>`;
+  chipsEl.innerHTML = `<span class="w-chip">Анализ гидросети (радиус 65 км)...</span>`;
 
   function getRegionalWatersFallback(bCode, lat, lon) {
     if (bCode === 'arctic_ob_taz') {
       return [
         { label: '🌊 р. Седе-Яха', wType: 'small_river' },
         { label: '🌊 р. Ево-Яха', wType: 'small_river' },
-        { label: '🌊 р. Тамчара-Яха', wType: 'small_river' },
         { label: '⚓ р. Пур / Обь', wType: 'big_river' },
         { label: '💧 Озеро тундровое (сор)', wType: 'tundra_lake' },
         { label: '💧 Песчаный карьер', wType: 'quarry' }
@@ -1297,6 +1331,13 @@ async function fetchNearbyWaters(lat, lon) {
         { label: '🌊 Протока / река 2-го порядка', wType: 'small_river' },
         { label: '💧 Водохранилище / плес', wType: 'quarry' },
         { label: '🌿 Затон / старица / пруд', wType: 'tundra_lake' }
+      ];
+    }
+    if (['black_azov', 'baltic', 'pacific_sea', 'barents_white'].includes(bCode)) {
+      return [
+        { label: '🌊 Морская бухта / залив', wType: 'sea_gulf' },
+        { label: '⚓ Открытое море / банка', wType: 'open_sea' },
+        { label: '🌊 Приустьевой участок реки', wType: 'small_river' }
       ];
     }
     return [
