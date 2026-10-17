@@ -171,7 +171,7 @@
       background: var(--bg-panel);
       border-bottom: 2px solid var(--accent);
       padding: 12px;
-      scroll-margin-top: 100px;
+      scroll-margin-top: 80px;
     }
     #mapDrawer.open { display: block; }
     
@@ -684,7 +684,7 @@
 
 <script>
 let clipSeq = 0;
-const CACHE_KEY = 'pro_fish_state_v3';
+const CACHE_KEY = 'pro_fish_state_v5';
 
 const IMG_SEARCH_DIRS = ['assets/fish/', 'fish/', ''];
 
@@ -919,6 +919,8 @@ try {
   } else {
     localStorage.removeItem('pro_fish_state');
     localStorage.removeItem('pro_fish_state_v2'); 
+    localStorage.removeItem('pro_fish_state_v3'); 
+    localStorage.removeItem('pro_fish_state_v4'); 
   }
 } catch(e) {
   console.warn('Ошибка чтения localStorage', e);
@@ -1595,6 +1597,15 @@ function calcHourly(fish, day, hrObj, method, water, depth) {
     kSeason = 0.05;
   }
 
+  const curMonth = new Date(day.date).getMonth() + 1;
+  let spawnBoost = 1.0;
+  if (fish.spawnMonth && fish.spawnMonth.length > 0) {
+     const firstSpawn = fish.spawnMonth[0];
+     const preSpawn = firstSpawn === 1 ? 12 : firstSpawn - 1;
+     if (curMonth === preSpawn) spawnBoost = 1.25;
+     if (fish.spawnMonth.includes(curMonth)) spawnBoost = 0.3;
+  }
+
   const dTr = Math.min(Math.abs(h - day.moon.transitHour), 24 - Math.abs(h - day.moon.transitHour));
   const kSol = (dTr <= 1.5) ? 1.12 : 1.0;
 
@@ -1604,8 +1615,8 @@ function calcHourly(fish, day, hrObj, method, water, depth) {
   else if ((md >= 6 && md <= 9) || (md >= 21 && md <= 24)) kMoon = 0.75;
   else kMoon = 0.95;
 
-  const pDiff = Math.abs(hrObj.press - state.normPress);
   const depthBuffer = Math.min(1.4, 0.8 + depth * 0.05);
+  const pDiff = Math.abs(hrObj.press - state.normPress);
   let staticPK = Math.max(0.7, 1.0 - (pDiff * 0.01 / depthBuffer) * fish.bladderSens);
   
   let dynPK = 1.0;
@@ -1632,7 +1643,7 @@ function calcHourly(fish, day, hrObj, method, water, depth) {
     else if (['Ю', 'ЮЗ', 'З'].includes(hrObj.windDir)) kWea *= 1.15;
   }
 
-  return Math.max(4, Math.min(98, Math.round(92 * kSeason * kLight * kSol * kMoon * kPress * kWea * kTempOver * methodFactor * depthFactor)));
+  return Math.max(4, Math.min(98, Math.round(92 * kSeason * spawnBoost * kLight * kSol * kMoon * kPress * kWea * kTempOver * methodFactor * depthFactor)));
 }
 
 function calcDayBest(fish, day, method, water, depth) {
