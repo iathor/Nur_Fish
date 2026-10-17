@@ -934,36 +934,36 @@ const MAP_LAYERS = {
 };
 
 function detectBasinByCoords(lat, lon) {
-  if (lat >= 43.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) {
-    return { code: 'black_azov', name: 'Черноморско-Азовский бассейн' };
-  }
-  if (lat >= 54.0 && lat <= 60.5 && lon >= 19.0 && lon <= 30.5) {
-    return { code: 'baltic', name: 'Балтийский морской бассейн' };
-  }
-  if (lat >= 65.0 && lon >= 30.5 && lon <= 58.0) {
-    return { code: 'barents_white', name: 'Баренцево-Беломорский арктический бассейн' };
-  }
-  if (lat >= 60.0 && lat < 66.0 && lon >= 29.0 && lon <= 38.0) {
-    return { code: 'nw_karelia', name: 'Ладожско-Онежский и Карельский бассейн' };
-  }
-  if (lon >= 135.0 && lat >= 42.0) {
-    return { code: 'pacific_sea', name: 'Тихоокеанский и Дальневосточный морской бассейн' };
-  }
-  if (lon >= 118.0 && lon < 141.0 && lat >= 47.0 && lat < 55.0) {
-    return { code: 'amur', name: 'Амурский пресноводный бассейн' };
-  }
-  if (lat >= 51.0 && lat <= 56.5 && lon >= 103.0 && lon <= 112.0) {
-    return { code: 'baikal', name: 'Байкало-Ангарский рифтовый бассейн' };
-  }
-  if (lon >= 88.0 && lon < 135.0 && lat >= 52.0) {
-    return { code: 'yenisei_lena', name: 'Енисейско-Ленский бассейн Восточной Сибири' };
-  }
-  if (lon >= 59.0 && lon < 88.0 && lat >= 53.0) {
-    return { code: 'arctic_ob_taz', name: 'Обь-Тазовский бассейн (ЯНАО, Обь, Пур, Таз)' };
-  }
-  if (lon < 38.0 && lat < 56.0) {
-    return { code: 'euro_west', name: 'Днепровско-Донской бассейн' };
-  }
+  // Черноморско-Азовский
+  if (lat >= 43.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) return { code: 'black_azov', name: 'Черноморско-Азовский бассейн' };
+  // Балтийский
+  if (lat >= 54.0 && lat <= 60.5 && lon >= 19.0 && lon <= 30.5) return { code: 'baltic', name: 'Балтийский морской бассейн' };
+  // Баренцево-Беломорский
+  if (lat >= 65.0 && lon >= 30.5 && lon <= 58.0) return { code: 'barents_white', name: 'Баренцево-Беломорский арктический бассейн' };
+  // Карелия
+  if (lat >= 60.0 && lat < 66.0 && lon >= 29.0 && lon <= 38.0) return { code: 'nw_karelia', name: 'Ладожско-Онежский и Карельский бассейн' };
+  // Дальний Восток
+  if (lon >= 135.0 && lat >= 42.0) return { code: 'pacific_sea', name: 'Тихоокеанский и Дальневосточный морской бассейн' };
+  if (lon >= 118.0 && lon < 141.0 && lat >= 47.0 && lat < 55.0) return { code: 'amur', name: 'Амурский пресноводный бассейн' };
+  // Байкал
+  if (lat >= 51.0 && lat <= 56.5 && lon >= 103.0 && lon <= 112.0) return { code: 'baikal', name: 'Байкало-Ангарский рифтовый бассейн' };
+  // Восточная Сибирь (Енисей, Лена)
+  if (lon >= 88.0 && lon < 135.0 && lat >= 52.0) return { code: 'yenisei_lena', name: 'Енисейско-Ленский бассейн' };
+  
+  // ЯНАО и Арктическая Обь (Крайний Север) - жестко ограничиваем широту
+  if (lon >= 59.0 && lon < 88.0 && lat >= 62.0) return { code: 'arctic_ob_taz', name: 'Обь-Тазовский бассейн (Низовья Оби, ЯНАО)' };
+  
+  // Урал и Приуралье (Екатеринбург, Челябинск, Пермь, Уфа)
+  // Привязка к volga_caspian, т.к. ихтиофауна идентична (судак, лещ, голавль, чехонь)
+  if (lat >= 51.0 && lat < 62.0 && lon >= 54.0 && lon < 65.0) return { code: 'volga_caspian', name: 'Урало-Камский и Исетский бассейн' };
+  
+  // Юг Западной Сибири (Тюмень, Омск, Новосибирск)
+  if (lat >= 51.0 && lat < 62.0 && lon >= 65.0 && lon < 88.0) return { code: 'arctic_ob_taz', name: 'Обь-Иртышский бассейн (Верхняя Обь, Иртыш)' };
+  
+  // Запад и Центр РФ
+  if (lon < 38.0 && lat < 56.0) return { code: 'euro_west', name: 'Днепровско-Донской бассейн' };
+  
+  // По умолчанию (Центр, Поволжье)
   return { code: 'volga_caspian', name: 'Волжско-Каспийский бассейн' };
 }
 
@@ -1254,34 +1254,47 @@ async function fetchLocationName(lat, lon) {
   }
 }
 
-function getDefaultWatersByBasin(basin) {
-  if (['black_azov', 'baltic', 'pacific_sea', 'barents_white'].includes(basin)) {
+function getDefaultWatersByBasin(basinName) {
+  if (basinName.includes('Черноморско') || basinName.includes('Балтийский') || basinName.includes('Тихоокеанский') || basinName.includes('Баренцево')) {
     return [
       { label: '🌊 Морская бухта / залив', wType: 'sea_gulf' },
       { label: '⚓ Открытое море / банка', wType: 'open_sea' },
       { label: '🌊 Приустьевой участок реки', wType: 'small_river' }
     ];
-  } else if (basin === 'arctic_ob_taz') {
+  } else if (basinName.includes('ЯНАО')) {
     return [
-      { label: '🌊 р. Седе-Яха', wType: 'small_river' },
-      { label: '🌊 р. Ево-Яха', wType: 'small_river' },
-      { label: '⚓ р. Пур / Обь', wType: 'big_river' },
+      { label: '🌊 р. Седе-Яха / Ево-Яха', wType: 'small_river' },
+      { label: '⚓ р. Пур / Таз / Обь', wType: 'big_river' },
       { label: '🌿 Озеро тундровое (сор)', wType: 'tundra_lake' },
       { label: '💧 Песчаный карьер', wType: 'quarry' }
     ];
-  } else if (basin === 'baikal') {
+  } else if (basinName.includes('Урало-Камский')) {
+    return [
+      { label: '⚓ р. Кама / Исеть / Урал', wType: 'big_river' },
+      { label: '🌊 Малая уральская река', wType: 'small_river' },
+      { label: '💧 Водохранилище / Карьер', wType: 'quarry' },
+      { label: '🌿 Лесное озеро', wType: 'tundra_lake' },
+      { label: '⚡ Теплый сброс ГРЭС/АЭС', wType: 'cooling_reservoir' }
+    ];
+  } else if (basinName.includes('Юг З.Сибири')) {
+    return [
+      { label: '⚓ р. Обь / Иртыш / Тобол', wType: 'big_river' },
+      { label: '🌊 Таежная река / протока', wType: 'small_river' },
+      { label: '💧 Озеро (карасевое)', wType: 'tundra_lake' },
+      { label: '⚡ Сброс ТЭЦ', wType: 'cooling_reservoir' }
+    ];
+  } else if (basinName.includes('Байкал')) {
     return [
       { label: '⚓ Озеро Байкал (открытый)', wType: 'quarry' },
       { label: '🌊 Малое Море / залив', wType: 'tundra_lake' },
       { label: '🌊 р. Селенга / Ангара', wType: 'big_river' }
     ];
-  } else if (basin === 'volga_caspian') {
+  } else if (basinName.includes('Волжско')) {
     return [
       { label: '⚓ Русло Волги / Камы / Дона', wType: 'big_river' },
       { label: '🌊 Протока / Ерик / Воложка', wType: 'small_river' },
       { label: '💧 Водохранилище', wType: 'quarry' },
-      { label: '🌿 Ильмень / Затон', wType: 'tundra_lake' },
-      { label: '⚡ Теплый сброс ГРЭС', wType: 'cooling_reservoir' }
+      { label: '🌿 Ильмень / Затон', wType: 'tundra_lake' }
     ];
   }
   return [
@@ -1331,9 +1344,10 @@ async function fetchNearbyWaters(lat, lon) {
         ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена/i.test(name) ? 'big_river' : 'small_river')
         : (/губа|море|бухта|залив/i.test(name) ? 'sea_gulf' : (/карьер|вдхр|водохранилище/i.test(name) ? 'quarry' : 'tundra_lake'));
       
-      const icon = isRiver ? '🌊 р. ' : '💧 ';
-      items.push({ label: icon + name.replace(/^(река|озеро)\s+/i, ''), wType });
-      if (items.length >= 6) break;
+      const isRiver = el.tags.waterway === 'river';
+      const wType = isRiver
+        ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена|урал|исеть|тобол|тура|чусовая|белая|вятка|ока/i.test(name) ? 'big_river' : 'small_river')
+        : (/губа|море|бухта|залив/i.test(name) ? 'sea_gulf' : (/карьер|вдхр|водохранилище/i.test(name) ? 'quarry' : 'tundra_lake'));
     }
 
     if (items.length > 0) {
