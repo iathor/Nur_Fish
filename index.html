@@ -945,20 +945,6 @@ const MAP_LAYERS = {
   osm: { url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png', attr: 'OSM' }
 };
 
-const BASIN_CONFIGS = {
-  black_azov: { name: 'Черноморско-Азовский бассейн', hasSea: true },
-  baltic: { name: 'Балтийский морской бассейн', hasSea: true },
-  barents_white: { name: 'Баренцево-Беломорский арктический бассейн', hasSea: true },
-  nw_karelia: { name: 'Ладожско-Онежский и Карельский бассейн', hasSea: true },
-  pacific_sea: { name: 'Тихоокеанский бассейн', hasSea: true },
-  amur: { name: 'Амурский пресноводный бассейн', hasSea: false },
-  baikal: { name: 'Байкало-Ангарский бассейн', hasSea: false },
-  yenisei_lena: { name: 'Енисейско-Ленский бассейн', hasSea: true },
-  arctic_ob_taz: { name: 'Обь-Тазовский бассейн (ЯНАО, Пур, Таз, Обь)', hasSea: true },
-  euro_west: { name: 'Днепровско-Донской бассейн', hasSea: false },
-  volga_caspian: { name: 'Волжско-Каспийский бассейн (Волга, Кама, Урал)', hasSea: false }
-};
-
 function detectBasinByCoords(lat, lon) {
   if (lat >= 41.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) return 'black_azov';
   if (lat >= 54.0 && lat <= 60.5 && lon >= 19.0 && lon <= 31.0) return 'baltic';
@@ -1236,11 +1222,12 @@ function detectMyGPS() {
 }
 
 function pickBestDefaultFish(regionalList) {
+  if (!regionalList || regionalList.length === 0) return 'pike';
   const curMonth = new Date().getMonth();
   const sorted = [...regionalList]
     .filter(f => f.legal !== 'redbook')
     .sort((a, b) => b.monthActivity[curMonth] - a.monthActivity[curMonth]);
-  return sorted[0] ? sorted[0].id : regionalList[0].id;
+  return sorted[0]?.id || regionalList[0]?.id || 'pike';
 }
 
 function syncDepthLimitsWithWater(wType) {
@@ -1848,7 +1835,7 @@ function renderAll() {
     state.fishId = pickBestDefaultFish(visibleSpecies);
   }
 
-  const fish = FISH_DB.find(f => f.id === state.fishId) || visibleSpecies[0];
+  const fish = FISH_DB.find(f => f.id === state.fishId) || visibleSpecies[0] || FISH_DB[0];
   const day = DAYS_DATA[state.dayIdx] || DAYS_DATA[0];
   const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
 
