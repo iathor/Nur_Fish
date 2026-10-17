@@ -7,6 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Клев ПРО">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Прогноз клева • Атлас Ихтиофауны России (89 видов)</title>
   
   <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
@@ -86,67 +87,286 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background: var(--bg-main); color: var(--text-main); padding-bottom: 40px; transition: background-color 0.2s ease, color 0.2s ease; }
 
-    .header { background: var(--bg-panel); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow); }
+    .header {
+      background: var(--bg-panel);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow);
+    }
     .header-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
     .loc-box { display: flex; flex-direction: column; gap: 2px; }
     .loc-hierarchy { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
     .loc-title { font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 6px; color: var(--text-main); }
+    
     .header-actions { display: flex; align-items: center; gap: 8px; }
-    .theme-toggle-btn { background: var(--bg-card); border: 1.5px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .theme-toggle-btn {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
     .theme-toggle-btn:hover { border-color: var(--accent); }
-    .live-pill { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: var(--badge-green); color: var(--badge-green-text); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+    .live-pill {
+      font-size: 11px; padding: 4px 10px; border-radius: 20px;
+      background: var(--badge-green); color: var(--badge-green-text); font-weight: 700;
+      display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
     .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); animation: blink 1.6s infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
-    .season-banner { margin-top: 6px; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid transparent; }
+    
+    .season-banner {
+      margin-top: 6px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border: 1px solid transparent;
+    }
     .season-banner.ice-safe { background: rgba(103, 232, 249, 0.15); border-color: var(--ice); color: var(--ice); }
     .season-banner.ice-danger { background: rgba(239, 68, 68, 0.15); border-color: var(--bad); color: var(--bad); }
     .season-banner.open-water { background: rgba(16, 185, 129, 0.15); border-color: var(--good); color: var(--good); }
+
     .basin-line { font-size: 12px; color: var(--accent); margin-top: 4px; font-weight: 700; }
     .astro-line { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+
     .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    .btn { flex: 1; min-width: 110px; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; text-align: center; cursor: pointer; transition: all 0.15s ease; }
+    .btn {
+      flex: 1;
+      min-width: 110px;
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
     .btn:hover { background: var(--border); }
     .btn-accent { background: #0284c7; border-color: #38bdf8; color: #fff; }
     .btn-accent:hover { background: #0369a1; }
-    #mapDrawer { display: none; background: var(--bg-panel); border-bottom: 2px solid var(--accent); padding: 12px; }
+
+    #mapDrawer {
+      display: none;
+      background: var(--bg-panel);
+      border-bottom: 2px solid var(--accent);
+      padding: 12px;
+    }
     #mapDrawer.open { display: block; }
+    
     .map-toolbar { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-    .map-search-input { flex: 1; min-width: 200px; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; }
+    .map-search-input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
     .layer-switch { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 8px; scrollbar-width: none; }
-    .layer-btn { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .layer-btn {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
     .layer-btn.active { background: #0284c7; color: #fff; border-color: #38bdf8; }
-    #mapBox { width: 100%; height: 320px; border-radius: 10px; border: 1px solid var(--border); background: #0f172a; z-index: 10; }
+
+    #mapBox {
+      width: 100%;
+      height: 320px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      z-index: 10;
+    }
     .map-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .filter-bar { background: var(--filter-bar-bg); color: var(--filter-bar-text); padding: 8px 16px; font-size: 11px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); gap: 8px; flex-wrap: wrap; }
-    .toggle-all-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+    .filter-bar {
+      background: var(--filter-bar-bg);
+      color: var(--filter-bar-text);
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .toggle-all-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
     .toggle-all-btn:hover { border-color: var(--accent); }
-    .fish-strip { background: var(--fish-strip-bg); padding: 10px 14px; display: flex; gap: 10px; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: thin; }
-    .fish-chip { display: flex; flex-direction: column; align-items: center; background: var(--fish-chip-bg); border: 1.5px solid var(--fish-chip-border); border-radius: 14px; padding: 8px 10px; min-width: 148px; flex-shrink: 0; cursor: pointer; transition: all 0.15s ease; text-align: center; position: relative; }
+
+    .fish-strip {
+      background: var(--fish-strip-bg);
+      padding: 10px 14px;
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: thin;
+    }
+    .fish-chip {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--fish-chip-bg);
+      border: 1.5px solid var(--fish-chip-border);
+      border-radius: 14px;
+      padding: 8px 10px;
+      min-width: 148px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+      position: relative;
+    }
     .fish-chip:hover { transform: translateY(-2px); border-color: var(--accent); }
-    .fish-chip.active { border-color: var(--accent); background: rgba(56, 189, 248, 0.12); box-shadow: 0 0 0 2px var(--accent); }
+    .fish-chip.active {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+      box-shadow: 0 0 0 2px var(--accent);
+    }
     .fish-chip-name { font-size: 12px; font-weight: 700; color: var(--fish-chip-text); margin: 4px 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 134px; }
-    .fish-status-badge { font-size: 9px; padding: 1px 6px; border-radius: 8px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.3px; }
+    .fish-status-badge {
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      letter-spacing: 0.3px;
+    }
     .status-redbook { background: var(--badge-red); color: var(--badge-red-text); }
     .status-license { background: var(--badge-amber); color: var(--badge-amber-text); }
     .status-introduced { background: var(--badge-purple); color: var(--badge-purple-text); }
     .status-free { background: var(--badge-green); color: var(--badge-green-text); }
-    .fish-img-box { width: 120px; height: 54px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    .fish-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)); }
-    .fish-img-box svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)); }
+
+    .fish-img-box {
+      width: 120px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .fish-img-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+    }
+    .fish-img-box svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
+    }
     .fish-scale { display: inline-flex; gap: 2px; align-items: center; }
-    .container { padding: 14px; display: flex; flex-direction: column; gap: 16px; max-width: 1200px; margin: 0 auto; }
-    .controls-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+
+    .container {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .controls-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
     .ctrl-item { display: flex; flex-direction: column; gap: 5px; }
     .ctrl-item label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-    select, input[type="range"], input[type="text"] { width: 100%; background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none; }
+    select, input[type="range"], input[type="text"] {
+      width: 100%;
+      background: var(--bg-input);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+    }
     select:focus, input:focus { border-color: var(--accent); }
-    .nearby-waters { background: var(--bg-panel); border: 1px dashed var(--border); border-radius: 10px; padding: 10px 12px; font-size: 11px; color: var(--text-muted); }
+
+    .nearby-waters {
+      background: var(--bg-panel);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
     .water-chips { display: flex; gap: 6px; overflow-x: auto; margin-top: 6px; scrollbar-width: none; }
-    .w-chip { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 5px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: all 0.2s ease; }
+    .w-chip {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
     .w-chip.active { border-color: var(--accent); background: #0284c7; color: #fff; }
+
     .three-day-box { display: flex; flex-direction: column; gap: 10px; }
-    .quick-verdict-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display: grid; grid-template-columns: 170px 1fr 50px; align-items: center; gap: 14px; }
-    @media (max-width: 768px) { .quick-verdict-card { grid-template-columns: 1fr; gap: 8px; } }
+    .quick-verdict-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: 170px 1fr 50px;
+      align-items: center;
+      gap: 14px;
+    }
+    @media (max-width: 768px) {
+      .quick-verdict-card { grid-template-columns: 1fr; gap: 8px; }
+    }
     .qv-left { display: flex; flex-direction: column; gap: 5px; }
     .qv-date { font-weight: 800; font-size: 13px; }
     .qv-badges { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -156,35 +376,128 @@
     .qv-tag.bad { background: #ef4444; }
     .qv-desc { font-size: 12px; color: var(--text-muted); line-height: 1.45; }
     .qv-icon { font-size: 32px; text-align: center; }
-    .section-label { font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; }
-    .week-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; }
-    .day-card { min-width: 140px; background: var(--bg-panel); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; cursor: pointer; transition: all 0.15s ease; }
+
+    .section-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .week-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
+    }
+    .day-card {
+      min-width: 140px;
+      background: var(--bg-panel);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
     .day-card.active { border-color: var(--accent); background: rgba(56, 189, 248, 0.12); }
     .d-head { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; }
     .d-temp { font-size: 15px; font-weight: 800; margin: 2px 0; }
     .d-meta { font-size: 11px; color: var(--text-muted); line-height: 1.35; }
     .d-fishes { margin-top: 4px; padding-top: 6px; border-top: 1px solid var(--border); display: flex; justify-content: center; }
+
     .tackle-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-    .tackle-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+    .tackle-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
     .t-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
     .t-val { font-size: 15px; font-weight: 800; color: var(--accent); }
     .t-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
-    .hourly-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
-    .sun-bar { font-size: 11px; color: #fde047; background: #422006; padding: 8px 12px; border-radius: 8px; margin: 8px 0 12px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-weight: 600; }
+
+    .hourly-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .sun-bar {
+      font-size: 11px; color: #fde047; background: #422006;
+      padding: 8px 12px; border-radius: 8px; margin: 8px 0 12px;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+      font-weight: 600;
+    }
     [data-theme="light"] .sun-bar { background: #fef08a; color: #854d0e; }
-    .hour-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px 12px; }
-    .hour-item { display: grid; grid-template-columns: 46px 110px 1fr; align-items: center; gap: 8px; background: var(--bg-card); padding: 8px 10px; border-radius: 8px; border-left: 3px solid transparent; }
+    .hour-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 8px 12px;
+    }
+    .hour-item {
+      display: grid;
+      grid-template-columns: 46px 110px 1fr;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border-left: 3px solid transparent;
+    }
     .hour-item.now { border: 1.5px solid var(--accent); background: rgba(56, 189, 248, 0.15); }
     .hour-item.twilight { border-left-color: var(--warn); }
     .h-tm { font-size: 13px; font-weight: 800; }
     .h-met { font-size: 11px; color: var(--text-muted); text-align: right; white-space: nowrap; }
-    .annual-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
-    .annual-banner { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
-    .banner-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+
+    .annual-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .annual-banner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .banner-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
     .banner-stat .b-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
     .banner-stat .b-val { font-size: 13px; font-weight: 800; margin-top: 3px; }
-    .month-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; overflow-x: auto; }
-    .m-cell { min-width: 48px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 6px 2px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .m-cell {
+      min-width: 48px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 2px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
     .m-cell.cur { border-color: var(--accent); box-shadow: 0 0 0 1.5px var(--accent); }
     .m-name { font-size: 11px; font-weight: 700; }
     .m-heat { width: 100%; height: 8px; border-radius: 4px; }
@@ -194,10 +507,35 @@
     .m-heat.h0 { background: var(--cal-empty); }
     .m-heat.spawn { background: var(--cal-spawn); }
     .m-tag { font-size: 9px; color: var(--text-muted); }
-    .guide-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
-    .guide-content { font-size: 13px; line-height: 1.55; display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 12px; margin-top: 10px; }
-    .guide-block { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
-    .guide-block h4 { font-size: 12px; font-weight: 800; color: var(--accent); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .guide-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .guide-content {
+      font-size: 13px;
+      line-height: 1.55;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .guide-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .guide-block h4 {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
   </style>
 </head>
 <body>
@@ -257,7 +595,7 @@
     <div class="nearby-waters">
       <div id="nearbyStatus">🌊 Гидрографическая сеть локации (кликните для быстрой смены биотопа):</div>
       <div class="water-chips" id="nearbyChips">
-        <span class="w-chip" style="opacity:0.7;">🔍 Сканирование гидрографической сети...</span>
+        <span class="w-chip">Анализ рек, озер и заливов...</span>
       </div>
     </div>
 
@@ -344,10 +682,8 @@
   </div>
 
 <script>
-// Защищенная очистка сессии от конфликтов CORS и инкогнито-режимов
-try { sessionStorage.clear(); } catch(e) {}
-
 let clipSeq = 0;
+
 const IMG_SEARCH_DIRS = ['assets/fish/', 'fish/', ''];
 
 function renderFishVisual(f) {
@@ -358,6 +694,7 @@ function renderFishVisual(f) {
 function handleFishImgError(imgEl) {
   const fid = imgEl.getAttribute('data-fid');
   const nextTry = parseInt(imgEl.getAttribute('data-try') || '0', 10) + 1;
+
   if (nextTry < IMG_SEARCH_DIRS.length) {
     imgEl.setAttribute('data-try', String(nextTry));
     imgEl.src = `${IMG_SEARCH_DIRS[nextTry]}${fid}.png`;
@@ -372,6 +709,7 @@ function renderFiveFish(score0to100, size = 18, theme = 'dark') {
   let col = '#10b981';
   if (rating < 1.8) col = '#ef4444';
   else if (rating < 3.3) col = '#f59e0b';
+
   const bgCol = theme === 'light' ? '#cbd5e1' : '#334155';
   const dPath = "M2,8 Q8,2 15,5 L21,2 L19,8 L21,14 L15,11 Q8,14 2,8 Z";
   let out = `<div class="fish-scale" title="Индекс активности: ${rating.toFixed(1)} / 5">`;
@@ -379,42 +717,81 @@ function renderFiveFish(score0to100, size = 18, theme = 'dark') {
     const frac = Math.max(0, Math.min(1, rating - (i - 1)));
     const w = (23 * frac).toFixed(1);
     const cid = `c_${++clipSeq}`;
-    out += `<svg width="${size}" height="${Math.round(size*0.68)}" viewBox="0 0 23 16"><defs><clipPath id="${cid}"><rect x="0" y="0" width="${w}" height="16"/></clipPath></defs><path d="${dPath}" fill="${bgCol}"/>${frac > 0 ? `<path d="${dPath}" fill="${col}" clip-path="url(#${cid})"/>` : ''}</svg>`;
+    out += `<svg width="${size}" height="${Math.round(size*0.68)}" viewBox="0 0 23 16">
+      <defs><clipPath id="${cid}"><rect x="0" y="0" width="${w}" height="16"/></clipPath></defs>
+      <path d="${dPath}" fill="${bgCol}"/>
+      ${frac > 0 ? `<path d="${dPath}" fill="${col}" clip-path="url(#${cid})"/>` : ''}
+    </svg>`;
   }
   return out + `</div>`;
 }
 
 function getFishCustomSVG(f) {
   const uid = `f_${f.id}_${++clipSeq}`;
+  
   if (['flounder', 'halibut', 'turbot', 'starry_flounder'].includes(f.id)) {
     const col = f.id === 'halibut' ? '#334155' : (f.id === 'turbot' ? '#64748b' : '#854d0e');
-    return `<svg viewBox="0 0 100 44"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs><ellipse cx="48" cy="22" rx="34" ry="17" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.2"/><path d="M82,22 L94,14 L91,22 L94,30 Z" fill="${col}"/><circle cx="28" cy="18" r="2.2" fill="#facc15"/><circle cx="28" cy="18" r="1.1" fill="#000"/><circle cx="34" cy="15" r="2.2" fill="#facc15"/><circle cx="34" cy="15" r="1.1" fill="#000"/></svg>`;
+    return `<svg viewBox="0 0 100 44">
+      <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs>
+      <ellipse cx="48" cy="22" rx="34" ry="17" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.2"/>
+      <path d="M82,22 L94,14 L91,22 L94,30 Z" fill="${col}"/>
+      <circle cx="28" cy="18" r="2.2" fill="#facc15"/><circle cx="28" cy="18" r="1.1" fill="#000"/>
+      <circle cx="34" cy="15" r="2.2" fill="#facc15"/><circle cx="34" cy="15" r="1.1" fill="#000"/>
+    </svg>`;
   }
+
   if (['sterlet', 'siberian_sturgeon', 'russian_sturgeon', 'paddlefish'].includes(f.id)) {
     const snout = f.id === 'paddlefish' ? 'M-6,22 L22,15' : 'M3,23 L22,15';
-    return `<svg viewBox="0 0 100 44"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#334155"/><stop offset="65%" stop-color="#64748b"/><stop offset="100%" stop-color="#fef08a"/></linearGradient></defs><path d="${snout} L78,17 L95,7 L88,22 L93,31 L78,24 L22,26 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.1"/><path d="M28,16 L32,13 L35,16 M42,16 L46,13 L49,16 M56,17 L60,14 L63,17" fill="#fde047"/><circle cx="21" cy="20" r="1.6" fill="#000"/></svg>`;
+    return `<svg viewBox="0 0 100 44">
+      <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#334155"/><stop offset="65%" stop-color="#64748b"/><stop offset="100%" stop-color="#fef08a"/></linearGradient></defs>
+      <path d="${snout} L78,17 L95,7 L88,22 L93,31 L78,24 L22,26 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.1"/>
+      <path d="M28,16 L32,13 L35,16 M42,16 L46,13 L49,16 M56,17 L60,14 L63,17" fill="#fde047"/>
+      <circle cx="21" cy="20" r="1.6" fill="#000"/>
+    </svg>`;
   }
+
   if (['catfish', 'amur_catfish', 'channel_catfish', 'burbot'].includes(f.id)) {
     const bColor = f.id === 'channel_catfish' ? '#475569' : '#2a180a';
-    return `<svg viewBox="0 0 100 44"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${bColor}"/><stop offset="60%" stop-color="#694b2a"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs><path d="M7,22 Q20,13 42,16 L84,17 C95,17 95,25 84,25 L42,26 Q20,29 7,22 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.1"/><path d="M10,25 L3,32 M12,24 L4,27" stroke="#334155" stroke-width="1.5" stroke-linecap="round"/><circle cx="15" cy="19" r="1.8" fill="#fde047"/><circle cx="15" cy="19" r="0.9" fill="#000"/></svg>`;
+    return `<svg viewBox="0 0 100 44">
+      <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${bColor}"/><stop offset="60%" stop-color="#694b2a"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs>
+      <path d="M7,22 Q20,13 42,16 L84,17 C95,17 95,25 84,25 L42,26 Q20,29 7,22 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.1"/>
+      <path d="M10,25 L3,32 M12,24 L4,27" stroke="#334155" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="15" cy="19" r="1.8" fill="#fde047"/><circle cx="15" cy="19" r="0.9" fill="#000"/>
+    </svg>`;
   }
+
   let topC = '#334155', midC = '#94a3b8', finC = '#dc2626', eyeC = '#ef4444';
-  if (['silver_carp', 'grass_carp', 'buffalo', 'tilapia'].includes(f.id)) { topC = '#3f3f46'; midC = '#a1a1aa'; finC = '#71717a'; eyeC = '#fbbf24'; }
-  else if (['salmon', 'trout', 'rainbow_trout', 'brown_trout', 'char'].includes(f.id)) { topC = '#1e3a8a'; midC = '#f43f5e'; finC = '#be123c'; eyeC = '#fde047'; }
-  return `<svg viewBox="0 0 100 44"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${topC}"/><stop offset="55%" stop-color="${midC}"/><stop offset="100%" stop-color="#ffffff"/></linearGradient></defs><path d="M38,12 L47,4 L58,12 Z" fill="#475569"/><path d="M33,27 L40,35 L47,28 Z" fill="${finC}"/><path d="M78,17 L92,9 L86,21 L92,33 L78,25 Z" fill="${finC}"/><path d="M9,21 Q34,10 62,14 L79,17 L79,25 L62,27 Q34,31 9,21 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="1.1"/><circle cx="17" cy="19.5" r="2.2" fill="${eyeC}"/><circle cx="17" cy="19.5" r="1.1" fill="#0f172a"/></svg>`;
+  if (['silver_carp', 'grass_carp', 'buffalo', 'tilapia'].includes(f.id)) {
+    topC = '#3f3f46'; midC = '#a1a1aa'; finC = '#71717a'; eyeC = '#fbbf24';
+  } else if (['salmon', 'trout', 'rainbow_trout', 'brown_trout', 'char'].includes(f.id)) {
+    topC = '#1e3a8a'; midC = '#f43f5e'; finC = '#be123c'; eyeC = '#fde047';
+  }
+
+  return `<svg viewBox="0 0 100 44">
+    <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${topC}"/><stop offset="55%" stop-color="${midC}"/><stop offset="100%" stop-color="#ffffff"/></linearGradient></defs>
+    <path d="M38,12 L47,4 L58,12 Z" fill="#475569"/>
+    <path d="M33,27 L40,35 L47,28 Z" fill="${finC}"/>
+    <path d="M78,17 L92,9 L86,21 L92,33 L78,25 Z" fill="${finC}"/>
+    <path d="M9,21 Q34,10 62,14 L79,17 L79,25 L62,27 Q34,31 9,21 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="1.1"/>
+    <circle cx="17" cy="19.5" r="2.2" fill="${eyeC}"/><circle cx="17" cy="19.5" r="1.1" fill="#0f172a"/>
+  </svg>`;
 }
 
 const WATER_PROFILES = {
-  small_river: { name: 'Малая / средняя река', minD: 0.2, maxD: 6.0, defD: 1.2, flow: 1.3 },
-  big_river: { name: 'Крупная магистральная река', minD: 0.5, maxD: 18.0, defD: 4.5, flow: 2.2 },
-  quarry: { name: 'Глубокое озеро / карьер / вдхр', minD: 0.5, maxD: 22.0, defD: 5.0, flow: 0.7 },
-  tundra_lake: { name: 'Мелководное озеро / старица / пруд', minD: 0.2, maxD: 3.5, defD: 1.0, flow: 0.4 },
+  small_river:       { name: 'Малая / средняя река', minD: 0.2, maxD: 6.0, defD: 1.2, flow: 1.3 },
+  big_river:         { name: 'Крупная магистральная река', minD: 0.5, maxD: 18.0, defD: 4.5, flow: 2.2 },
+  quarry:            { name: 'Глубокое озеро / карьер / вдхр', minD: 0.5, maxD: 22.0, defD: 5.0, flow: 0.7 },
+  tundra_lake:       { name: 'Мелководное озеро / старица / пруд', minD: 0.2, maxD: 3.5, defD: 1.0, flow: 0.4 },
   cooling_reservoir: { name: 'Теплый сброс ГРЭС/АЭС / Прудхоз', minD: 0.5, maxD: 8.0, defD: 2.5, flow: 1.1 },
-  sea_gulf: { name: 'Морская губа / эстуарий / лиман', minD: 0.5, maxD: 15.0, defD: 3.5, flow: 1.8 },
-  open_sea: { name: 'Открытое море / банка / шельф', minD: 2.0, maxD: 60.0, defD: 15.0, flow: 2.4 }
+  sea_gulf:          { name: 'Морская губа / эстуарий / лиман', minD: 0.5, maxD: 15.0, defD: 3.5, flow: 1.8 },
+  open_sea:          { name: 'Открытое море / банка / шельф', minD: 2.0, maxD: 60.0, defD: 15.0, flow: 2.4 }
 };
 
+/**
+ * ПОЛНЫЙ РЕЕСТР: 89 ВИДОВ ВОДНЫХ БИОРЕСУРСОВ РОССИИ
+ */
 const FISH_DB = [
+  // --- БЛОК 1: Базовые пресноводные и хищные виды РФ (36 исходных) ---
   { id:'pike', name:'Щука', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','amur','baikal'], waters:['small_river','big_river','quarry','tundra_lake'], tWaterOpt:[8,16], tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.3,5.5], depthMax:12.0, spawnMonth:[4,5], banMonths:'Нерестовый весенний запрет', monthActivity:[1,2,0,0,3,2,2,3,3,3,2,1], baseAdvice:'У стен камыша, на бровках и свалах. На севере концентрируется у впадения ручьев.', topGear:'Спиннинг 7–28 г, поводок-струна, со льда — жерлицы.' },
   { id:'perch', name:'Окунь речной', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','baikal'], waters:['small_river','big_river','quarry','tundra_lake','cooling_reservoir'], tWaterOpt:[10,18], tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', depthOpt:[0.3,4.5], depthMax:10.0, spawnMonth:[5,6], banMonths:'Период весеннего нереста', monthActivity:[2,2,2,0,1,3,3,3,3,3,2,2], baseAdvice:'Стайный хищник бровок и кос. Зимой отлично берет балансиры и безнасадки.', topGear:'Микроджиг 1–5 г, зимний удильник с балансиром 50 мм.' },
   { id:'zander', name:'Судак', type:'predator', habitat:'fresh', legal:'free', basins:['volga_caspian','nw_karelia','euro_west','black_azov','baltic'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[12,20], tMinStop:1.0, coldFactor:0.85, optPress:757, bladderSens:1.20, feedMode:'crepuscular', depthOpt:[3.0,12.0], depthMax:20.0, spawnMonth:[4,5], banMonths:'15 апреля — 10 июня', monthActivity:[1,1,2,0,1,3,2,2,3,3,2,1], baseAdvice:'Держится твердого дна, коряжников и русловых свалов.', topGear:'Джиг 14–36 г, судаковые вибы со льда.' },
@@ -427,7 +804,7 @@ const FISH_DB = [
   { id:'tench', name:'Линь', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov'], waters:['small_river','quarry','tundra_lake'], tWaterOpt:[18,24], tMinStop:6.0, coldFactor:0.25, optPress:758, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.5,2.5], depthMax:4.5, spawnMonth:[5,6,7], banMonths:'15 мая — 30 июня', monthActivity:[0,0,0,1,2,0,3,3,2,0,0,0], baseAdvice:'Тихие илистые заводи, протоки с зарослями кувшинок и хвоща.', topGear:'Поплавочная глухая оснастка, пучок червей с творогом.' },
   { id:'chub', name:'Голавль', type:'predator', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov'], waters:['small_river','big_river'], tWaterOpt:[14,21], tMinStop:3.0, coldFactor:0.45, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.2,2.5], depthMax:5.0, spawnMonth:[4,5], banMonths:'Весенний нерестовый запрет', monthActivity:[0,0,1,2,0,3,3,3,3,2,0,0], baseAdvice:'Быстрины, перекаты, нависшие кусты. Чувствителен к прозрачности воды.', topGear:'Ультралайт, крэнки-жуки, микроколебалки.' },
   { id:'asp', name:'Жерех', type:'predator', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov'], waters:['big_river','quarry'], tWaterOpt:[15,22], tMinStop:3.0, coldFactor:0.45, optPress:758, bladderSens:0.95, feedMode:'diurnal', depthOpt:[0.3,4.0], depthMax:8.0, spawnMonth:[4,5], banMonths:'15 апреля — 31 мая', monthActivity:[0,0,1,0,2,3,3,3,3,2,1,0], baseAdvice:'Осторожный хищник струи. Бьет стайного малька на косах.', topGear:'Дальнобойный спиннинг, пилькеры, кастмастеры.' },
-  { id:'grayling', name:'Хариус сибирский / европейский', type:'predator', habitat:'fresh', legal:'license', basins:['arctic_ob_taz','yenisei_lena','nw_karelia','baikal'], waters:['small_river','big_river'], tWaterOpt:[6,14], tMinStop:0.0, coldFactor:1.10, optPress:758, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[0.2,2.5], depthMax:5.0, spawnMonth:[5,6], banMonths:'15 мая — 25 июня', monthActivity:[1,1,2,2,0,0,3,3,3,3,2,1], baseAdvice:'Чистые порожистые реки. Стоит за валунами.', topGear:'Нахлыст, сбирулино, вертушки #00–#2.' },
+  { id:'grayling', name:'Хариус сибирский / европейский', type:'predator', habitat:'fresh', legal:'license', basins:['arctic_ob_taz','yenisei_lena','nw_karelia','baikal'], waters:['small_river','big_river'], tWaterOpt:[6,14], tMinStop:0.0, coldFactor:1.10, optPress:758, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[0.2,2.5], depthMax:5.0, spawnMonth:[5,6], banMonths:'15 мая — 25 июня', monthActivity:[1,1,2,2,0,0,3,3,3,3,2,1], baseAdvice:'Чистые порожистые реки Полярного Урала и Сибири. Стоит за валунами.', topGear:'Нахлыст, сбирулино, вертушки #00–#2.' },
   { id:'whitefish', name:'Сиг проходной / озерный', type:'peace', habitat:'fresh', legal:'free', basins:['nw_karelia','barents_white','baltic'], waters:['big_river','quarry'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.12, optPress:757, bladderSens:0.75, feedMode:'crepuscular', depthOpt:[1.0,8.0], depthMax:16.0, spawnMonth:[10,11], banMonths:'Осенний нерестовый запрет', monthActivity:[2,2,2,2,3,3,2,2,0,0,3,3], baseAdvice:'Холодноводные озера Северо-Запада. Зимой кормится бокоплавом.', topGear:'Зимняя гирлянда мормышек, блесны с цепочкой.' },
   { id:'flounder', name:'Камбала-глосса / звездчатая', type:'predator', habitat:'sea', legal:'free', basins:['black_azov','baltic','barents_white','pacific_sea'], waters:['sea_gulf','open_sea'], tWaterOpt:[6,15], tMinStop:1.0, coldFactor:0.95, optPress:760, bladderSens:0.25, feedMode:'all_day', depthOpt:[1.5,15.0], depthMax:35.0, spawnMonth:[2,3], banMonths:'Морские регламенты', monthActivity:[2,1,2,2,3,3,3,3,3,3,2,2], baseAdvice:'Песчано-илистое дно, банки. Волочение грузила привлекает мутью.', topGear:'Сёрфовое удилище, морской червь (нереис), шумовые бусины.' },
   { id:'mullet', name:'Пеленгас / Лобан', type:'peace', habitat:'sea', legal:'free', basins:['black_azov','pacific_sea'], waters:['sea_gulf'], tWaterOpt:[14,24], tMinStop:6.0, coldFactor:0.35, optPress:760, bladderSens:0.85, feedMode:'diurnal', depthOpt:[0.5,5.0], depthMax:12.0, spawnMonth:[5,6], banMonths:'1 мая — 15 июня', monthActivity:[0,0,1,2,3,2,2,3,3,3,1,0], baseAdvice:'Песчаные косы, лиманы. Клюет на плавающий крючок с зеленым пенопластом.', topGear:'Сёрфовая донка, чашечный монтаж под нереиса.' },
@@ -446,208 +823,109 @@ const FISH_DB = [
   { id:'herring', name:'Сельдь атлантическая / тихоокеанская', type:'peace', habitat:'sea', legal:'free', basins:['pacific_sea','barents_white','baltic'], waters:['sea_gulf','open_sea'], tWaterOpt:[4,12], tMinStop:0.5, coldFactor:0.90, optPress:760, bladderSens:0.75, feedMode:'diurnal', depthOpt:[2.0,18.0], depthMax:35.0, spawnMonth:[4,5], banMonths:'Нерестовые лимиты', monthActivity:[2,2,3,3,2,1,1,2,3,3,2,2], baseAdvice:'Пелагические плотные косяки в толще прибрежных вод.', topGear:'Ставка-самодур с мобискином и золотыми крючками.' },
   { id:'mackerel', name:'Скумбрия атлантическая', type:'predator', habitat:'sea', legal:'free', basins:['black_azov','baltic','barents_white'], waters:['sea_gulf','open_sea'], tWaterOpt:[12,20], tMinStop:7.0, coldFactor:0.40, optPress:760, bladderSens:0.50, feedMode:'diurnal', depthOpt:[2.0,18.0], depthMax:35.0, spawnMonth:[5,6], banMonths:'Без жесткого запрета', monthActivity:[0,0,0,1,2,3,3,3,3,2,0,0], baseAdvice:'Быстрый стайный пелагик открытых заливов.', topGear:'Пилькеры 20–40 г, ярусные оснастки с перьями.' },
   { id:'cod', name:'Атлантическая треска', type:'predator', habitat:'sea', legal:'free', basins:['barents_white','baltic'], waters:['sea_gulf','open_sea'], tWaterOpt:[1,8], tMinStop:-1.0, coldFactor:1.20, optPress:758, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[10.0,45.0], depthMax:80.0, spawnMonth:[1,2,3], banMonths:'Суточная норма вылова', monthActivity:[3,3,3,2,2,1,1,2,3,3,3,3], baseAdvice:'Каменистые банки и свалы шельфа северных морей.', topGear:'Тяжелый бортовой джиг, пилькеры 200–500 г с октопусом.' },
-  { id:'smelt', name:'Корюшка', type:'predator', habitat:'sea', legal:'free', basins:['baltic','barents_white','arctic_ob_taz','pacific_sea'], waters:['sea_gulf','big_river'], tWaterOpt:[0,8], tMinStop:-1.5, coldFactor:1.30, optPress:759, bladderSens:0.70, feedMode:'diurnal', depthOpt:[1.0,14.0], depthMax:25.0, spawnMonth:[4,5], banMonths:'Весенний ход', monthActivity:[3,3,3,2,1,0,0,0,1,2,3,3], baseAdvice:'Зимний лов со льда в заливах. Характерный огуречный запах.', topGear:'Кобылки, гирлянды светонакопительных мормышек.' },
-  { id:'salmon', name:'Сёмга', type:'predator', habitat:'fresh', legal:'license', basins:['barents_white','nw_karelia','baltic'], waters:['big_river'], tWaterOpt:[6,14], tMinStop:0.5, coldFactor:1.00, optPress:758, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[0.5,4.5], depthMax:10.0, spawnMonth:[9,10,11], banMonths:'Строго по лицензиям на РПУ', monthActivity:[0,0,1,1,2,3,3,3,2,0,0,0], baseAdvice:'Порожистые реки Кольского и Карелии. Стоит перед сливами.', topGear:'Двуручный нахлыст, лососевые колебалки 20–45 г.' },
+  { id:'smelt', name:'Корюшка европейская / зубастая', type:'predator', habitat:'sea', legal:'free', basins:['baltic','barents_white','arctic_ob_taz','pacific_sea'], waters:['sea_gulf','big_river'], tWaterOpt:[0,8], tMinStop:-1.5, coldFactor:1.30, optPress:759, bladderSens:0.70, feedMode:'diurnal', depthOpt:[1.0,14.0], depthMax:25.0, spawnMonth:[4,5], banMonths:'Весенний нерестовый ход', monthActivity:[3,3,3,2,1,0,0,0,1,2,3,3], baseAdvice:'Зимний лов со льда в заливах. Характерный огуречный запах.', topGear:'Кобылки, гирлянды светонакопительных мормышек.' },
+  { id:'salmon', name:'Атлантический лосось (Сёмга)', type:'predator', habitat:'fresh', legal:'license', basins:['barents_white','nw_karelia','baltic'], waters:['big_river'], tWaterOpt:[6,14], tMinStop:0.5, coldFactor:1.00, optPress:758, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[0.5,4.5], depthMax:10.0, spawnMonth:[9,10,11], banMonths:'Строго по лицензиям на РПУ', monthActivity:[0,0,1,1,2,3,3,3,2,0,0,0], baseAdvice:'Порожистые реки Кольского и Карелии. Стоит перед сливами и за валунами.', topGear:'Двуручный нахлыст, лососевые колебалки 20–45 г.' },
   { id:'crayfish', name:'Речной рак', type:'peace', habitat:'fresh', legal:'license', basins:['volga_caspian','euro_west','nw_karelia','black_azov'], waters:['small_river','quarry'], tWaterOpt:[15,22], tMinStop:6.0, coldFactor:0.20, optPress:758, bladderSens:0.10, feedMode:'nocturnal', depthOpt:[0.5,3.5], depthMax:6.0, spawnMonth:[10,11,12,1,2,3,4], banMonths:'Запрет в период вынашивания икры', monthActivity:[0,0,0,0,0,1,2,3,3,3,0,0], baseAdvice:'Чистые водоемы с глинистыми берегами и норами.', topGear:'Разрешенные раколовки с рыбой или чесночным хлебом.' },
-  { id:'crab', name:'Краб прибрежный', type:'predator', habitat:'sea', legal:'license', basins:['black_azov','barents_white','pacific_sea'], waters:['sea_gulf'], tWaterOpt:[12,20], tMinStop:2.0, coldFactor:0.75, optPress:760, bladderSens:0.15, feedMode:'nocturnal', depthOpt:[1.0,15.0], depthMax:30.0, spawnMonth:[5,6], banMonths:'Региональные запреты', monthActivity:[1,1,1,2,0,0,3,3,3,3,2,1], baseAdvice:'Каменные гряды и волноломы морского побережья.', topGear:'Подъемник-хватка с рыбной насадкой.' },
-  { id:'king_crab', name:'Камчатский краб', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea','barents_white'], waters:['open_sea'], tWaterOpt:[0,6], tMinStop:-0.5, coldFactor:1.10, optPress:760, bladderSens:0.15, feedMode:'all_day', depthOpt:[10.0,40.0], depthMax:80.0, spawnMonth:[4,5], banMonths:'Лов по разовым квотам', monthActivity:[2,2,2,0,0,2,3,3,3,3,2,2], baseAdvice:'Глубоководный донный гигант северных морей.', topGear:'Специализированная крабовая ловушка с сельдью.' },
+  { id:'crab', name:'Краб прибрежный / каменный', type:'predator', habitat:'sea', legal:'license', basins:['black_azov','barents_white','pacific_sea'], waters:['sea_gulf'], tWaterOpt:[12,20], tMinStop:2.0, coldFactor:0.75, optPress:760, bladderSens:0.15, feedMode:'nocturnal', depthOpt:[1.0,15.0], depthMax:30.0, spawnMonth:[5,6], banMonths:'Региональные запреты / выпуск самок', monthActivity:[1,1,1,2,0,0,3,3,3,3,2,1], baseAdvice:'Каменные гряды и волноломы морского побережья.', topGear:'Подъемник-хватка с рыбной насадкой.' },
+  { id:'king_crab', name:'Камчатский краб', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea','barents_white'], waters:['open_sea'], tWaterOpt:[0,6], tMinStop:-0.5, coldFactor:1.10, optPress:760, bladderSens:0.15, feedMode:'all_day', depthOpt:[10.0,40.0], depthMax:80.0, spawnMonth:[4,5], banMonths:'Лов строго по разовым квотам', monthActivity:[2,2,2,0,0,2,3,3,3,3,2,2], baseAdvice:'Глубоководный донный гигант северных морей.', topGear:'Специализированная крабовая ловушка с сельдью.' },
 
-  // --- БЛОК 2: Интродуценты ---
-  { id:'silver_carp', name:'Толстолобик', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov'], waters:['cooling_reservoir','quarry','big_river'], tWaterOpt:[20,28], tMinStop:8.0, coldFactor:0.15, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:8.0, spawnMonth:[6,7], banMonths:'Искусственное разведение', monthActivity:[0,0,0,0,1,3,3,3,2,0,0,0], baseAdvice:'Фитопланктофаг. Водоемы-охладители ГРЭС.', topGear:'Оснастка «палочка толстолобика» с технопланктоном.' },
-  { id:'grass_carp', name:'Белый амур', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov','amur'], waters:['cooling_reservoir','quarry','big_river'], tWaterOpt:[18,26], tMinStop:7.0, coldFactor:0.20, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.5,3.5], depthMax:7.0, spawnMonth:[6,7], banMonths:'Прудовый регламент', monthActivity:[0,0,0,0,1,3,3,3,2,0,0,0], baseAdvice:'Макрофитофаг. Выкашивает водную траву.', topGear:'Мощный карповик, волосяной монтаж, пучок камыша.' },
-  { id:'channel_catfish', name:'Сомик канальный', type:'predator', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov'], waters:['cooling_reservoir','quarry'], tWaterOpt:[18,28], tMinStop:6.0, coldFactor:0.25, optPress:756, bladderSens:0.95, feedMode:'nocturnal', depthOpt:[1.0,6.0], depthMax:10.0, spawnMonth:[5,6], banMonths:'Аквакультура', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Активен на теплых сбросах ГРЭС.', topGear:'Донка, печень птицы, креветка, пучок червей.' },
-  { id:'tilapia', name:'Тиляпия', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov'], waters:['cooling_reservoir'], tWaterOpt:[22,32], tMinStop:14.0, coldFactor:0.05, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.3,2.5], depthMax:4.0, spawnMonth:[5,6,7,8], banMonths:'Теплые сбросы', monthActivity:[0,0,0,0,1,3,3,3,3,1,0,0], baseAdvice:'Тропический вид. В РФ живет в каналах ГРЭС/АЭС.', topGear:'Легкий поплавок, кукуруза, червь.' },
-  { id:'rotan', name:'Ротан (Головешка)', type:'predator', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia','amur'], waters:['tundra_lake','small_river','quarry'], tWaterOpt:[12,22], tMinStop:-0.5, coldFactor:0.80, optPress:758, bladderSens:0.30, feedMode:'all_day', depthOpt:[0.2,2.0], depthMax:4.0, spawnMonth:[5,6], banMonths:'Инвазивный вид', monthActivity:[2,2,3,3,2,3,3,3,3,3,2,2], baseAdvice:'Выживает в промерзающих болотах.', topGear:'Зимняя блесна с куриной кожей, микроджиг.' },
-  { id:'buffalo', name:'Буффало', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','black_azov'], waters:['cooling_reservoir','quarry'], tWaterOpt:[18,26], tMinStop:7.0, coldFactor:0.20, optPress:757, bladderSens:0.90, feedMode:'diurnal', depthOpt:[1.0,5.0], depthMax:8.0, spawnMonth:[5,6], banMonths:'Прудовое хозяйство', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Интродуцент из Северной Америки. Похож на карася.', topGear:'Фидер, флэт-метод, распаренные злаки.' },
-  { id:'rainbow_trout', name:'Форель радужная', type:'predator', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','nw_karelia','pacific_sea'], waters:['cooling_reservoir','quarry','small_river'], tWaterOpt:[10,18], tMinStop:0.5, coldFactor:0.95, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:8.0, spawnMonth:[3,4], banMonths:'Платные пруды', monthActivity:[2,2,3,3,2,1,1,2,3,3,3,2], baseAdvice:'Холодные проточные хозяйства. Атакует сырную пасту.', topGear:'Спиннинг Area-УЛ, форелевая паста, микроколебалки.' },
-  { id:'russian_sturgeon', name:'Осетр русский', type:'peace', habitat:'fresh', legal:'redbook', basins:['volga_caspian','black_azov'], waters:['big_river','sea_gulf'], tWaterOpt:[14,22], tMinStop:2.0, coldFactor:0.60, optPress:758, bladderSens:0.60, feedMode:'nocturnal', depthOpt:[3.0,16.0], depthMax:25.0, spawnMonth:[5,6], banMonths:'КРАСНАЯ КНИГА РФ', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Дикие популяции под строжайшей охраной. Лов только в платниках.', topGear:'Только искусственные платные водоемы.' },
-  { id:'paddlefish', name:'Веслонос', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','black_azov'], waters:['cooling_reservoir','quarry'], tWaterOpt:[16,24], tMinStop:5.0, coldFactor:0.30, optPress:758, bladderSens:0.50, feedMode:'diurnal', depthOpt:[1.5,6.0], depthMax:12.0, spawnMonth:[5,6], banMonths:'Искусственное разведение', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Планктофаг с длинным рострумом.', topGear:'Специализированные прудовые снасти.' },
+  // --- БЛОК 2: Тепловодные интродуценты, ГРЭС и аквакультура (Центр, Юг) ---
+  { id:'silver_carp', name:'Толстолобик белый / пестрый', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov'], waters:['cooling_reservoir','quarry','big_river'], tWaterOpt:[20,28], tMinStop:8.0, coldFactor:0.15, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:8.0, spawnMonth:[6,7], banMonths:'Искусственное воспроизводство', monthActivity:[0,0,0,0,1,3,3,3,2,0,0,0], baseAdvice:'Фитопланктофаг. Кормится в верхних и средних слоях водоемов-охладителей ГРЭС и прудов.', topGear:'Специальная оснастка «палочка толстолобика» с технопланктоном.' },
+  { id:'grass_carp', name:'Белый амур', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov','amur'], waters:['cooling_reservoir','quarry','big_river'], tWaterOpt:[18,26], tMinStop:7.0, coldFactor:0.20, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.5,3.5], depthMax:7.0, spawnMonth:[6,7], banMonths:'Прудовый и речной регламент', monthActivity:[0,0,0,0,1,3,3,3,2,0,0,0], baseAdvice:'Макрофитофаг. Выкашивает водную траву. Клюет на стебель камыша, огурец и водоросли.', topGear:'Мощный карповик, волосяной монтаж, плавающий бойл, пучок травы.' },
+  { id:'channel_catfish', name:'Сомик канальный', type:'predator', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov'], waters:['cooling_reservoir','quarry'], tWaterOpt:[18,28], tMinStop:6.0, coldFactor:0.25, optPress:756, bladderSens:0.95, feedMode:'nocturnal', depthOpt:[1.0,6.0], depthMax:10.0, spawnMonth:[5,6], banMonths:'Без ограничений (аквакультура)', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Американский интродуцент. Активен на теплых сбросах ГРЭС и южных прудах.', topGear:'Донка, фидер, печень птицы, креветка, пучок червей.' },
+  { id:'tilapia', name:'Тиляпия (нильская / мозамбикская)', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','black_azov'], waters:['cooling_reservoir'], tWaterOpt:[22,32], tMinStop:14.0, coldFactor:0.05, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.3,2.5], depthMax:4.0, spawnMonth:[5,6,7,8], banMonths:'Вылов только в искусственных теплых сбросах', monthActivity:[0,0,0,0,1,3,3,3,3,1,0,0], baseAdvice:'Теплолюбивый тропический вид. В РФ живет исключительно в каналах охлаждения ГРЭС/АЭС.', topGear:'Легкий поплавок, фидер, кукуруза, червь, тесто с аттрактантами.' },
+  { id:'rotan', name:'Ротан (Головешка)', type:'predator', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia','amur'], waters:['tundra_lake','small_river','quarry'], tWaterOpt:[12,22], tMinStop:-0.5, coldFactor:0.80, optPress:758, bladderSens:0.30, feedMode:'all_day', depthOpt:[0.2,2.0], depthMax:4.0, spawnMonth:[5,6], banMonths:'Без ограничений (инвазивный вид)', monthActivity:[2,2,3,3,2,3,3,3,3,3,2,2], baseAdvice:'Выживает в промерзающих до дна прудах и болотах. Хватает сало, червя, резину.', topGear:'Зимняя блесна с подсадкой куриной кожи, микроджиг.' },
+  { id:'buffalo', name:'Буффало (большеротый)', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','black_azov'], waters:['cooling_reservoir','quarry'], tWaterOpt:[18,26], tMinStop:7.0, coldFactor:0.20, optPress:757, bladderSens:0.90, feedMode:'diurnal', depthOpt:[1.0,5.0], depthMax:8.0, spawnMonth:[5,6], banMonths:'Прудовое хозяйство', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Интродуцент из Северной Америки. Внешне похож на карася, питается зоопланктоном.', topGear:'Фидер, флэт-метод, распаренные злаки, бойлы.' },
+  { id:'rainbow_trout', name:'Форель радужная (Микижа)', type:'predator', habitat:'fresh', legal:'introduced', basins:['volga_caspian','euro_west','nw_karelia','pacific_sea'], waters:['cooling_reservoir','quarry','small_river'], tWaterOpt:[10,18], tMinStop:0.5, coldFactor:0.95, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:8.0, spawnMonth:[3,4], banMonths:'Платные пруды / садковые хозяйства', monthActivity:[2,2,3,3,2,1,1,2,3,3,3,2], baseAdvice:'Платные пруды и холодные проточные хозяйства. Атакует яркую сырную пасту и блесны.', topGear:'Спиннинг Area-УЛ до 3.5 г, форелевая паста, микроколебалки.' },
+  { id:'russian_sturgeon', name:'Осетр русский', type:'peace', habitat:'fresh', legal:'redbook', basins:['volga_caspian','black_azov'], waters:['big_river','sea_gulf'], tWaterOpt:[14,22], tMinStop:2.0, coldFactor:0.60, optPress:758, bladderSens:0.60, feedMode:'nocturnal', depthOpt:[3.0,16.0], depthMax:25.0, spawnMonth:[5,6], banMonths:'КРАСНАЯ КНИГА РФ (Вылов запрещен)', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Дикие популяции под строжайшей охраной государства. Лов только в платных прудхозах.', topGear:'Только искусственные платные водоемы.' },
+  { id:'paddlefish', name:'Веслонос', type:'peace', habitat:'fresh', legal:'introduced', basins:['volga_caspian','black_azov'], waters:['cooling_reservoir','quarry'], tWaterOpt:[16,24], tMinStop:5.0, coldFactor:0.30, optPress:758, bladderSens:0.50, feedMode:'diurnal', depthOpt:[1.5,6.0], depthMax:12.0, spawnMonth:[5,6], banMonths:'Объект искусственного разведения', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Планктофаг с длинным рострумом. Случайно багрится или ловится на спецснасти в прудах.', topGear:'Специализированные прудовые снасти.' },
 
-  // --- БЛОК 3: Центр, Северо-Запад и Юг ---
-  { id:'barbel', name:'Усач (Марена)', type:'peace', habitat:'fresh', legal:'license', basins:['euro_west','black_azov'], waters:['big_river','small_river'], tWaterOpt:[14,22], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[1.0,5.0], depthMax:8.0, spawnMonth:[5,6], banMonths:'Красная книга / Лицензия', monthActivity:[0,0,1,2,0,3,3,3,2,1,0,0], baseAdvice:'Каменистые перекаты быстрых рек Кавказа и Юго-Запада.', topGear:'Мощный речной фидер, сырные насадки.' },
-  { id:'white_bream', name:'Густера', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia'], waters:['big_river','small_river','quarry'], tWaterOpt:[14,20], tMinStop:2.0, coldFactor:0.55, optPress:758, bladderSens:1.00, feedMode:'crepuscular', depthOpt:[1.5,6.0], depthMax:10.0, spawnMonth:[5,6], banMonths:'Весенний нерестовый запрет', monthActivity:[1,1,2,2,0,3,3,3,3,2,1,1], baseAdvice:'Стоит вперемешку с лещом на свалах.', topGear:'Пикер, легкий фидер, мотыль с опарышем.' },
-  { id:'blue_bream', name:'Синец', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west'], waters:['big_river','quarry'], tWaterOpt:[12,19], tMinStop:2.0, coldFactor:0.50, optPress:758, bladderSens:1.00, feedMode:'diurnal', depthOpt:[2.0,8.0], depthMax:12.0, spawnMonth:[5,6], banMonths:'Нерестовый запрет', monthActivity:[1,1,2,2,0,3,3,3,2,2,1,1], baseAdvice:'Стайный планктофаг крупных водохранилищ.', topGear:'Фидер с длинным поводком.' },
-  { id:'sopa', name:'Белоглазка (Сопа)', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west'], waters:['big_river'], tWaterOpt:[10,18], tMinStop:1.5, coldFactor:0.65, optPress:758, bladderSens:1.00, feedMode:'diurnal', depthOpt:[2.0,7.0], depthMax:11.0, spawnMonth:[4,5], banMonths:'Весенний запрет', monthActivity:[1,2,2,0,2,3,3,3,2,2,1,1], baseAdvice:'Любит быстрое течение и песчано-хрящеватое дно.', topGear:'Речной фидер на тяжелых кормушках.' },
-  { id:'undermouth', name:'Подуст', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west'], waters:['big_river','small_river'], tWaterOpt:[12,19], tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.85, feedMode:'diurnal', depthOpt:[0.8,3.5], depthMax:6.0, spawnMonth:[4,5], banMonths:'Весенний нерест', monthActivity:[0,0,2,0,2,3,3,3,2,1,0,0], baseAdvice:'Соскабливает перифитон с камней на течении.', topGear:'Проводочная болонская удочка.' },
-  { id:'vimba', name:'Рыбец (Сырть)', type:'peace', habitat:'fresh', legal:'license', basins:['volga_caspian','black_azov','baltic','euro_west'], waters:['big_river','sea_gulf'], tWaterOpt:[12,19], tMinStop:2.0, coldFactor:0.60, optPress:758, bladderSens:0.90, feedMode:'crepuscular', depthOpt:[1.5,6.0], depthMax:10.0, spawnMonth:[5,6], banMonths:'Сезонный запрет на Дону и Кубани', monthActivity:[1,1,3,2,0,2,3,3,3,2,1,1], baseAdvice:'Ценный проходной вид. Кормится на ракушечных косах.', topGear:'Донка, фидер, мотыль, червь.' },
-  { id:'gudgeon', name:'Пескарь', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia'], waters:['small_river'], tWaterOpt:[12,20], tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.40, feedMode:'diurnal', depthOpt:[0.2,1.5], depthMax:3.0, spawnMonth:[5,6], banMonths:'Без ограничений', monthActivity:[1,1,2,2,3,3,3,3,2,1,0,0], baseAdvice:'Песчаные отмели чистых рек. Отличный живец.', topGear:'Легкий поплавок, мелкий червь.' },
-  { id:'loach', name:'Вьюн', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west'], waters:['tundra_lake','small_river'], tWaterOpt:[14,22], tMinStop:2.0, coldFactor:0.40, optPress:755, bladderSens:0.10, feedMode:'nocturnal', depthOpt:[0.2,1.5], depthMax:3.0, spawnMonth:[4,5], banMonths:'Без ограничений', monthActivity:[0,0,1,2,3,3,3,3,2,1,0,0], baseAdvice:'Илистые заводи, канавы. Природный барометр.', topGear:'Поплавок у дна.' },
-  { id:'volga_zander', name:'Берш', type:'predator', habitat:'fresh', legal:'license', basins:['volga_caspian','black_azov'], waters:['big_river','quarry'], tWaterOpt:[12,20], tMinStop:1.0, coldFactor:0.80, optPress:757, bladderSens:1.15, feedMode:'crepuscular', depthOpt:[3.0,14.0], depthMax:22.0, spawnMonth:[4,5], banMonths:'Красная книга бассейна Дона', monthActivity:[1,1,2,0,1,3,2,2,3,3,2,1], baseAdvice:'Безклыковый судак. Держится плотных стай на глубине.', topGear:'Джиг, зимняя блесна с тюлькой.' },
-  { id:'chekhon', name:'Чехонь', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov'], waters:['big_river','quarry'], tWaterOpt:[15,22], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.85, feedMode:'diurnal', depthOpt:[0.2,3.0], depthMax:6.0, spawnMonth:[5,6], banMonths:'Нерестовый запрет', monthActivity:[0,0,1,3,0,3,3,3,2,1,0,0], baseAdvice:'Саблевидная пелагическая рыба водохранилищ.', topGear:'Бомбарда с опарышем, резинка.' },
-  { id:'vobla', name:'Вобла каспийская', type:'peace', habitat:'fresh', legal:'license', basins:['volga_caspian'], waters:['big_river','sea_gulf'], tWaterOpt:[10,18], tMinStop:4.0, coldFactor:0.45, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:7.0, spawnMonth:[4,5], banMonths:'ЖЕСТКИЕ СЕЗОННЫЕ ОКНА И ЗАПРЕТЫ', monthActivity:[0,0,2,3,0,1,1,1,1,1,0,0], baseAdvice:'Весенний массовый ход из Каспия на нерест.', topGear:'Донка с 2–3 крючками.' },
-  { id:'rudd', name:'Красноперка', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov'], waters:['tundra_lake','quarry','small_river'], tWaterOpt:[16,24], tMinStop:5.0, coldFactor:0.35, optPress:758, bladderSens:0.85, feedMode:'diurnal', depthOpt:[0.2,2.0], depthMax:4.0, spawnMonth:[5,6], banMonths:'Весенний нерест', monthActivity:[0,0,1,2,3,3,3,3,2,1,0,0], baseAdvice:'Густые заросли тростника и кувшинок.', topGear:'Поплавок, мормышинг.' },
-  { id:'dace', name:'Елец', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia','arctic_ob_taz','yenisei_lena'], waters:['small_river','big_river'], tWaterOpt:[10,18], tMinStop:1.0, coldFactor:0.75, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.3,2.0], depthMax:4.0, spawnMonth:[4,5], banMonths:'Весенний запрет', monthActivity:[1,1,2,0,3,3,3,3,3,2,1,1], baseAdvice:'Быстрые реки с чистым песчано-галечным дном.', topGear:'Нахлыст, проводка.' },
-  { id:'shemaya', name:'Шемайя', type:'peace', habitat:'fresh', legal:'redbook', basins:['volga_caspian','black_azov'], waters:['big_river','sea_gulf'], tWaterOpt:[14,22], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.3,3.0], depthMax:6.0, spawnMonth:[5,6], banMonths:'КРАСНАЯ КНИГА РФ', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'«Царская рыба». Вылов строго запрещен.', topGear:'Любой вылов запрещен.' },
-  { id:'brown_trout', name:'Форель ручьевая', type:'predator', habitat:'fresh', legal:'license', basins:['black_azov','volga_caspian'], waters:['small_river'], tWaterOpt:[8,15], tMinStop:0.5, coldFactor:1.00, optPress:758, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[0.2,2.0], depthMax:4.0, spawnMonth:[10,11], banMonths:'Осенний запрет', monthActivity:[1,1,2,3,3,3,2,3,0,0,1,1], baseAdvice:'Холодные горные ручьи Кавказа.', topGear:'Стримовый УЛ, микровоблеры.' },
-  { id:'taran', name:'Тарань', type:'peace', habitat:'fresh', legal:'free', basins:['black_azov'], waters:['sea_gulf','big_river'], tWaterOpt:[12,20], tMinStop:3.0, coldFactor:0.55, optPress:758, bladderSens:0.95, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:8.0, spawnMonth:[3,4], banMonths:'Весенний запрет на Кубани', monthActivity:[2,2,3,0,2,3,3,3,2,2,1,1], baseAdvice:'Азовский подвид плотвы. Идет в лиманы весной.', topGear:'Поплавок, донка.' },
+  // --- БЛОК 3: Карповые и окуневые Центра, Северо-Запада и Юга ---
+  { id:'barbel', name:'Усач (Марена)', type:'peace', habitat:'fresh', legal:'license', basins:['euro_west','black_azov'], waters:['big_river','small_river'], tWaterOpt:[14,22], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[1.0,5.0], depthMax:8.0, spawnMonth:[5,6], banMonths:'Красная книга ряда регионов / Лицензия', monthActivity:[0,0,1,2,0,3,3,3,2,1,0,0], baseAdvice:'Сильная рыба каменистых перекатов быстрых рек Кавказа и Юго-Запада.', topGear:'Мощный речной фидер, сырные насадки, пиявка, выползок.' },
+  { id:'white_bream', name:'Густера', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia'], waters:['big_river','small_river','quarry'], tWaterOpt:[14,20], tMinStop:2.0, coldFactor:0.55, optPress:758, bladderSens:1.00, feedMode:'crepuscular', depthOpt:[1.5,6.0], depthMax:10.0, spawnMonth:[5,6], banMonths:'Весенний нерестовый запрет', monthActivity:[1,1,2,2,0,3,3,3,3,2,1,1], baseAdvice:'Стоит вперемешку с лещом на свалах. Назойливо теребит насадку.', topGear:'Пикер, легкий фидер, мотыль с опарышем.' },
+  { id:'blue_bream', name:'Синец', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west'], waters:['big_river','quarry'], tWaterOpt:[12,19], tMinStop:2.0, coldFactor:0.50, optPress:758, bladderSens:1.00, feedMode:'diurnal', depthOpt:[2.0,8.0], depthMax:12.0, spawnMonth:[5,6], banMonths:'Нерестовый запрет', monthActivity:[1,1,2,2,0,3,3,3,2,2,1,1], baseAdvice:'Стайный планктофаг крупных водохранилищ и спокойных плесов.', topGear:'Фидерная снасть с длинным поводком (до 1 м), опарыш.' },
+  { id:'sopa', name:'Белоглазка (Сопа)', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west'], waters:['big_river'], tWaterOpt:[10,18], tMinStop:1.5, coldFactor:0.65, optPress:758, bladderSens:1.00, feedMode:'diurnal', depthOpt:[2.0,7.0], depthMax:11.0, spawnMonth:[4,5], banMonths:'Весенний запрет', monthActivity:[1,2,2,0,2,3,3,3,2,2,1,1], baseAdvice:'Любит быстрое течение и песчано-хрящеватое русловое дно.', topGear:'Речной фидер на тяжелых кормушках (80–120 г).' },
+  { id:'undermouth', name:'Подуст волжский', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west'], waters:['big_river','small_river'], tWaterOpt:[12,19], tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.85, feedMode:'diurnal', depthOpt:[0.8,3.5], depthMax:6.0, spawnMonth:[4,5], banMonths:'Весенний нерест', monthActivity:[0,0,2,0,2,3,3,3,2,1,0,0], baseAdvice:'Соскабливает нижним хрящевым ртом перифитон с камней на течении.', topGear:'Проводочная болонская удочка, опарыш, мотыль.' },
+  { id:'vimba', name:'Рыбец (Сырть)', type:'peace', habitat:'fresh', legal:'license', basins:['volga_caspian','black_azov','baltic','euro_west'], waters:['big_river','sea_gulf'], tWaterOpt:[12,19], tMinStop:2.0, coldFactor:0.60, optPress:758, bladderSens:0.90, feedMode:'crepuscular', depthOpt:[1.5,6.0], depthMax:10.0, spawnMonth:[5,6], banMonths:'Строгий сезонный запрет на Дону и Кубани', monthActivity:[1,1,3,2,0,2,3,3,3,2,1,1], baseAdvice:'Ценный проходной карповый вид. Кормится на ракушечных косах струи.', topGear:'Донка, фидер, мотыль, червь, ракушка.' },
+  { id:'gudgeon', name:'Пескарь обыкновенный', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia'], waters:['small_river'], tWaterOpt:[12,20], tMinStop:3.0, coldFactor:0.50, optPress:758, bladderSens:0.40, feedMode:'diurnal', depthOpt:[0.2,1.5], depthMax:3.0, spawnMonth:[5,6], banMonths:'Без ограничений', monthActivity:[1,1,2,2,3,3,3,3,2,1,0,0], baseAdvice:'Песчаные отмели чистых рек. Отличный живец на судака и щуку.', topGear:'Легкая поплавочная снасть, мелкий червь.' },
+  { id:'loach', name:'Вьюн обыкновенный', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west'], waters:['tundra_lake','small_river'], tWaterOpt:[14,22], tMinStop:2.0, coldFactor:0.40, optPress:755, bladderSens:0.10, feedMode:'nocturnal', depthOpt:[0.2,1.5], depthMax:3.0, spawnMonth:[4,5], banMonths:'Без ограничений', monthActivity:[0,0,1,2,3,3,3,3,2,1,0,0], baseAdvice:'Илистые заводи, канавы. Живой природный барометр (беспокоится перед грозой).', topGear:'Поплавок у дна, мотыль, кусочек червя.' },
+  { id:'volga_zander', name:'Берш (Волжский судак)', type:'predator', habitat:'fresh', legal:'license', basins:['volga_caspian','black_azov'], waters:['big_river','quarry'], tWaterOpt:[12,20], tMinStop:1.0, coldFactor:0.80, optPress:757, bladderSens:1.15, feedMode:'crepuscular', depthOpt:[3.0,14.0], depthMax:22.0, spawnMonth:[4,5], banMonths:'Красная книга бассейна Дона, квоты на Волге', monthActivity:[1,1,2,0,1,3,2,2,3,3,2,1], baseAdvice:'В отличие от судака не имеет клыков. Держится плотных стай на глубине.', topGear:'Джиг с мелким виброхвостом, зимняя блесна с тюлькой.' },
+  { id:'chekhon', name:'Чехонь', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov'], waters:['big_river','quarry'], tWaterOpt:[15,22], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.85, feedMode:'diurnal', depthOpt:[0.2,3.0], depthMax:6.0, spawnMonth:[5,6], banMonths:'Весенний нерестовый запрет', monthActivity:[0,0,1,3,0,3,3,3,2,1,0,0], baseAdvice:'Саблевидная пелагическая рыба струи водохранилищ.', topGear:'Бомбарда с опарышем, резинка, микровертушки.' },
+  { id:'vobla', name:'Вобла каспийская', type:'peace', habitat:'fresh', legal:'license', basins:['volga_caspian'], waters:['big_river','sea_gulf'], tWaterOpt:[10,18], tMinStop:4.0, coldFactor:0.45, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:7.0, spawnMonth:[4,5], banMonths:'ЖЕСТКИЕ СЕЗОННЫЕ ОКНА И ЗАПРЕТЫ В АСТРАХАНИ', monthActivity:[0,0,2,3,0,1,1,1,1,1,0,0], baseAdvice:'Символ низовий Волги. Весенний массовый ход из Каспия на нерест.', topGear:'Донка с 2–3 крючками, червь, опарыш.' },
+  { id:'rudd', name:'Красноперка', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov'], waters:['tundra_lake','quarry','small_river'], tWaterOpt:[16,24], tMinStop:5.0, coldFactor:0.35, optPress:758, bladderSens:0.85, feedMode:'diurnal', depthOpt:[0.2,2.0], depthMax:4.0, spawnMonth:[5,6], banMonths:'Весенний нерест', monthActivity:[0,0,1,2,3,3,3,3,2,1,0,0], baseAdvice:'Густые заросли тростника и кувшинок. Любит солнце и верхний горизонт.', topGear:'Поплавок, ультралайт (мормышинг), микровертушки.' },
+  { id:'dace', name:'Елец', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','nw_karelia','arctic_ob_taz','yenisei_lena'], waters:['small_river','big_river'], tWaterOpt:[10,18], tMinStop:1.0, coldFactor:0.75, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.3,2.0], depthMax:4.0, spawnMonth:[4,5], banMonths:'Весенний запрет', monthActivity:[1,1,2,0,3,3,3,3,3,2,1,1], baseAdvice:'Быстрые реки с чистым песчано-галечным дном.', topGear:'Нахлыст, проводка с лодки, зимняя мормышка с мотылем.' },
+  { id:'shemaya', name:'Шемайя (Черноморско-каспийская)', type:'peace', habitat:'fresh', legal:'redbook', basins:['volga_caspian','black_azov'], waters:['big_river','sea_gulf'], tWaterOpt:[14,22], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.3,3.0], depthMax:6.0, spawnMonth:[5,6], banMonths:'КРАСНАЯ КНИГА РФ в ряде бассейнов', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'«Царская рыба». Вылов строго запрещен во многих регионах (штраф за особь).', topGear:'Любой вылов запрещен.' },
+  { id:'brown_trout', name:'Форель ручьевая (Пеструшка)', type:'predator', habitat:'fresh', legal:'license', basins:['black_azov','volga_caspian'], waters:['small_river'], tWaterOpt:[8,15], tMinStop:0.5, coldFactor:1.00, optPress:758, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[0.2,2.0], depthMax:4.0, spawnMonth:[10,11], banMonths:'Осенний нерестовый запрет', monthActivity:[1,1,2,3,3,3,2,3,0,0,1,1], baseAdvice:'Холодные горные ручьи Кавказа. Крайне пуглива.', topGear:'Стримовый УЛ, микровоблеры, нахлыст.' },
+  { id:'taran', name:'Тарань', type:'peace', habitat:'fresh', legal:'free', basins:['black_azov'], waters:['sea_gulf','big_river'], tWaterOpt:[12,20], tMinStop:3.0, coldFactor:0.55, optPress:758, bladderSens:0.95, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:8.0, spawnMonth:[3,4], banMonths:'Весенний нерестовый запрет на Кубани', monthActivity:[2,2,3,0,2,3,3,3,2,2,1,1], baseAdvice:'Азовско-черноморский подвид плотвы. Весной идет в лиманы и реки на нерест.', topGear:'Поплавок, донка, фидер, насадка — опарыш, червь.' },
 
-  // --- БЛОК 4: Черноморский комплекс ---
-  { id:'bluefish', name:'Луфарь', type:'predator', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf','open_sea'], tWaterOpt:[16,24], tMinStop:10.0, coldFactor:0.25, optPress:760, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[1.0,15.0], depthMax:30.0, spawnMonth:[6,7,8], banMonths:'Без запрета', monthActivity:[0,0,0,0,1,2,3,3,3,2,0,0], baseAdvice:'Агрессивный стайный хищник с острыми зубами.', topGear:'Спиннинг с пилькерами, стальной поводок.' },
-  { id:'red_mullet', name:'Султанка (Барабулька)', type:'peace', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf'], tWaterOpt:[15,23], tMinStop:8.0, coldFactor:0.35, optPress:760, bladderSens:0.60, feedMode:'diurnal', depthOpt:[1.0,12.0], depthMax:25.0, spawnMonth:[5,6], banMonths:'Период нереста', monthActivity:[0,0,0,1,2,3,3,3,3,2,1,0], baseAdvice:'Щупальцами перерывает верхний слой грунта.', topGear:'Пикер, морская донка, нереис.' },
-  { id:'sea_bream', name:'Морской карась (Ласкирь)', type:'peace', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf'], tWaterOpt:[16,24], tMinStop:9.0, coldFactor:0.30, optPress:760, bladderSens:0.70, feedMode:'diurnal', depthOpt:[1.0,10.0], depthMax:20.0, spawnMonth:[6,7], banMonths:'Без ограничений', monthActivity:[0,0,0,1,2,3,3,3,3,2,0,0], baseAdvice:'Обгрызает насадку зубами-резцами.', topGear:'Рокфишинг, съедобная резина (Marukyu).' },
-  { id:'wrasse', name:'Зеленушка (Рулена)', type:'peace', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf'], tWaterOpt:[16,24], tMinStop:10.0, coldFactor:0.25, optPress:760, bladderSens:0.50, feedMode:'diurnal', depthOpt:[0.5,8.0], depthMax:15.0, spawnMonth:[5,6,7], banMonths:'Без ограничений', monthActivity:[0,0,0,1,2,3,3,3,3,1,0,0], baseAdvice:'Среди скал и водорослей у берега.', topGear:'Микроджиг, мидия или краб.' },
-  { id:'scorpionfish', name:'Скорпена', type:'predator', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf'], tWaterOpt:[14,22], tMinStop:7.0, coldFactor:0.40, optPress:760, bladderSens:0.30, feedMode:'nocturnal', depthOpt:[1.0,12.0], depthMax:25.0, spawnMonth:[6,7,8], banMonths:'Без ограничений', monthActivity:[0,0,0,1,2,3,3,3,3,2,0,0], baseAdvice:'Ядовитые шипы! Ночью выходит набережным.', topGear:'Рокфишинг в темноте, джиг.' },
-  { id:'turbot', name:'Калкан черноморский', type:'predator', habitat:'sea', legal:'license', basins:['black_azov'], waters:['sea_gulf','open_sea'], tWaterOpt:[10,18], tMinStop:4.0, coldFactor:0.80, optPress:760, bladderSens:0.20, feedMode:'all_day', depthOpt:[5.0,30.0], depthMax:60.0, spawnMonth:[4,5], banMonths:'Жесткий нерестовый запрет', monthActivity:[1,1,2,0,0,2,3,3,3,3,2,1], baseAdvice:'Крупная шиповатая камбала.', topGear:'Мощный сёрфкастинг, резка рыбы.' },
+  // --- БЛОК 4: Черноморский ихтиокомплекс ---
+  { id:'bluefish', name:'Луфарь', type:'predator', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf','open_sea'], tWaterOpt:[16,24], tMinStop:10.0, coldFactor:0.25, optPress:760, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[1.0,15.0], depthMax:30.0, spawnMonth:[6,7,8], banMonths:'Без жесткого запрета', monthActivity:[0,0,0,0,1,2,3,3,3,2,0,0], baseAdvice:'Агрессивный стайный хищник с бритвенно-острыми зубами. Режет поводки.', topGear:'Спиннинг с пилькерами, попперы, воблеры с металлическим поводком.' },
+  { id:'red_mullet', name:'Султанка (Барабулька)', type:'peace', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf'], tWaterOpt:[15,23], tMinStop:8.0, coldFactor:0.35, optPress:760, bladderSens:0.60, feedMode:'diurnal', depthOpt:[1.0,12.0], depthMax:25.0, spawnMonth:[5,6], banMonths:'Период нереста', monthActivity:[0,0,0,1,2,3,3,3,3,2,1,0], baseAdvice:'Песчаное дно с ракушкой. Щупальцами перерывает верхний слой грунта.', topGear:'Пикер, морская донка, мелкий крючок с нереисом.' },
+  { id:'sea_bream', name:'Морской карась (Ласкирь)', type:'peace', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf'], tWaterOpt:[16,24], tMinStop:9.0, coldFactor:0.30, optPress:760, bladderSens:0.70, feedMode:'diurnal', depthOpt:[1.0,10.0], depthMax:20.0, spawnMonth:[6,7], banMonths:'Без ограничений', monthActivity:[0,0,0,1,2,3,3,3,3,2,0,0], baseAdvice:'Каменистые гряды, пирсы. Имеет зубы, похожие на резцы, обгрызает насадку.', topGear:'Рокфишинг, дроп-шот, съедобная резина (Marukyu), мясо креветки.' },
+  { id:'wrasse', name:'Зеленушка (Рулена)', type:'peace', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf'], tWaterOpt:[16,24], tMinStop:10.0, coldFactor:0.25, optPress:760, bladderSens:0.50, feedMode:'diurnal', depthOpt:[0.5,8.0], depthMax:15.0, spawnMonth:[5,6,7], banMonths:'Без ограничений', monthActivity:[0,0,0,1,2,3,3,3,3,1,0,0], baseAdvice:'Среди скал и водорослей у берега. Яркая тропическая окраска.', topGear:'Микроджиг, поплавочная удочка с мидией или крабом.' },
+  { id:'scorpionfish', name:'Скорпена (Морской ерш)', type:'predator', habitat:'sea', legal:'free', basins:['black_azov'], waters:['sea_gulf'], tWaterOpt:[14,22], tMinStop:7.0, coldFactor:0.40, optPress:760, bladderSens:0.30, feedMode:'nocturnal', depthOpt:[1.0,12.0], depthMax:25.0, spawnMonth:[6,7,8], banMonths:'Без ограничений', monthActivity:[0,0,0,1,2,3,3,3,3,2,0,0], baseAdvice:'Осторожно: ядовитые шипы! Ночью выходит на охоту к набережным и камням.', topGear:'Рокфишинг в темноте, силиконовые рачки, джиг-головки 2–4 г.' },
+  { id:'turbot', name:'Калкан черноморский', type:'predator', habitat:'sea', legal:'license', basins:['black_azov'], waters:['sea_gulf','open_sea'], tWaterOpt:[10,18], tMinStop:4.0, coldFactor:0.80, optPress:760, bladderSens:0.20, feedMode:'all_day', depthOpt:[5.0,30.0], depthMax:60.0, spawnMonth:[4,5], banMonths:'Жесткий нерестовый запрет и квоты', monthActivity:[1,1,2,0,0,2,3,3,3,3,2,1], baseAdvice:'Крупная шиповатая камбала. Питается рыбой со дна песчаных кос.', topGear:'Мощный сёрфкастинг, резка рыбы (хамса, ставрида).' },
 
-  // --- БЛОК 5: Сибирь (ЯНАО, Енисей, Байкал) ---
-  { id:'chir', name:'Щокур (Чир)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['small_river','big_river','tundra_lake'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.20, optPress:757, bladderSens:0.70, feedMode:'diurnal', depthOpt:[1.5,8.0], depthMax:16.0, spawnMonth:[10,11], banMonths:'Период осеннего хода', monthActivity:[2,2,3,2,1,1,2,2,3,0,0,3], baseAdvice:'Зимой на реках Пур и Таз стоит на плесах с медленным током.', topGear:'Тяжелая мормышка с бокоплавом.' },
-  { id:'pizhyan', name:'Пыжьян', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['small_river','big_river'], tWaterOpt:[4,13], tMinStop:0.0, coldFactor:1.15, optPress:758, bladderSens:0.75, feedMode:'crepuscular', depthOpt:[1.0,7.0], depthMax:14.0, spawnMonth:[9,10], banMonths:'Осенний запрет', monthActivity:[2,2,2,2,2,3,3,2,0,0,3,3], baseAdvice:'Песчано-галечные перекаты и ямы.', topGear:'Нахлыст, зимняя гирлянда.' },
-  { id:'peled', name:'Пелядь (Сырок)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['tundra_lake','big_river','small_river'], tWaterOpt:[6,15], tMinStop:0.0, coldFactor:1.10, optPress:757, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,5.0], depthMax:12.0, spawnMonth:[10,11,12], banMonths:'Период нереста в озерах', monthActivity:[2,2,3,2,2,3,3,3,2,0,0,1], baseAdvice:'Пелагический планктофаг озер и соров.', topGear:'Сбирулино, мелкие мормышки.' },
-  { id:'muksun', name:'Муксун', type:'peace', habitat:'fresh', legal:'redbook', basins:['arctic_ob_taz','yenisei_lena'], waters:['big_river','sea_gulf'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.18, optPress:758, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[2.0,12.0], depthMax:20.0, spawnMonth:[10,11], banMonths:'ПОЛНЫЙ ЗАПРЕТ ВЫЛОВА', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Вылов строго запрещен законодательством РФ!', topGear:'Мониторинг (выпуск обязателен).' },
-  { id:'nelma', name:'Нельма', type:'predator', habitat:'fresh', legal:'redbook', basins:['arctic_ob_taz','yenisei_lena'], waters:['big_river','sea_gulf'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.15, optPress:756, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[1.5,10.0], depthMax:18.0, spawnMonth:[9,10], banMonths:'ЗАПРЕТ ВЫЛОВА (Красная книга)', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Крупнейший сиговый хищник. Запрет на вылов.', topGear:'Любой вылов запрещен.' },
-  { id:'cisco', name:'Ряпушка сибирская', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['big_river','sea_gulf','tundra_lake'], tWaterOpt:[2,10], tMinStop:-0.5, coldFactor:1.25, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[1.0,8.0], depthMax:15.0, spawnMonth:[9,10], banMonths:'Период нерестового хода', monthActivity:[3,3,3,2,1,2,2,2,0,0,2,3], baseAdvice:'Массовая рыба низовий рек Пур, Таз и Обской губы.', topGear:'Зимняя гирлянда микромормышек.' },
-  { id:'tugun', name:'Тугун (Манерка)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['small_river','big_river'], tWaterOpt:[8,16], tMinStop:1.0, coldFactor:0.95, optPress:758, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.3,2.5], depthMax:5.0, spawnMonth:[9,10], banMonths:'Осенний запрет', monthActivity:[1,1,2,2,3,3,3,3,0,0,1,1], baseAdvice:'Мелкий сижок таежных притоков.', topGear:'Поплавочная снасть с мелким крючком.' },
-  { id:'siberian_sturgeon', name:'Сибирский осетр', type:'peace', habitat:'fresh', legal:'redbook', basins:['arctic_ob_taz','yenisei_lena','baikal'], waters:['big_river','sea_gulf'], tWaterOpt:[10,18], tMinStop:0.5, coldFactor:0.80, optPress:758, bladderSens:0.60, feedMode:'nocturnal', depthOpt:[3.0,16.0], depthMax:25.0, spawnMonth:[5,6], banMonths:'КРАСНАЯ КНИГА РФ', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Популяция под строжайшей охраной.', topGear:'Любой вылов запрещен.' },
-  { id:'omul', name:'Байкальский омуль', type:'peace', habitat:'fresh', legal:'license', basins:['baikal'], waters:['quarry'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.15, optPress:759, bladderSens:0.70, feedMode:'diurnal', depthOpt:[2.0,25.0], depthMax:50.0, spawnMonth:[9,10,11], banMonths:'Жесткие квоты/лицензии', monthActivity:[2,2,2,1,2,3,3,3,0,0,0,2], baseAdvice:'Символ озера Байкал. Ночной лов на свет.', topGear:'Настроечная мушка (кембрик).' },
-  { id:'lenok', name:'Ленок (Ускуч)', type:'predator', habitat:'fresh', legal:'license', basins:['baikal','yenisei_lena','amur'], waters:['small_river','big_river'], tWaterOpt:[6,14], tMinStop:0.0, coldFactor:1.10, optPress:758, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[0.4,3.0], depthMax:6.0, spawnMonth:[5,6], banMonths:'Весенне-летний запрет', monthActivity:[1,1,2,2,0,3,3,3,3,2,1,1], baseAdvice:'В сумерках жадно хватает поверхностного «мыша».', topGear:'Спиннинг с искусственной мышью.' },
-  { id:'taimen', name:'Обыкновенный таймень', type:'predator', habitat:'fresh', legal:'redbook', basins:['yenisei_lena','baikal','amur'], waters:['big_river','small_river'], tWaterOpt:[6,14], tMinStop:0.0, coldFactor:1.05, optPress:757, bladderSens:0.75, feedMode:'crepuscular', depthOpt:[1.0,6.0], depthMax:12.0, spawnMonth:[5,6], banMonths:'КРАСНАЯ КНИГА РФ', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Хозяин сибирских рек. Поймал-отпусти.', topGear:'Мощный спиннинг, мыши.' },
+  // --- БЛОК 5: Сибирский ихтиокомплекс (ЯНАО, Обь, Таз, Енисей, Лена, Байкал) ---
+  { id:'chir', name:'Щокур (Чир)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['small_river','big_river','tundra_lake'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.20, optPress:757, bladderSens:0.70, feedMode:'diurnal', depthOpt:[1.5,8.0], depthMax:16.0, spawnMonth:[10,11], banMonths:'Период осеннего нерестового хода', monthActivity:[2,2,3,2,1,1,2,2,3,0,0,3], baseAdvice:'Бентофаг северных рек. Зимой на реках Пур и Таз стоит на плесах с медленным током.', topGear:'Зимняя донка, тяжелая мормышка с пучком мотыля или бокоплава.' },
+  { id:'pizhyan', name:'Пыжьян (Сибирский сиг)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['small_river','big_river'], tWaterOpt:[4,13], tMinStop:0.0, coldFactor:1.15, optPress:758, bladderSens:0.75, feedMode:'crepuscular', depthOpt:[1.0,7.0], depthMax:14.0, spawnMonth:[9,10], banMonths:'1 сентября — 31 октября', monthActivity:[2,2,2,2,2,3,3,2,0,0,3,3], baseAdvice:'Песчано-галечные перекаты и ямы с замедленным течением таежных рек.', topGear:'Нахлыст (нимфы), поплавок в проводку, зимняя гирлянда.' },
+  { id:'peled', name:'Пелядь (Сырок)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['tundra_lake','big_river','small_river'], tWaterOpt:[6,15], tMinStop:0.0, coldFactor:1.10, optPress:757, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,5.0], depthMax:12.0, spawnMonth:[10,11,12], banMonths:'Период нереста в озерах', monthActivity:[2,2,3,2,2,3,3,3,2,0,0,1], baseAdvice:'Пелагический планктофаг озер и соров. Кормится в толще воды под кромкой льда.', topGear:'Сбирулино, зимний поплавок с подвеской мелких мормышек.' },
+  { id:'muksun', name:'Муксун', type:'peace', habitat:'fresh', legal:'redbook', basins:['arctic_ob_taz','yenisei_lena'], waters:['big_river','sea_gulf'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.18, optPress:758, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[2.0,12.0], depthMax:20.0, spawnMonth:[10,11], banMonths:'ПОЛНЫЙ ЗАПРЕТ ВЫЛОВА (Красная книга)', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Вылов в Обь-Иртышском бассейне строго запрещен законодательством РФ!', topGear:'Только ихтиологический мониторинг (выпуск обязателен).' },
+  { id:'nelma', name:'Нельма', type:'predator', habitat:'fresh', legal:'redbook', basins:['arctic_ob_taz','yenisei_lena'], waters:['big_river','sea_gulf'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.15, optPress:756, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[1.5,10.0], depthMax:18.0, spawnMonth:[9,10], banMonths:'ЗАПРЕТ ВЫЛОВА (Красная книга РФ)', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Крупнейший сиговый хищник. В бассейне Оби подлежит немедленному выпуску.', topGear:'Любой любительский лов запрещен.' },
+  { id:'cisco', name:'Ряпушка сибирская', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['big_river','sea_gulf','tundra_lake'], tWaterOpt:[2,10], tMinStop:-0.5, coldFactor:1.25, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[1.0,8.0], depthMax:15.0, spawnMonth:[9,10], banMonths:'Период нерестового хода', monthActivity:[3,3,3,2,1,2,2,2,0,0,2,3], baseAdvice:'Массовая рыба низовий рек Пур, Таз и Обской губы. Со льда берет на гирлянду.', topGear:'Зимняя гирлянда со светонакопительными микромормышками.' },
+  { id:'tugun', name:'Тугун (Манерка)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','yenisei_lena'], waters:['small_river','big_river'], tWaterOpt:[8,16], tMinStop:1.0, coldFactor:0.95, optPress:758, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.3,2.5], depthMax:5.0, spawnMonth:[9,10], banMonths:'15 сентября — 31 октября', monthActivity:[1,1,2,2,3,3,3,3,0,0,1,1], baseAdvice:'Мелкий сижок таежных притоков с ароматом свежего огурца.', topGear:'Поплавочная снасть с мелким крючком, насадка — мошка, ручейник.' },
+  { id:'siberian_sturgeon', name:'Сибирский осетр', type:'peace', habitat:'fresh', legal:'redbook', basins:['arctic_ob_taz','yenisei_lena','baikal'], waters:['big_river','sea_gulf'], tWaterOpt:[10,18], tMinStop:0.5, coldFactor:0.80, optPress:758, bladderSens:0.60, feedMode:'nocturnal', depthOpt:[3.0,16.0], depthMax:25.0, spawnMonth:[5,6], banMonths:'КРАСНАЯ КНИГА РФ (Вылов запрещен)', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Обская популяция находится под строжайшей государственной охраной.', topGear:'Любой любительский лов запрещен.' },
+  { id:'omul', name:'Байкальский омуль', type:'peace', habitat:'fresh', legal:'license', basins:['baikal'], waters:['quarry'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.15, optPress:759, bladderSens:0.70, feedMode:'diurnal', depthOpt:[2.0,25.0], depthMax:50.0, spawnMonth:[9,10,11], banMonths:'Вылов по жестким квотам/лицензиям', monthActivity:[2,2,2,1,2,3,3,3,0,0,0,2], baseAdvice:'Символ озера Байкал. Ночной лов со льда или катеров на свет прожектора.', topGear:'Специальная настроечная мушка (кембрик, бисер), гирлянда.' },
+  { id:'lenok', name:'Ленок (Ускуч)', type:'predator', habitat:'fresh', legal:'license', basins:['baikal','yenisei_lena','amur'], waters:['small_river','big_river'], tWaterOpt:[6,14], tMinStop:0.0, coldFactor:1.10, optPress:758, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[0.4,3.0], depthMax:6.0, spawnMonth:[5,6], banMonths:'15 мая — 25 июня', monthActivity:[1,1,2,2,0,3,3,3,3,2,1,1], baseAdvice:'Холодные горные реки. В сумерках и ночью жадно хватает поверхностного «мыша».', topGear:'Спиннинг с искусственной мышью, воблеры-минноу, нахлыст.' },
+  { id:'taimen', name:'Обыкновенный таймень', type:'predator', habitat:'fresh', legal:'redbook', basins:['yenisei_lena','baikal','amur'], waters:['big_river','small_river'], tWaterOpt:[6,14], tMinStop:0.0, coldFactor:1.05, optPress:757, bladderSens:0.75, feedMode:'crepuscular', depthOpt:[1.0,6.0], depthMax:12.0, spawnMonth:[5,6], banMonths:'КРАСНАЯ КНИГА РФ (Принцип «поймал-отпусти»)', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Хозяин сибирских рек. Вылов разрешен только в спецзонах без изъятия.', topGear:'Мощный спиннинг, крупные воблеры, мыши.' },
 
-  // --- БЛОК 6: Дальний Восток, Амур и Тихий океан ---
-  { id:'snakehead', name:'Змееголов', type:'predator', habitat:'fresh', legal:'free', basins:['amur'], waters:['tundra_lake','small_river'], tWaterOpt:[18,28], tMinStop:6.0, coldFactor:0.20, optPress:756, bladderSens:0.30, feedMode:'diurnal', depthOpt:[0.2,2.0], depthMax:4.0, spawnMonth:[6,7], banMonths:'Нерестовый период', monthActivity:[0,0,0,0,1,3,3,3,2,0,0,0], baseAdvice:'Дышит атмосферным воздухом. Живет в густой траве.', topGear:'Кастинг, силиконовая лягушка.' },
-  { id:'sky_gazer', name:'Верхогляд', type:'predator', habitat:'fresh', legal:'free', basins:['amur'], waters:['big_river'], tWaterOpt:[16,24], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.3,3.0], depthMax:6.0, spawnMonth:[6,7], banMonths:'Весенне-летний запрет', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Хищник верхних слоев Амура.', topGear:'Спиннинг, пилькеры, попперы.' },
-  { id:'yellowcheek', name:'Желтощек', type:'predator', habitat:'fresh', legal:'redbook', basins:['amur'], waters:['big_river'], tWaterOpt:[15,22], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:8.0, spawnMonth:[6,7], banMonths:'КРАСНАЯ КНИГА РФ', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Крупный хищник Амура. Вылов запрещен!', topGear:'Лов запрещен.' },
-  { id:'chinese_perch', name:'Ауха', type:'predator', habitat:'fresh', legal:'redbook', basins:['amur'], waters:['big_river'], tWaterOpt:[16,24], tMinStop:5.0, coldFactor:0.30, optPress:758, bladderSens:0.90, feedMode:'crepuscular', depthOpt:[1.0,5.0], depthMax:8.0, spawnMonth:[6,7], banMonths:'КРАСНАЯ КНИГА РФ', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Китайский окунь. Находится под охраной.', topGear:'Лов запрещен.' },
-  { id:'amur_catfish', name:'Амурский сом', type:'predator', habitat:'fresh', legal:'free', basins:['amur'], waters:['big_river','tundra_lake'], tWaterOpt:[16,24], tMinStop:6.0, coldFactor:0.30, optPress:756, bladderSens:0.90, feedMode:'nocturnal', depthOpt:[1.5,6.0], depthMax:10.0, spawnMonth:[6,7], banMonths:'Летний нерест', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Активен на плесах и в протоках.', topGear:'Донка, лягушка.' },
-  { id:'pink_salmon', name:'Горбуша', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea','amur','barents_white'], waters:['sea_gulf','big_river'], tWaterOpt:[6,14], tMinStop:1.0, coldFactor:0.95, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,8.0], depthMax:20.0, spawnMonth:[7,8,9], banMonths:'Ход по путевкам', monthActivity:[0,0,0,0,1,2,3,3,1,0,0,0], baseAdvice:'Массовый лосось. В реке атакует розовые блесны.', topGear:'Спиннинг, яркие колебалки.' },
-  { id:'chum_salmon', name:'Кета', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea','amur'], waters:['sea_gulf','big_river'], tWaterOpt:[6,14], tMinStop:1.0, coldFactor:0.95, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[1.0,10.0], depthMax:25.0, spawnMonth:[8,9,10], banMonths:'Лицензионные участки', monthActivity:[0,0,0,0,0,1,2,3,3,1,0,0], baseAdvice:'Реагирует на колебалки (тасманский дьявол).', topGear:'Тяжелый спиннинг, колебалки.' },
-  { id:'coho_salmon', name:'Кижуч', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea'], waters:['sea_gulf','big_river'], tWaterOpt:[5,12], tMinStop:0.5, coldFactor:1.00, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,6.0], depthMax:15.0, spawnMonth:[9,10,11], banMonths:'Лицензионный лов', monthActivity:[0,0,0,0,0,0,1,3,3,2,0,0], baseAdvice:'«Серебряный лосось» Камчатки. Делает свечки.', topGear:'Спиннинг, тяжелые вертушки.' },
-  { id:'sockeye_salmon', name:'Нерка (Красница)', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea'], waters:['sea_gulf','big_river'], tWaterOpt:[5,12], tMinStop:0.5, coldFactor:1.00, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[1.0,8.0], depthMax:20.0, spawnMonth:[7,8], banMonths:'Строгий регламент вылова', monthActivity:[0,0,0,0,0,2,3,2,0,0,0,0], baseAdvice:'В реках идет плотным строем.', topGear:'Нахлыст, специализированные мушки.' },
-  { id:'chinook_salmon', name:'Чавыча', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea'], waters:['big_river','sea_gulf'], tWaterOpt:[5,12], tMinStop:0.5, coldFactor:1.05, optPress:758, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[1.5,10.0], depthMax:25.0, spawnMonth:[6,7], banMonths:'Именные лицензии, жесткие лимиты', monthActivity:[0,0,0,0,1,3,3,1,0,0,0,0], baseAdvice:'«Князь лососей». Трофей до 20–30 кг.', topGear:'Тяжелый спиннинг, мощнейшие катушки.' },
-  { id:'cherry_salmon', name:'Сима (Масу)', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea'], waters:['small_river','sea_gulf'], tWaterOpt:[8,15], tMinStop:1.0, coldFactor:0.90, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,5.0], depthMax:12.0, spawnMonth:[5,6], banMonths:'Весенний лицензионный ход', monthActivity:[0,0,0,1,3,3,1,0,0,0,0,0], baseAdvice:'Самый ранний тихоокеанский лосось.', topGear:'Тонущие воблеры-минноу.' },
-  { id:'char', name:'Голец / Кунджа', type:'predator', habitat:'fresh', legal:'license', basins:['pacific_sea','barents_white','yenisei_lena'], waters:['small_river','sea_gulf'], tWaterOpt:[3,11], tMinStop:-0.5, coldFactor:1.20, optPress:758, bladderSens:0.75, feedMode:'crepuscular', depthOpt:[0.5,6.0], depthMax:15.0, spawnMonth:[9,10], banMonths:'Осенний запрет', monthActivity:[2,2,2,3,3,3,2,3,0,0,2,2], baseAdvice:'Пятнистая кунджа устраивает засады.', topGear:'Белые колебалки, стримеры.' },
-  { id:'dolly_varden', name:'Мальма', type:'predator', habitat:'fresh', legal:'free', basins:['pacific_sea'], waters:['small_river'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.15, optPress:758, bladderSens:0.75, feedMode:'diurnal', depthOpt:[0.3,3.0], depthMax:6.0, spawnMonth:[9,10], banMonths:'Период нереста', monthActivity:[2,2,2,3,3,3,3,2,0,0,2,2], baseAdvice:'Многочисленный голец горных рек Дальнего Востока.', topGear:'Легкий спиннинг, вертушки.' },
-  { id:'walleye_pollock', name:'Минтай', type:'predator', habitat:'sea', legal:'free', basins:['pacific_sea'], waters:['sea_gulf','open_sea'], tWaterOpt:[1,8], tMinStop:0.0, coldFactor:1.05, optPress:760, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[15.0,50.0], depthMax:100.0, spawnMonth:[3,4,5], banMonths:'Промысловые квоты', monthActivity:[2,2,3,3,2,1,1,2,2,3,3,2], baseAdvice:'Холодные придонные слои шельфа.', topGear:'Пилькеры 80–150 г, сабики.' },
-  { id:'navaga', name:'Навага', type:'predator', habitat:'sea', legal:'free', basins:['barents_white','pacific_sea','arctic_ob_taz'], waters:['sea_gulf'], tWaterOpt:[-1,6], tMinStop:-1.5, coldFactor:1.35, optPress:760, bladderSens:0.65, feedMode:'diurnal', depthOpt:[1.0,12.0], depthMax:25.0, spawnMonth:[12,1], banMonths:'Без ограничений', monthActivity:[3,3,2,1,0,0,0,1,2,3,3,3], baseAdvice:'Зимний лов со льда в мороз на блесны.', topGear:'Зимняя блесна без бородки.' },
-  { id:'greenling', name:'Терпуг', type:'predator', habitat:'sea', legal:'free', basins:['pacific_sea'], waters:['sea_gulf','open_sea'], tWaterOpt:[6,14], tMinStop:1.0, coldFactor:0.90, optPress:760, bladderSens:0.70, feedMode:'diurnal', depthOpt:[5.0,25.0], depthMax:50.0, spawnMonth:[8,9], banMonths:'Прибрежный регламент', monthActivity:[1,1,2,3,3,3,3,2,1,1,1,1], baseAdvice:'Прибрежные скалы, водоросли, рифы.', topGear:'Джиг с октопусами.' },
-  { id:'starry_flounder', name:'Камбала звездчатая', type:'predator', habitat:'sea', legal:'free', basins:['pacific_sea'], waters:['sea_gulf'], tWaterOpt:[4,14], tMinStop:0.5, coldFactor:0.95, optPress:760, bladderSens:0.25, feedMode:'all_day', depthOpt:[1.5,20.0], depthMax:40.0, spawnMonth:[3,4], banMonths:'Морские правила', monthActivity:[2,1,2,3,3,3,3,3,3,2,2,2], baseAdvice:'Опесчаненные бухты и эстуарии рек Тихого океана.', topGear:'Сёрфовая снасть, нарезка рыбы.' }
+  // --- БЛОК 6: Дальний Восток, Амур и Тихоокеанский бассейн ---
+  { id:'snakehead', name:'Змееголов', type:'predator', habitat:'fresh', legal:'free', basins:['amur'], waters:['tundra_lake','small_river'], tWaterOpt:[18,28], tMinStop:6.0, coldFactor:0.20, optPress:756, bladderSens:0.30, feedMode:'diurnal', depthOpt:[0.2,2.0], depthMax:4.0, spawnMonth:[6,7], banMonths:'Нерестовый период', monthActivity:[0,0,0,0,1,3,3,3,2,0,0,0], baseAdvice:'Дышит атмосферным воздухом. Обитает в густых зарослях травы и теплой воде.', topGear:'Кастинговое удилище heavy, силиконовые незацепляемые лягушки.' },
+  { id:'sky_gazer', name:'Верхогляд', type:'predator', habitat:'fresh', legal:'free', basins:['amur'], waters:['big_river'], tWaterOpt:[16,24], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.3,3.0], depthMax:6.0, spawnMonth:[6,7], banMonths:'Весенне-летний запрет', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Хищник верхних слоев Амура с направленными вверх глазами и пастью.', topGear:'Дальнобойный спиннинг, пилькеры, кастмастеры, попперы.' },
+  { id:'yellowcheek', name:'Желтощек', type:'predator', habitat:'fresh', legal:'redbook', basins:['amur'], waters:['big_river'], tWaterOpt:[15,22], tMinStop:4.0, coldFactor:0.40, optPress:758, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,4.0], depthMax:8.0, spawnMonth:[6,7], banMonths:'КРАСНАЯ КНИГА РФ (Вылов запрещен)', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Крупный хищник Амура. Вылов категорически запрещен!', topGear:'Лов запрещен.' },
+  { id:'chinese_perch', name:'Ауха (Китайский окунь)', type:'predator', habitat:'fresh', legal:'redbook', basins:['amur'], waters:['big_river'], tWaterOpt:[16,24], tMinStop:5.0, coldFactor:0.30, optPress:758, bladderSens:0.90, feedMode:'crepuscular', depthOpt:[1.0,5.0], depthMax:8.0, spawnMonth:[6,7], banMonths:'КРАСНАЯ КНИГА РФ', monthActivity:[0,0,0,0,0,0,0,0,0,0,0,0], baseAdvice:'Красивейший эндемик бассейна Амура. Находится под охраной.', topGear:'Лов запрещен.' },
+  { id:'amur_catfish', name:'Амурский сом', type:'predator', habitat:'fresh', legal:'free', basins:['amur'], waters:['big_river','tundra_lake'], tWaterOpt:[16,24], tMinStop:6.0, coldFactor:0.30, optPress:756, bladderSens:0.90, feedMode:'nocturnal', depthOpt:[1.5,6.0], depthMax:10.0, spawnMonth:[6,7], banMonths:'Летний нерест', monthActivity:[0,0,0,1,2,3,3,3,2,1,0,0], baseAdvice:'Меньше европейского сома, но очень активен на плесах и в протоках.', topGear:'Донка, спиннинг с крупным силиконом, лягушка.' },
+  { id:'pink_salmon', name:'Горбуша', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea','amur','barents_white'], waters:['sea_gulf','big_river'], tWaterOpt:[6,14], tMinStop:1.0, coldFactor:0.95, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,8.0], depthMax:20.0, spawnMonth:[7,8,9], banMonths:'Ход по путевкам/лицензиям', monthActivity:[0,0,0,0,1,2,3,3,1,0,0,0], baseAdvice:'Массовый тихоокеанский лосось. В реке атакует ярко-розовые блесны и мухи.', topGear:'Спиннинг 10–35 г, блесны Blue Fox #4–#5 розовых тонов.' },
+  { id:'chum_salmon', name:'Кета', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea','amur'], waters:['sea_gulf','big_river'], tWaterOpt:[6,14], tMinStop:1.0, coldFactor:0.95, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[1.0,10.0], depthMax:25.0, spawnMonth:[8,9,10], banMonths:'Лицензионные участки', monthActivity:[0,0,0,0,0,1,2,3,3,1,0,0], baseAdvice:'Мощный боец рек Дальнего Востока. Реагирует на колебалки с тасманским дьяволом.', topGear:'Спиннинг тяжелого класса, колеблющиеся блесны.' },
+  { id:'coho_salmon', name:'Кижуч', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea'], waters:['sea_gulf','big_river'], tWaterOpt:[5,12], tMinStop:0.5, coldFactor:1.00, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,6.0], depthMax:15.0, spawnMonth:[9,10,11], banMonths:'Лицензионный лов', monthActivity:[0,0,0,0,0,0,1,3,3,2,0,0], baseAdvice:'«Серебряный лосось» Камчатки. Свечки при вываживании, яростные атаки.', topGear:'Спиннинг, тяжелые вертушки с колокольчиком.' },
+  { id:'sockeye_salmon', name:'Нерка (Красница)', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea'], waters:['sea_gulf','big_river'], tWaterOpt:[5,12], tMinStop:0.5, coldFactor:1.00, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[1.0,8.0], depthMax:20.0, spawnMonth:[7,8], banMonths:'Строгий регламент вылова', monthActivity:[0,0,0,0,0,2,3,2,0,0,0,0], baseAdvice:'Питается ракообразными в море. В реках Камчатки идет плотным строем.', topGear:'Нахлыст, специализированные мушки.' },
+  { id:'chinook_salmon', name:'Чавыча', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea'], waters:['big_river','sea_gulf'], tWaterOpt:[5,12], tMinStop:0.5, coldFactor:1.05, optPress:758, bladderSens:0.80, feedMode:'crepuscular', depthOpt:[1.5,10.0], depthMax:25.0, spawnMonth:[6,7], banMonths:'Именные лицензии, жесткие лимиты', monthActivity:[0,0,0,0,1,3,3,1,0,0,0,0], baseAdvice:'«Князь лососей». Трофей до 20–30 кг на реках Камчатки.', topGear:'Морской тяжелый спиннинг, мощнейшие катушки со шнуром #3.0+ PE.' },
+  { id:'cherry_salmon', name:'Сима (Масу)', type:'predator', habitat:'sea', legal:'license', basins:['pacific_sea'], waters:['small_river','sea_gulf'], tWaterOpt:[8,15], tMinStop:1.0, coldFactor:0.90, optPress:759, bladderSens:0.80, feedMode:'diurnal', depthOpt:[0.5,5.0], depthMax:12.0, spawnMonth:[5,6], banMonths:'Весенний лицензионный ход', monthActivity:[0,0,0,1,3,3,1,0,0,0,0,0], baseAdvice:'Самый ранний и красивый тихоокеанский лосось Приморья и Сахалина.', topGear:'Спиннинг 5–21 г, тонущие воблеры-минноу, колебалки.' },
+  { id:'char', name:'Голец арктический / Кунджа', type:'predator', habitat:'fresh', legal:'license', basins:['pacific_sea','barents_white','yenisei_lena'], waters:['small_river','sea_gulf'], tWaterOpt:[3,11], tMinStop:-0.5, coldFactor:1.20, optPress:758, bladderSens:0.75, feedMode:'crepuscular', depthOpt:[0.5,6.0], depthMax:15.0, spawnMonth:[9,10], banMonths:'Осенний нерестовый запрет', monthActivity:[2,2,2,3,3,3,2,3,0,0,2,2], baseAdvice:'Холодолюбивый хищник. Пятнистая кунджа устраивает засады за корягами.', topGear:'Спиннинг, белые колебалки, нахлыстовые стримеры.' },
+  { id:'dolly_varden', name:'Мальма', type:'predator', habitat:'fresh', legal:'free', basins:['pacific_sea'], waters:['small_river'], tWaterOpt:[4,12], tMinStop:0.0, coldFactor:1.15, optPress:758, bladderSens:0.75, feedMode:'diurnal', depthOpt:[0.3,3.0], depthMax:6.0, spawnMonth:[9,10], banMonths:'Период нереста', monthActivity:[2,2,2,3,3,3,3,2,0,0,2,2], baseAdvice:'Многочисленный голец горных рек Дальнего Востока.', topGear:'Легкий спиннинг, поплавок с икринкой, вертушки #2.' },
+  { id:'walleye_pollock', name:'Минтай', type:'predator', habitat:'sea', legal:'free', basins:['pacific_sea'], waters:['sea_gulf','open_sea'], tWaterOpt:[1,8], tMinStop:0.0, coldFactor:1.05, optPress:760, bladderSens:0.70, feedMode:'crepuscular', depthOpt:[15.0,50.0], depthMax:100.0, spawnMonth:[3,4,5], banMonths:'Промысловые квоты', monthActivity:[2,2,3,3,2,1,1,2,2,3,3,2], baseAdvice:'Холодные придонные слои шельфа Охотского и Берингова морей.', topGear:'Пилькеры 80–150 г, ставки с октопусами.' },
+  { id:'navaga', name:'Навага дальневосточная / северная', type:'predator', habitat:'sea', legal:'free', basins:['barents_white','pacific_sea','arctic_ob_taz'], waters:['sea_gulf'], tWaterOpt:[-1,6], tMinStop:-1.5, coldFactor:1.35, optPress:760, bladderSens:0.65, feedMode:'diurnal', depthOpt:[1.0,12.0], depthMax:25.0, spawnMonth:[12,1], banMonths:'Без ограничений', monthActivity:[3,3,2,1,0,0,0,1,2,3,3,3], baseAdvice:'Зимний лов со льда в мороз на блесны с подсадкой морского червя.', topGear:'Зимняя блесна-иголка без бородки.' },
+  { id:'greenling', name:'Терпуг (Одноперый / пятнистый)', type:'predator', habitat:'sea', legal:'free', basins:['pacific_sea'], waters:['sea_gulf','open_sea'], tWaterOpt:[6,14], tMinStop:1.0, coldFactor:0.90, optPress:760, bladderSens:0.70, feedMode:'diurnal', depthOpt:[5.0,25.0], depthMax:50.0, spawnMonth:[8,9], banMonths:'Прибрежный регламент', monthActivity:[1,1,2,3,3,3,3,2,1,1,1,1], baseAdvice:'Прибрежные скалы, водоросли, рифы дальневосточных морей.', topGear:'Джиг с силиконовыми октопусами, кастмастеры, донка.' },
+  { id:'starry_flounder', name:'Камбала звездчатая', type:'predator', habitat:'sea', legal:'free', basins:['pacific_sea'], waters:['sea_gulf'], tWaterOpt:[4,14], tMinStop:0.5, coldFactor:0.95, optPress:760, bladderSens:0.25, feedMode:'all_day', depthOpt:[1.5,20.0], depthMax:40.0, spawnMonth:[3,4], banMonths:'Морские правила', monthActivity:[2,1,2,3,3,3,3,3,3,2,2,2], baseAdvice:'Опесчаненные бухты и эстуарии рек Тихого океана.', topGear:'Сёрфовая снасть, нарезка рыбы, морской червь.' }
 ];
 
-function detectBasinByCoords(lat, lon) {
-  if (lat >= 43.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) return { code: 'black_azov', name: 'Черноморско-Азовский бассейн' };
-  if (lat >= 54.0 && lat <= 60.5 && lon >= 19.0 && lon <= 30.5) return { code: 'baltic', name: 'Балтийский морской бассейн' };
-  if (lat >= 65.0 && lon >= 30.5 && lon <= 58.0) return { code: 'barents_white', name: 'Баренцево-Беломорский арктический бассейн' };
-  if (lat >= 60.0 && lat < 66.0 && lon >= 29.0 && lon <= 38.0) return { code: 'nw_karelia', name: 'Ладожско-Онежский и Карельский бассейн' };
-  if (lon >= 135.0 && lat >= 42.0) return { code: 'pacific_sea', name: 'Тихоокеанский и Дальневосточный морской бассейн' };
-  if (lon >= 118.0 && lon < 141.0 && lat >= 47.0 && lat < 55.0) return { code: 'amur', name: 'Амурский пресноводный бассейн' };
-  if (lat >= 51.0 && lat <= 56.5 && lon >= 103.0 && lon <= 112.0) return { code: 'baikal', name: 'Байкало-Ангарский рифтовый бассейн' };
-  if (lon >= 88.0 && lon < 135.0 && lat >= 52.0) return { code: 'yenisei_lena', name: 'Енисейско-Ленский бассейн' };
-  if (lon >= 59.0 && lon < 88.0 && lat >= 62.0) return { code: 'arctic_ob_taz', name: 'Обь-Тазовский бассейн (ЯНАО, Обь)' };
-  // Уральская изоляция:
-  if (lat >= 51.0 && lat < 62.0 && lon >= 54.0 && lon < 65.0) return { code: 'volga_caspian', name: 'Урало-Камский и Исетский бассейн' };
-  if (lat >= 51.0 && lat < 62.0 && lon >= 65.0 && lon < 88.0) return { code: 'arctic_ob_taz', name: 'Обь-Иртышский бассейн (Юг З.Сибири)' };
-  if (lon < 38.0 && lat < 56.0) return { code: 'euro_west', name: 'Днепровско-Донской бассейн' };
-  return { code: 'volga_caspian', name: 'Волжско-Каспийский бассейн' };
-}
+let state = {
+  theme: 'auto',
+  lat: 66.084,
+  lon: 76.679,
+  elevation: 45,
+  normPress: 758,
+  locCountry: 'Россия',
+  locAdmin1: 'ЯНАО',
+  locAdmin2: 'г. Новый Уренгой',
+  locLabel: 'Новый Уренгой',
+  basinCode: 'arctic_ob_taz',
+  basinName: 'Обь-Тазовский бассейн (ЯНАО, Обь, Пур, Таз)',
+  showAllSpecies: false,
+  fishId: 'chir',
+  dayIdx: 0,
+  method: 'winter_jig',
+  water: 'small_river',
+  depth: 1.2,
+  iceState: 'ice_safe',
+  iceThickness: 18
+};
 
-function getDefaultWatersByBasin(basinName) {
-  if (basinName.includes('Черноморско') || basinName.includes('Балтийский') || basinName.includes('Тихоокеанский') || basinName.includes('Баренцево')) {
-    return [{ label: '🌊 Морская бухта / залив', wType: 'sea_gulf' }, { label: '⚓ Открытое море / банка', wType: 'open_sea' }, { label: '🌊 Приустьевой участок реки', wType: 'small_river' }];
-  } else if (basinName.includes('ЯНАО')) {
-    return [{ label: '🌊 р. Седе-Яха / Ево-Яха', wType: 'small_river' }, { label: '⚓ р. Пур / Таз / Обь', wType: 'big_river' }, { label: '🌿 Озеро тундровое (сор)', wType: 'tundra_lake' }, { label: '💧 Песчаный карьер', wType: 'quarry' }];
-  } else if (basinName.includes('Урало-Камский')) {
-    return [{ label: '⚓ р. Кама / Исеть / Урал', wType: 'big_river' }, { label: '🌊 Малая уральская река', wType: 'small_river' }, { label: '💧 Водохранилище / Карьер', wType: 'quarry' }, { label: '🌿 Лесное озеро', wType: 'tundra_lake' }, { label: '⚡ Теплый сброс ГРЭС/АЭС', wType: 'cooling_reservoir' }];
-  } else if (basinName.includes('Юг З.Сибири')) {
-    return [{ label: '⚓ р. Обь / Иртыш / Тобол', wType: 'big_river' }, { label: '🌊 Таежная река / протока', wType: 'small_river' }, { label: '💧 Озеро (карасевое)', wType: 'tundra_lake' }, { label: '⚡ Сброс ТЭЦ', wType: 'cooling_reservoir' }];
-  } else if (basinName.includes('Байкал')) {
-    return [{ label: '⚓ Озеро Байкал (открытый)', wType: 'quarry' }, { label: '🌊 Малое Море / залив', wType: 'tundra_lake' }, { label: '🌊 р. Селенга / Ангара', wType: 'big_river' }];
-  } else if (basinName.includes('Волжско')) {
-    return [{ label: '⚓ Русло Волги / Камы / Дона', wType: 'big_river' }, { label: '🌊 Протока / Ерик', wType: 'small_river' }, { label: '💧 Водохранилище', wType: 'quarry' }, { label: '⚡ Теплый сброс ГРЭС', wType: 'cooling_reservoir' }];
-  }
-  return [{ label: '🌊 Малая / средняя река', wType: 'small_river' }, { label: '⚓ Магистральное русло', wType: 'big_river' }, { label: '💧 Карьер / водохранилище', wType: 'quarry' }, { label: '🌿 Озеро / старица', wType: 'tundra_lake' }];
-}
+let DAYS_DATA = [];
+let mapInstance = null;
+let mapMarker = null;
+let currentTileLayer = null;
 
-function getFilteredFishList() {
-  if (state.showAllSpecies) return FISH_DB;
-  return FISH_DB.filter(f => {
-    const basinMatch = f.basins.includes(state.basinCode);
-    const waterMatch = !f.waters || f.waters.includes(state.water);
-    if (f.legal === 'introduced' && state.water !== 'cooling_reservoir') return false;
-    return basinMatch && waterMatch;
-  });
-}
-
-function toggleShowAllSpecies() {
-  state.showAllSpecies = !state.showAllSpecies;
-  document.getElementById('showAllToggle').textContent = state.showAllSpecies ? 'Только бассейн и биотоп' : `Все ${FISH_DB.length} видов РФ`;
-  renderAll();
-}
-
-function evaluateIceCondition(dailyTemps) {
-  let freezingDegreeDays = 0;
-  for (let t of dailyTemps) { if (t < 0) freezingDegreeDays += Math.abs(t); }
-  const currentTemp = dailyTemps[0];
-  if (freezingDegreeDays >= 35 && currentTemp <= -4) {
-    state.iceState = 'ice_safe'; state.iceThickness = Math.min(90, Math.max(12, Math.round(2.1 * Math.sqrt(freezingDegreeDays))));
-  } else if (currentTemp <= -1.0 || freezingDegreeDays > 8) {
-    state.iceState = 'ice_danger'; state.iceThickness = Math.min(8, Math.max(1, Math.round(1.0 * Math.sqrt(Math.max(1, freezingDegreeDays)))));
-  } else {
-    state.iceState = 'open_water'; state.iceThickness = 0;
-  }
-  updateSeasonUI(); populateSeasonalMethods();
-}
-
-function updateSeasonUI() {
-  const banner = document.getElementById('seasonBanner');
-  const txt = document.getElementById('seasonStatusText');
-  const th = document.getElementById('iceThicknessText');
-  banner.className = 'season-banner ' + (state.iceState === 'ice_safe' ? 'ice-safe' : (state.iceState === 'ice_danger' ? 'ice-danger' : 'open-water'));
-  if (state.iceState === 'ice_safe') {
-    txt.innerHTML = '❄️ <b>Подледный режим</b>: Прочный ледостав. Доступны зимние оснастки!'; th.textContent = `Толщина монолита: ~${state.iceThickness} см (безопасно)`;
-  } else if (state.iceState === 'ice_danger') {
-    txt.innerHTML = '⚠️ <b>Опасный ледостав / Шуга</b>: Забереги, шугоход. Выход на лед категорически запрещен!'; th.textContent = `Лед: ~${state.iceThickness} см (смертельно опасно)`;
-  } else {
-    txt.innerHTML = '🌊 <b>Сезон открытой воды</b>: Акватории свободны от льда.'; th.textContent = 'Открытая вода';
-  }
-}
-
-function populateSeasonalMethods() {
-  const sel = document.getElementById('methodSelect');
-  const prevVal = state.method;
-  sel.innerHTML = '';
-  if (state.iceState === 'ice_safe') {
-    const winterOptions = [
-      { val: 'winter_jig', text: 'Зимняя мормышка / Безмотылка' }, { val: 'winter_lure', text: 'Зимнее блеснение: Балансир / Виб' },
-      { val: 'winter_livebait', text: 'Жерлицы / Подледные поставуши' }, { val: 'winter_stuka', text: 'Тяжелая стукалка со дна' }, { val: 'winter_cisco', text: 'Гирлянда мормышек / Сабики' }
-    ];
-    winterOptions.forEach(opt => { const el = document.createElement('option'); el.value = opt.val; el.textContent = opt.text; sel.appendChild(el); });
-    if (!prevVal.startsWith('winter_')) state.method = 'winter_jig'; else state.method = prevVal;
-  } else {
-    const summerOptions = [
-      { val: 'spin_micro', text: 'Спиннинг: Микроджиг / Мормышинг' }, { val: 'spin_jig', text: 'Спиннинг: Джиг тяжелый / средний' },
-      { val: 'spin_lure', text: 'Спиннинг: Блесны (колебалки, вертушки)' }, { val: 'bottom', text: 'Донная снасть (Фидер / Пикер)' },
-      { val: 'float', text: 'Поплавочная снасть (Мах / Болонка)' }, { val: 'fly', text: 'Нахлыст: Сухие / мокрые мушки' },
-      { val: 'sea_rock', text: 'Морской рокфишинг / Дроп-шот' }, { val: 'sea_surf', text: 'Морской сёрфкастинг с берега' }, { val: 'sea_boat', text: 'Морской отвесный лов с борта' }
-    ];
-    summerOptions.forEach(opt => { const el = document.createElement('option'); el.value = opt.val; el.textContent = opt.text; sel.appendChild(el); });
-    if (prevVal.startsWith('winter_')) state.method = 'spin_micro'; else state.method = prevVal;
-  }
-  sel.value = state.method;
-}
-
-function applyTheme(t) {
-  const root = document.documentElement; const btn = document.getElementById('themeBtn'); let effectiveTheme = t;
-  if (t === 'auto') { effectiveTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; btn.innerHTML = '💻 Авто'; }
-  else if (t === 'dark') { btn.innerHTML = '🌙 Тёмная'; } else { btn.innerHTML = '☀️ Светлая'; }
-  root.setAttribute('data-theme', effectiveTheme);
-  const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.setAttribute('content', effectiveTheme === 'dark' ? '#0b1120' : '#f1f5f9');
-  try { localStorage.setItem('pro_fish_theme', t); } catch(e){}
-}
-
-function cycleTheme() {
-  const modes = ['auto', 'dark', 'light'];
-  let next = modes[(modes.indexOf(state.theme) + 1) % modes.length];
-  state.theme = next; applyTheme(next); renderAll();
-}
-
-function initTheme() {
-  let saved = 'auto';
-  try { saved = localStorage.getItem('pro_fish_theme') || 'auto'; } catch(e){}
-  state.theme = saved; applyTheme(saved);
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.theme === 'auto') applyTheme('auto'); });
-}
-
-let mapInstance = null, mapMarker = null, currentTileLayer = null;
 const MAP_LAYERS = {
   topo: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Topo' },
   sat: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Esri Satellite' },
@@ -655,9 +933,187 @@ const MAP_LAYERS = {
   osm: { url: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png', attr: 'OSM' }
 };
 
+function detectBasinByCoords(lat, lon) {
+  if (lat >= 43.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) {
+    return { code: 'black_azov', name: 'Черноморско-Азовский бассейн' };
+  }
+  if (lat >= 54.0 && lat <= 60.5 && lon >= 19.0 && lon <= 30.5) {
+    return { code: 'baltic', name: 'Балтийский морской бассейн' };
+  }
+  if (lat >= 65.0 && lon >= 30.5 && lon <= 58.0) {
+    return { code: 'barents_white', name: 'Баренцево-Беломорский арктический бассейн' };
+  }
+  if (lat >= 60.0 && lat < 66.0 && lon >= 29.0 && lon <= 38.0) {
+    return { code: 'nw_karelia', name: 'Ладожско-Онежский и Карельский бассейн' };
+  }
+  if (lon >= 135.0 && lat >= 42.0) {
+    return { code: 'pacific_sea', name: 'Тихоокеанский и Дальневосточный морской бассейн' };
+  }
+  if (lon >= 118.0 && lon < 141.0 && lat >= 47.0 && lat < 55.0) {
+    return { code: 'amur', name: 'Амурский пресноводный бассейн' };
+  }
+  if (lat >= 51.0 && lat <= 56.5 && lon >= 103.0 && lon <= 112.0) {
+    return { code: 'baikal', name: 'Байкало-Ангарский рифтовый бассейн' };
+  }
+  if (lon >= 88.0 && lon < 135.0 && lat >= 52.0) {
+    return { code: 'yenisei_lena', name: 'Енисейско-Ленский бассейн Восточной Сибири' };
+  }
+  if (lon >= 59.0 && lon < 88.0 && lat >= 53.0) {
+    return { code: 'arctic_ob_taz', name: 'Обь-Тазовский бассейн (ЯНАО, Обь, Пур, Таз)' };
+  }
+  if (lon < 38.0 && lat < 56.0) {
+    return { code: 'euro_west', name: 'Днепровско-Донской бассейн' };
+  }
+  return { code: 'volga_caspian', name: 'Волжско-Каспийский бассейн' };
+}
+
+function getFilteredFishList() {
+  if (state.showAllSpecies) return FISH_DB;
+  return FISH_DB.filter(f => {
+    const basinMatch = f.basins.includes(state.basinCode);
+    const waterMatch = !f.waters || f.waters.includes(state.water);
+    // Искусственные интродуценты не показываются в нативном открытом севере
+    if (f.legal === 'introduced' && state.water !== 'cooling_reservoir') return false;
+    return basinMatch && waterMatch;
+  });
+}
+
+function toggleShowAllSpecies() {
+  state.showAllSpecies = !state.showAllSpecies;
+  document.getElementById('showAllToggle').textContent = state.showAllSpecies
+    ? 'Только бассейн и биотоп'
+    : `Все ${FISH_DB.length} видов РФ`;
+  renderAll();
+}
+
+function evaluateIceCondition(dailyTemps) {
+  let freezingDegreeDays = 0;
+  for (let t of dailyTemps) {
+    if (t < 0) freezingDegreeDays += Math.abs(t);
+  }
+  const currentTemp = dailyTemps[0];
+
+  if (freezingDegreeDays >= 35 && currentTemp <= -4) {
+    state.iceState = 'ice_safe';
+    state.iceThickness = Math.min(90, Math.max(12, Math.round(2.1 * Math.sqrt(freezingDegreeDays))));
+  } else if (currentTemp <= -1.0 || freezingDegreeDays > 8) {
+    state.iceState = 'ice_danger';
+    state.iceThickness = Math.min(8, Math.max(1, Math.round(1.0 * Math.sqrt(Math.max(1, freezingDegreeDays)))));
+  } else {
+    state.iceState = 'open_water';
+    state.iceThickness = 0;
+  }
+
+  updateSeasonUI();
+  populateSeasonalMethods();
+}
+
+function updateSeasonUI() {
+  const banner = document.getElementById('seasonBanner');
+  const txt = document.getElementById('seasonStatusText');
+  const th = document.getElementById('iceThicknessText');
+
+  banner.className = 'season-banner ' + (state.iceState === 'ice_safe' ? 'ice-safe' : (state.iceState === 'ice_danger' ? 'ice-danger' : 'open-water'));
+
+  if (state.iceState === 'ice_safe') {
+    txt.innerHTML = '❄️ <b>Подледный режим</b>: Прочный ледостав. Доступны зимние оснастки!';
+    th.textContent = `Толщина монолита: ~${state.iceThickness} см (безопасно)`;
+  } else if (state.iceState === 'ice_danger') {
+    txt.innerHTML = '⚠️ <b>Опасный ледостав / Шуга</b>: Забереги, шугоход. Выход на лед категорически запрещен!';
+    th.textContent = `Лед: ~${state.iceThickness} см (смертельно опасно)`;
+  } else {
+    txt.innerHTML = '🌊 <b>Сезон открытой воды</b>: Акватории свободны от льда.';
+    th.textContent = 'Открытая вода';
+  }
+}
+
+function populateSeasonalMethods() {
+  const sel = document.getElementById('methodSelect');
+  const prevVal = state.method;
+  sel.innerHTML = '';
+
+  if (state.iceState === 'ice_safe') {
+    const winterOptions = [
+      { val: 'winter_jig', text: 'Зимняя мормышка / Безмотылка (мотыль, бокоплав)' },
+      { val: 'winter_lure', text: 'Зимнее блеснение: Балансир / Виб / Вертикалка' },
+      { val: 'winter_livebait', text: 'Жерлицы / Подледные поставуши на живца' },
+      { val: 'winter_stuka', text: 'Тяжелая стукалка со дна (налим, треска)' },
+      { val: 'winter_cisco', text: 'Гирлянда мормышек / Сабики (сиговые, корюшка)' }
+    ];
+    winterOptions.forEach(opt => {
+      const el = document.createElement('option');
+      el.value = opt.val;
+      el.textContent = opt.text;
+      sel.appendChild(el);
+    });
+    if (!prevVal.startsWith('winter_')) state.method = 'winter_jig';
+    else state.method = prevVal;
+  } else {
+    const summerOptions = [
+      { val: 'spin_micro', text: 'Спиннинг: Микроджиг / Мормышинг / Нано (0.2–4 г)' },
+      { val: 'spin_jig', text: 'Спиннинг: Джиг тяжелый / средний (10–45 г)' },
+      { val: 'spin_lure', text: 'Спиннинг: Блесны (колебалки, вертушки, воблеры)' },
+      { val: 'bottom', text: 'Донная снасть (Фидер / Пикер / Закидушка)' },
+      { val: 'float', text: 'Поплавочная снасть (Мах / Болонка / Сбирулино)' },
+      { val: 'fly', text: 'Нахлыст: Сухие / мокрые мушки, стримеры' },
+      { val: 'sea_rock', text: 'Морской рокфишинг / Ajing / Дроп-шот' },
+      { val: 'sea_surf', text: 'Морской сёрфкастинг с берега (тяжелая донка)' },
+      { val: 'sea_boat', text: 'Морской отвесный лов с борта (пилькеры, сабики)' }
+    ];
+    summerOptions.forEach(opt => {
+      const el = document.createElement('option');
+      el.value = opt.val;
+      el.textContent = opt.text;
+      sel.appendChild(el);
+    });
+    if (prevVal.startsWith('winter_')) state.method = 'spin_micro';
+    else state.method = prevVal;
+  }
+  sel.value = state.method;
+}
+
+function applyTheme(t) {
+  const root = document.documentElement;
+  const btn = document.getElementById('themeBtn');
+  let effectiveTheme = t;
+
+  if (t === 'auto') {
+    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    effectiveTheme = isDark ? 'dark' : 'light';
+    btn.innerHTML = '💻 Авто';
+  } else if (t === 'dark') {
+    btn.innerHTML = '🌙 Тёмная';
+  } else {
+    btn.innerHTML = '☀️ Светлая';
+  }
+
+  root.setAttribute('data-theme', effectiveTheme);
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute('content', effectiveTheme === 'dark' ? '#0b1120' : '#f1f5f9');
+  localStorage.setItem('pro_fish_theme', t);
+}
+
+function cycleTheme() {
+  const modes = ['auto', 'dark', 'light'];
+  let next = modes[(modes.indexOf(state.theme) + 1) % modes.length];
+  state.theme = next;
+  applyTheme(next);
+  renderAll();
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('pro_fish_theme') || 'auto';
+  state.theme = saved;
+  applyTheme(saved);
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (state.theme === 'auto') applyTheme('auto');
+  });
+}
+
 function switchMapLayer(key) {
   document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('l_' + key); if (btn) btn.classList.add('active');
+  const btn = document.getElementById('l_' + key);
+  if (btn) btn.classList.add('active');
   if (!mapInstance) return;
   if (currentTileLayer) mapInstance.removeLayer(currentTileLayer);
   const cfg = MAP_LAYERS[key] || MAP_LAYERS.topo;
@@ -665,32 +1121,48 @@ function switchMapLayer(key) {
 }
 
 function toggleMapDrawer() {
-  const dr = document.getElementById('mapDrawer'); dr.classList.toggle('open');
+  const dr = document.getElementById('mapDrawer');
+  dr.classList.toggle('open');
   if (dr.classList.contains('open')) {
     setTimeout(() => {
-      if (typeof L === 'undefined') { alert('Загрузка картографического движка...'); return; }
+      if (typeof L === 'undefined') {
+        alert('Загрузка картографического движка...');
+        return;
+      }
       if (!mapInstance) {
         mapInstance = L.map('mapBox').setView([state.lat, state.lon], 9);
         switchMapLayer('topo');
         mapMarker = L.marker([state.lat, state.lon]).addTo(mapInstance);
         mapInstance.on('click', e => setNewLocation(e.latlng.lat, e.latlng.lng));
-      } else { mapInstance.invalidateSize(); mapInstance.setView([state.lat, state.lon]); }
+      } else {
+        mapInstance.invalidateSize();
+        mapInstance.setView([state.lat, state.lon]);
+      }
     }, 150);
   }
 }
 
 async function searchPlaceByName() {
-  const q = document.getElementById('placeSearchInput').value.trim(); if (!q) return;
+  const q = document.getElementById('placeSearchInput').value.trim();
+  if (!q) return;
   try {
     const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=ru&format=json`);
     const data = await res.json();
     if (data.results && data.results.length > 0) {
       const p = data.results[0];
-      state.locCountry = p.country || 'РФ'; state.locAdmin1 = p.admin1 || ''; state.locAdmin2 = p.admin2 || p.name; state.locLabel = p.name;
-      updateLocationHeader(); await setNewLocation(p.latitude, p.longitude, true);
+      state.locCountry = p.country || 'РФ';
+      state.locAdmin1 = p.admin1 || '';
+      state.locAdmin2 = p.admin2 || p.name;
+      state.locLabel = p.name;
+      updateLocationHeader();
+      await setNewLocation(p.latitude, p.longitude, true);
       if (mapInstance) mapInstance.setView([p.latitude, p.longitude], 10);
-    } else { alert('Локация или водоем не найдены.'); }
-  } catch (e) { alert('Сбой геокодера.'); }
+    } else {
+      alert('Локация или водоем не найдены.');
+    }
+  } catch (e) {
+    alert('Сбой геокодера.');
+  }
 }
 
 function updateLocationHeader() {
@@ -700,45 +1172,65 @@ function updateLocationHeader() {
 }
 
 function detectMyGPS() {
-  if (!navigator.geolocation) { alert('Геолокация недоступна на устройстве.'); return; }
+  if (!navigator.geolocation) {
+    alert('Геолокация недоступна на устройстве.');
+    return;
+  }
   document.getElementById('apiStatus').textContent = 'Опрос GPS...';
   navigator.geolocation.getCurrentPosition(
-    pos => { setNewLocation(pos.coords.latitude, pos.coords.longitude); },
-    () => { alert('Включите доступ к GPS или укажите точку кликом на карте.'); if (!document.getElementById('mapDrawer').classList.contains('open')) toggleMapDrawer(); },
+    pos => {
+      setNewLocation(pos.coords.latitude, pos.coords.longitude);
+    },
+    () => {
+      alert('Включите доступ к GPS или укажите точку кликом на карте.');
+      if (!document.getElementById('mapDrawer').classList.contains('open')) toggleMapDrawer();
+    },
     { enableHighAccuracy: true, timeout: 8000 }
   );
 }
 
-let state = {
-  theme: 'auto', lat: 66.084, lon: 76.679, elevation: 45, normPress: 758,
-  locCountry: 'Россия', locAdmin1: 'ЯНАО', locAdmin2: 'г. Новый Уренгой', locLabel: 'Новый Уренгой',
-  basinCode: 'arctic_ob_taz', basinName: 'Обь-Тазовский бассейн (ЯНАО, Обь, Пур, Таз)',
-  showAllSpecies: false, fishId: 'chir', dayIdx: 0, method: 'winter_jig', water: 'small_river',
-  depth: 1.2, iceState: 'ice_safe', iceThickness: 18
-};
-let DAYS_DATA = [];
-
 function pickBestDefaultFish(regionalList) {
   const curMonth = new Date().getMonth();
-  const sorted = [...regionalList].filter(f => f.legal !== 'redbook').sort((a, b) => b.monthActivity[curMonth] - a.monthActivity[curMonth]);
+  const sorted = [...regionalList]
+    .filter(f => f.legal !== 'redbook')
+    .sort((a, b) => b.monthActivity[curMonth] - a.monthActivity[curMonth]);
   return sorted[0] ? sorted[0].id : regionalList[0].id;
 }
 
 function syncDepthLimitsWithWater(wType) {
   const prof = WATER_PROFILES[wType] || WATER_PROFILES.small_river;
-  const dRange = document.getElementById('depthRange'); const dValSpan = document.getElementById('depthVal'); const dNote = document.getElementById('depthLimitNote');
-  dRange.min = prof.minD; dRange.max = prof.maxD; dNote.textContent = `(от ${prof.minD} до ${prof.maxD} м)`;
-  if (state.depth < prof.minD) state.depth = prof.minD; if (state.depth > prof.maxD) state.depth = prof.maxD;
-  dRange.value = state.depth; dValSpan.textContent = state.depth.toFixed(1);
+  const dRange = document.getElementById('depthRange');
+  const dValSpan = document.getElementById('depthVal');
+  const dNote = document.getElementById('depthLimitNote');
+
+  dRange.min = prof.minD;
+  dRange.max = prof.maxD;
+  dNote.textContent = `(от ${prof.minD} до ${prof.maxD} м)`;
+
+  if (state.depth < prof.minD) state.depth = prof.minD;
+  if (state.depth > prof.maxD) state.depth = prof.maxD;
+  dRange.value = state.depth;
+  dValSpan.textContent = state.depth.toFixed(1);
 }
 
 async function setNewLocation(lat, lon, skipReverseGeo = false) {
-  state.lat = Math.round(lat * 10000) / 10000; state.lon = Math.round(lon * 10000) / 10000;
-  if (mapMarker && mapInstance) { mapMarker.setLatLng([state.lat, state.lon]); mapInstance.panTo([state.lat, state.lon]); }
+  state.lat = Math.round(lat * 10000) / 10000;
+  state.lon = Math.round(lon * 10000) / 10000;
+
+  if (mapMarker && mapInstance) {
+    mapMarker.setLatLng([state.lat, state.lon]);
+    mapInstance.panTo([state.lat, state.lon]);
+  }
+
   const basin = detectBasinByCoords(state.lat, state.lon);
-  state.basinCode = basin.code; state.basinName = basin.name;
+  state.basinCode = basin.code;
+  state.basinName = basin.name;
+
   const regionalList = getFilteredFishList();
-  if (!state.fishId || !regionalList.some(f => f.id === state.fishId)) { state.fishId = pickBestDefaultFish(regionalList); }
+  if (!state.fishId || !regionalList.some(f => f.id === state.fishId)) {
+    state.fishId = pickBestDefaultFish(regionalList);
+  }
+
   if (!skipReverseGeo) fetchLocationName(state.lat, state.lon);
   fetchNearbyWaters(state.lat, state.lon);
   await fetchLiveMeteo();
@@ -748,35 +1240,72 @@ async function fetchLocationName(lat, lon) {
   try {
     const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ru`);
     const data = await res.json();
-    state.locCountry = data.countryName || 'Россия'; state.locAdmin1 = data.principalSubdivision || ''; state.locAdmin2 = data.locality || data.city || ''; state.locLabel = data.city || data.locality || data.principalSubdivision || 'Координатная точка';
+    state.locCountry = data.countryName || 'Россия';
+    state.locAdmin1 = data.principalSubdivision || '';
+    state.locAdmin2 = data.locality || data.city || '';
+    state.locLabel = data.city || data.locality || data.principalSubdivision || 'Координатная точка';
     updateLocationHeader();
   } catch (e) {
-    state.locCountry = 'Россия'; state.locAdmin1 = `${lat.toFixed(2)}°N`; state.locAdmin2 = `${lon.toFixed(2)}°E`; state.locLabel = `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
+    state.locCountry = 'Россия';
+    state.locAdmin1 = `${lat.toFixed(2)}°N`;
+    state.locAdmin2 = `${lon.toFixed(2)}°E`;
+    state.locLabel = `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
     updateLocationHeader();
   }
 }
 
 async function fetchNearbyWaters(lat, lon) {
   const chipsEl = document.getElementById('nearbyChips');
-  chipsEl.innerHTML = `<span class="w-chip" style="opacity:0.7;">🔍 Сканирование гидрографии...</span>`;
-  const defaultWaters = getDefaultWatersByBasin(state.basinName);
-  const cacheKey = `nur_waters_${(Math.round(lat * 50) / 50).toFixed(2)}_${(Math.round(lon * 50) / 50).toFixed(2)}`;
+  chipsEl.innerHTML = `<span class="w-chip">Гидрологический поиск...</span>`;
 
-  try {
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) { renderWaterChips(JSON.parse(cached)); return; }
-  } catch (e) {}
+  let defaultWaters = [];
+  if (['black_azov', 'baltic', 'pacific_sea', 'barents_white'].includes(state.basinCode)) {
+    defaultWaters = [
+      { label: '🌊 Морская бухта / залив', wType: 'sea_gulf' },
+      { label: '⚓ Открытое море / банка', wType: 'open_sea' },
+      { label: '🌊 Приустьевой участок реки', wType: 'small_river' }
+    ];
+  } else if (state.basinCode === 'arctic_ob_taz') {
+    defaultWaters = [
+      { label: '🌊 р. Седе-Яха', wType: 'small_river' },
+      { label: '🌊 р. Ево-Яха', wType: 'small_river' },
+      { label: '⚓ р. Пур / Обь', wType: 'big_river' },
+      { label: '🌿 Озеро тундровое (сор)', wType: 'tundra_lake' },
+      { label: '💧 Песчаный карьер', wType: 'quarry' }
+    ];
+  } else if (state.basinCode === 'baikal') {
+    defaultWaters = [
+      { label: '⚓ Озеро Байкал (открытый)', wType: 'quarry' },
+      { label: '🌊 Малое Море / залив', wType: 'tundra_lake' },
+      { label: '🌊 р. Селенга / Ангара', wType: 'big_river' }
+    ];
+  } else if (state.basinCode === 'volga_caspian') {
+    defaultWaters = [
+      { label: '⚓ Русло Волги / Камы / Дона', wType: 'big_river' },
+      { label: '🌊 Протока / Ерик / Воложка', wType: 'small_river' },
+      { label: '💧 Водохранилище', wType: 'quarry' },
+      { label: '🌿 Ильмень / Затон', wType: 'tundra_lake' },
+      { label: '⚡ Теплый сброс ГРЭС', wType: 'cooling_reservoir' }
+    ];
+  } else {
+    defaultWaters = [
+      { label: '🌊 Малая / средняя река', wType: 'small_river' },
+      { label: '⚓ Магистральное русло', wType: 'big_river' },
+      { label: '💧 Карьер / водохранилище', wType: 'quarry' },
+      { label: '🌿 Озеро / старица', wType: 'tundra_lake' }
+    ];
+  }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6000);
-  const query = `[out:json][timeout:4];(way["waterway"="river"]["name"](around:25000,${lat},${lon});way["natural"="water"]["name"](around:25000,${lat},${lon}););out tags 10;`;
+  const timer = setTimeout(() => controller.abort(), 1800);
+  const query = `[out:json][timeout:3];(way["waterway"="river"]["name"](around:25000,${lat},${lon});way["natural"="water"]["name"](around:25000,${lat},${lon}););out tags 10;`;
 
   try {
     const res = await fetch('https://maps.mail.ru/osm/tools/overpass/api/interpreter?data=' + encodeURIComponent(query), { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!res.ok) throw new Error();
+    clearTimeout(timer);
     const data = await res.json();
-    const seen = new Set(); const items = [];
+    const seen = new Set();
+    const items = [];
 
     for (const el of (data.elements || [])) {
       const name = el.tags && (el.tags['name:ru'] || el.tags.name);
@@ -784,125 +1313,222 @@ async function fetchNearbyWaters(lat, lon) {
       seen.add(name);
       const isRiver = el.tags.waterway === 'river';
       const wType = isRiver
-        ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена|урал|исеть|тобол|тура|чусовая|белая|вятка|ока/i.test(name) ? 'big_river' : 'small_river')
+        ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена/i.test(name) ? 'big_river' : 'small_river')
         : (/губа|море|бухта|залив/i.test(name) ? 'sea_gulf' : (/карьер|вдхр|водохранилище/i.test(name) ? 'quarry' : 'tundra_lake'));
       const icon = isRiver ? '🌊 р. ' : '💧 ';
       items.push({ label: icon + name.replace(/^(река|озеро)\s+/i, ''), wType });
       if (items.length >= 6) break;
     }
-    if (items.length > 0) {
-      try { sessionStorage.setItem(cacheKey, JSON.stringify(items)); } catch(e){}
-      renderWaterChips(items); return;
-    }
-  } catch (e) { clearTimeout(timeoutId); }
-  renderWaterChips(defaultWaters);
-}
 
-function renderWaterChips(items) {
-  const chipsEl = document.getElementById('nearbyChips');
-  chipsEl.innerHTML = items.map((it, idx) => `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`).join('');
-  if (items.length > 0 && document.getElementById('waterSelect').value !== items[0].wType) {
-    state.water = items[0].wType; document.getElementById('waterSelect').value = items[0].wType; syncDepthLimitsWithWater(items[0].wType);
-  }
+    if (items.length > 0) {
+      chipsEl.innerHTML = items.map((it, idx) =>
+        `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`
+      ).join('');
+      return;
+    }
+  } catch (e) {}
+
+  clearTimeout(timer);
+  chipsEl.innerHTML = defaultWaters.map((it, idx) =>
+    `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`
+  ).join('');
 }
 
 function selectNearbyWater(el, wType) {
-  document.querySelectorAll('.w-chip').forEach(c => c.classList.remove('active')); el.classList.add('active');
-  state.water = wType; document.getElementById('waterSelect').value = wType; syncDepthLimitsWithWater(wType); renderAll();
+  document.querySelectorAll('.w-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  state.water = wType;
+  document.getElementById('waterSelect').value = wType;
+  syncDepthLimitsWithWater(wType);
+  renderAll();
 }
 
 function computeMoon(dateStr) {
-  const dt = new Date(dateStr + 'T12:00:00Z'); const syn = 29.53058867;
+  const dt = new Date(dateStr + 'T12:00:00Z');
+  const syn = 29.53058867;
   const age = (((dt - new Date('2026-10-16T04:52:00Z')) / 86400000) % syn + syn) % syn;
-  const ratio = age / syn; const illum = Math.round((1 - Math.cos(ratio * 2 * Math.PI)) * 50);
-  const moonDay = Math.max(1, Math.min(30, Math.floor(age) + 1)); const transitHour = Math.round((12 + ratio * 24) % 24);
+  const ratio = age / syn;
+  const illum = Math.round((1 - Math.cos(ratio * 2 * Math.PI)) * 50);
+  const moonDay = Math.max(1, Math.min(30, Math.floor(age) + 1));
+  const transitHour = Math.round((12 + ratio * 24) % 24);
   return { moonDay, illum, transitHour, underfootHour: (transitHour + 12) % 24 };
 }
 
 function buildFallback() {
   const dRu = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], mRu = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-  const startDt = new Date('2026-10-16T00:00:00'); DAYS_DATA = []; const temps = [];
+  const startDt = new Date('2026-10-16T00:00:00');
+  DAYS_DATA = [];
+  const temps = [];
+
   for (let i = 0; i < 14; i++) {
-    const cur = new Date(startDt.getTime() + i * 86400000); const dStr = cur.toISOString().split('T')[0];
-    const moon = computeMoon(dStr); const tMax = Math.round(-6 - i * 0.7); const tMin = tMax - 5; temps.push(tMax);
-    const p = Math.round(756 + Math.sin(i * 0.7) * 4); const dP = i === 0 ? -1 : Math.round(Math.cos(i) * 3); const w = Math.round(5 + Math.sin(i) * 2);
+    const cur = new Date(startDt.getTime() + i * 86400000);
+    const dStr = cur.toISOString().split('T')[0];
+    const moon = computeMoon(dStr);
+    const tMax = Math.round(-6 - i * 0.7);
+    const tMin = tMax - 5;
+    temps.push(tMax);
+    const p = Math.round(756 + Math.sin(i * 0.7) * 4);
+    const dP = i === 0 ? -1 : Math.round(Math.cos(i) * 3);
+    const w = Math.round(5 + Math.sin(i) * 2);
+
     const hours = [];
     for (let h = 0; h < 24; h++) {
       const wave = Math.sin(((h - 5) / 24) * 2 * Math.PI);
-      hours.push({ hour: h, tAir: Math.round((tMin + (tMax - tMin) * ((wave + 1) / 2)) * 10) / 10, press: Math.round(p + (dP * (h - 12)) / 24), dp3h: Math.round((dP / 8) * 10) / 10, wind: Math.max(1, w), windDir: 'СЗ', cloud: 85, precip: 0.1 });
+      hours.push({
+        hour: h,
+        tAir: Math.round((tMin + (tMax - tMin) * ((wave + 1) / 2)) * 10) / 10,
+        press: Math.round(p + (dP * (h - 12)) / 24),
+        dp3h: Math.round((dP / 8) * 10) / 10,
+        wind: Math.max(1, w),
+        windDir: 'СЗ', cloud: 85, precip: 0.1
+      });
     }
-    DAYS_DATA.push({ date: dStr, label: `${dRu[cur.getDay()]}, ${cur.getDate()} ${mRu[cur.getMonth()]}`, tDay: tMax, tNight: tMin, pressAvg: p, dP, windMax: w, windDir: 'СЗ', sunriseHr: 7.4 + i * 0.05, sunsetHr: 16.7 - i * 0.05, waterTemp: Math.max(0.1, 1.2 - i * 0.08), moon, hours });
+
+    DAYS_DATA.push({
+      date: dStr,
+      label: `${dRu[cur.getDay()]}, ${cur.getDate()} ${mRu[cur.getMonth()]}`,
+      tDay: tMax, tNight: tMin, pressAvg: p, dP, windMax: w, windDir: 'СЗ',
+      sunriseHr: 7.4 + i * 0.05, sunsetHr: 16.7 - i * 0.05,
+      waterTemp: Math.max(0.1, 1.2 - i * 0.08),
+      moon, hours
+    });
   }
   evaluateIceCondition(temps);
 }
 
 async function fetchLiveMeteo() {
-  const st = document.getElementById('apiStatus'); st.textContent = 'Опрос метеосети...';
+  const st = document.getElementById('apiStatus');
+  st.textContent = 'Опрос метеосети...';
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}&hourly=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,wind_speed_10m_max,wind_direction_10m_dominant&forecast_days=14&wind_speed_unit=ms&timezone=auto&_cb=${Date.now()}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error();
     const data = await res.json();
-    state.elevation = Math.round(data.elevation || 45); state.normPress = Math.round(760 - (state.elevation / 11.5));
+
+    state.elevation = Math.round(data.elevation || 45);
+    state.normPress = Math.round(760 - (state.elevation / 11.5));
+
     const dRu = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], mRu = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'], dirs = ['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'];
     const allP = data.hourly.surface_pressure.map(v => v * 0.750062);
+
     DAYS_DATA = data.daily.time.map((dStr, i) => {
-      const dt = new Date(dStr + 'T00:00:00'); const srD = new Date(data.daily.sunrise[i]), ssD = new Date(data.daily.sunset[i]);
-      const hours = []; let sumP = 0;
+      const dt = new Date(dStr + 'T00:00:00');
+      const srD = new Date(data.daily.sunrise[i]), ssD = new Date(data.daily.sunset[i]);
+      const hours = [];
+      let sumP = 0;
       for (let h = 0; h < 24; h++) {
-        const g = i * 24 + h; const pMm = allP[g] || 755; sumP += pMm;
-        hours.push({ hour: h, tAir: Math.round((data.hourly.temperature_2m[g] || 0) * 10) / 10, press: Math.round(pMm), dp3h: Math.round((pMm - (g >= 3 ? allP[g - 3] : pMm)) * 10) / 10, wind: Math.round((data.hourly.wind_speed_10m[g] || 3) * 10) / 10, windDir: dirs[Math.round(((data.hourly.wind_direction_10m[g] || 0) / 45)) % 8], cloud: data.hourly.cloud_cover[g] || 50, precip: data.hourly.precipitation[g] || 0 });
+        const g = i * 24 + h;
+        const pMm = allP[g] || 755;
+        sumP += pMm;
+        hours.push({
+          hour: h,
+          tAir: Math.round((data.hourly.temperature_2m[g] || 0) * 10) / 10,
+          press: Math.round(pMm),
+          dp3h: Math.round((pMm - (g >= 3 ? allP[g - 3] : pMm)) * 10) / 10,
+          wind: Math.round((data.hourly.wind_speed_10m[g] || 3) * 10) / 10,
+          windDir: dirs[Math.round(((data.hourly.wind_direction_10m[g] || 0) / 45)) % 8],
+          cloud: data.hourly.cloud_cover[g] || 50,
+          precip: data.hourly.precipitation[g] || 0
+        });
       }
-      const pAvg = Math.round(sumP / 24); const prevAvg = i > 0 ? Math.round(allP.slice((i-1)*24, i*24).reduce((a,b)=>a+b,0)/24) : pAvg;
+      const pAvg = Math.round(sumP / 24);
+      const prevAvg = i > 0 ? Math.round(allP.slice((i-1)*24, i*24).reduce((a,b)=>a+b,0)/24) : pAvg;
       const meanT = (data.daily.temperature_2m_max[i] + data.daily.temperature_2m_min[i]) / 2;
       return {
-        date: dStr, label: `${dRu[dt.getDay()]}, ${dt.getDate()} ${mRu[dt.getMonth()]}`, tDay: Math.round(data.daily.temperature_2m_max[i]), tNight: Math.round(data.daily.temperature_2m_min[i]), pressAvg: pAvg, dP: i === 0 ? Math.round(allP[23] - allP[0]) : (pAvg - prevAvg), windMax: Math.round(data.daily.wind_speed_10m_max[i]), windDir: dirs[Math.round(((data.daily.wind_direction_10m_dominant[i] || 0) / 45)) % 8], sunriseHr: srD.getHours() + srD.getMinutes()/60, sunsetHr: ssD.getHours() + ssD.getMinutes()/60,
-        waterTemp: state.water === 'cooling_reservoir' ? Math.max(16, Math.min(30, Math.round((meanT * 0.3 + 18) * 10) / 10)) : Math.max(0.1, Math.min(24, Math.round((meanT * 0.50 + 2.5) * 10) / 10)), moon: computeMoon(dStr), hours
+        date: dStr, label: `${dRu[dt.getDay()]}, ${dt.getDate()} ${mRu[dt.getMonth()]}`,
+        tDay: Math.round(data.daily.temperature_2m_max[i]), tNight: Math.round(data.daily.temperature_2m_min[i]),
+        pressAvg: pAvg, dP: i === 0 ? Math.round(allP[23] - allP[0]) : (pAvg - prevAvg),
+        windMax: Math.round(data.daily.wind_speed_10m_max[i]),
+        windDir: dirs[Math.round(((data.daily.wind_direction_10m_dominant[i] || 0) / 45)) % 8],
+        sunriseHr: srD.getHours() + srD.getMinutes()/60, sunsetHr: ssD.getHours() + ssD.getMinutes()/60,
+        waterTemp: state.water === 'cooling_reservoir'
+          ? Math.max(16, Math.min(30, Math.round((meanT * 0.3 + 18) * 10) / 10))
+          : Math.max(0.1, Math.min(24, Math.round((meanT * 0.50 + 2.5) * 10) / 10)),
+        moon: computeMoon(dStr), hours
       };
     });
+
     evaluateIceCondition(data.daily.temperature_2m_max);
-    st.textContent = 'Онлайн • 14 дней'; renderAll();
-  } catch (e) { st.textContent = 'Автономный режим'; renderAll(); }
+    st.textContent = 'Онлайн • 14 дней';
+    renderAll();
+  } catch (e) {
+    st.textContent = 'Автономный режим';
+    renderAll();
+  }
 }
 
 function calcHourly(fish, day, hrObj, method, water, depth) {
   if (fish.legal === 'redbook') return 0;
   if (depth > fish.depthMax) return 4;
   if (state.iceState === 'ice_danger' && !method.startsWith('winter_')) return 8;
+
+  // Термический фактор воды: теплолюбивые виды впадают в оцепенение при T < tMinStop
   if (day.waterTemp < fish.tMinStop) return 5;
+
   let depthFactor = 1.0;
-  if (depth <= 0.8 && (method === 'spin_micro' || method === 'float')) { if (['bleak', 'grayling', 'roach', 'chub', 'trout', 'ide', 'tugun', 'dace', 'rudd'].includes(fish.id)) depthFactor = 1.15; }
-  else if (depth < fish.depthOpt[0]) { depthFactor = Math.max(0.35, 1.0 - (fish.depthOpt[0] - depth) * 0.25); }
-  else if (depth > fish.depthOpt[1]) { depthFactor = Math.max(0.20, 1.0 - (depth - fish.depthOpt[1]) / (fish.depthMax - fish.depthOpt[1])); }
+  if (depth <= 0.8 && (method === 'spin_micro' || method === 'float')) {
+    if (['bleak', 'grayling', 'roach', 'chub', 'trout', 'ide', 'tugun', 'dace', 'rudd'].includes(fish.id)) depthFactor = 1.15;
+  } else if (depth < fish.depthOpt[0]) {
+    depthFactor = Math.max(0.35, 1.0 - (fish.depthOpt[0] - depth) * 0.25);
+  } else if (depth > fish.depthOpt[1]) {
+    depthFactor = Math.max(0.20, 1.0 - (depth - fish.depthOpt[1]) / (fish.depthMax - fish.depthOpt[1]));
+  }
+
   let methodFactor = 0.75;
-  if (method === 'winter_livebait') { methodFactor = fish.type === 'predator' ? 1.08 : 0.05; }
-  else if (method === 'winter_lure') { methodFactor = ['perch', 'pike', 'zander', 'grayling', 'smelt', 'trout', 'cod', 'navaga', 'lenok', 'volga_zander'].includes(fish.id) ? 1.05 : 0.15; }
-  else if (method === 'winter_jig') { methodFactor = ['chir', 'pizhyan', 'peled', 'cisco', 'roach', 'perch', 'whitefish', 'ruffe', 'smelt', 'bream', 'ide', 'dace', 'white_bream'].includes(fish.id) ? 1.08 : 0.40; }
-  else if (method === 'winter_stuka') { methodFactor = ['burbot', 'cod', 'halibut', 'navaga'].includes(fish.id) ? 1.25 : 0.15; }
-  else if (method === 'winter_cisco') { methodFactor = ['cisco', 'peled', 'smelt', 'whitefish', 'herring'].includes(fish.id) ? 1.25 : 0.20; }
-  else if (method === 'fly') { methodFactor = ['grayling', 'lenok', 'salmon', 'trout', 'chub', 'ide', 'tugun', 'dace', 'brown_trout'].includes(fish.id) ? 1.20 : 0.15; }
-  else if (method === 'sea_rock' || method === 'sea_surf' || method === 'sea_boat') { methodFactor = fish.habitat === 'sea' ? 1.15 : 0.15; }
+  if (method === 'winter_livebait') {
+    methodFactor = fish.type === 'predator' ? 1.08 : 0.05;
+  } else if (method === 'winter_lure') {
+    methodFactor = ['perch', 'pike', 'zander', 'grayling', 'smelt', 'trout', 'cod', 'navaga', 'lenok', 'volga_zander'].includes(fish.id) ? 1.05 : 0.15;
+  } else if (method === 'winter_jig') {
+    methodFactor = ['chir', 'pizhyan', 'peled', 'cisco', 'roach', 'perch', 'whitefish', 'ruffe', 'smelt', 'bream', 'ide', 'dace', 'white_bream'].includes(fish.id) ? 1.08 : 0.40;
+  } else if (method === 'winter_stuka') {
+    methodFactor = ['burbot', 'cod', 'halibut', 'navaga'].includes(fish.id) ? 1.25 : 0.15;
+  } else if (method === 'winter_cisco') {
+    methodFactor = ['cisco', 'peled', 'smelt', 'whitefish', 'herring'].includes(fish.id) ? 1.25 : 0.20;
+  } else if (method === 'fly') {
+    methodFactor = ['grayling', 'lenok', 'salmon', 'trout', 'chub', 'ide', 'tugun', 'dace', 'brown_trout'].includes(fish.id) ? 1.20 : 0.15;
+  } else if (method === 'sea_rock' || method === 'sea_surf' || method === 'sea_boat') {
+    methodFactor = fish.habitat === 'sea' ? 1.15 : 0.15;
+  }
+
   const h = hrObj.hour, sr = day.sunriseHr, ss = day.sunsetHr;
   const dSr = Math.abs(h + 0.5 - sr), dSs = Math.abs(h + 0.5 - ss);
   const isDay = (h + 0.5 >= sr - 0.5) && (h + 0.5 <= ss + 0.5);
+
   let kLight = 0.25;
-  if (fish.feedMode === 'nocturnal') { kLight = !isDay ? 1.05 : ((dSs <= 1.2 || dSr <= 1.0) ? 0.75 : 0.15); }
-  else if (fish.feedMode === 'crepuscular') { kLight = (dSr <= 1.5 || dSs <= 1.5) ? 1.05 : (isDay ? 0.85 : 0.20); }
-  else if (fish.feedMode === 'diurnal') { kLight = isDay ? 1.0 : 0.10; }
-  else { kLight = 0.80; }
+  if (fish.feedMode === 'nocturnal') {
+    kLight = !isDay ? 1.05 : ((dSs <= 1.2 || dSr <= 1.0) ? 0.75 : 0.15);
+  } else if (fish.feedMode === 'crepuscular') {
+    kLight = (dSr <= 1.5 || dSs <= 1.5) ? 1.05 : (isDay ? 0.85 : 0.20);
+  } else if (fish.feedMode === 'diurnal') {
+    kLight = isDay ? 1.0 : 0.10;
+  } else {
+    kLight = 0.80;
+  }
+
   let kSeason = fish.coldFactor;
-  if (state.iceState === 'ice_safe' && ['crucian', 'carp', 'tench', 'catfish', 'mullet', 'mackerel', 'crayfish', 'silver_carp', 'grass_carp', 'tilapia', 'channel_catfish', 'buffalo'].includes(fish.id)) { kSeason = 0.05; }
+  if (state.iceState === 'ice_safe' && ['crucian', 'carp', 'tench', 'catfish', 'mullet', 'mackerel', 'crayfish', 'silver_carp', 'grass_carp', 'tilapia', 'channel_catfish', 'buffalo'].includes(fish.id)) {
+    kSeason = 0.05;
+  }
+
   const dTr = Math.min(Math.abs(h - day.moon.transitHour), 24 - Math.abs(h - day.moon.transitHour));
   const kSol = (dTr <= 1.5) ? 1.12 : 1.0;
+
   const md = day.moon.moonDay;
   const kMoon = ((md >= 4 && md <= 9) || (md >= 18 && md <= 23)) ? 1.08 : ((md <= 2 || md >= 29) ? 0.75 : 0.90);
+
   const depthBuffer = Math.min(1.4, 0.8 + depth * 0.05);
   const pDiff = Math.abs(hrObj.press - state.normPress) / depthBuffer;
   const grad = Math.abs(hrObj.dp3h) * 2.2;
   let kPress = Math.max(0.35, 1.0 - (pDiff * 0.01 + grad * 0.035) * fish.bladderSens);
+
   if (fish.id === 'burbot' && (hrObj.dp3h < 0 || hrObj.precip > 0)) kPress = Math.min(1.2, kPress + 0.18);
+
   let kWea = 1.0;
-  if (state.iceState !== 'ice_safe' && fish.id !== 'burbot') { kWea = Math.max(0.45, 1.0 - Math.max(0, hrObj.wind - 4.0) * 0.05); }
+  if (state.iceState !== 'ice_safe' && fish.id !== 'burbot') {
+    kWea = Math.max(0.45, 1.0 - Math.max(0, hrObj.wind - 4.0) * 0.05);
+  }
+
   return Math.max(4, Math.min(98, Math.round(92 * kSeason * kLight * kSol * kMoon * kPress * kWea * methodFactor * depthFactor)));
 }
 
@@ -913,147 +1539,321 @@ function calcDayBest(fish, day, method, water, depth) {
 }
 
 function calcDynamicRig(method, water, depth, wind) {
-  const prof = WATER_PROFILES[water] || WATER_PROFILES.small_river; const flowCoeff = prof.flow;
+  const prof = WATER_PROFILES[water] || WATER_PROFILES.small_river;
+  const flowCoeff = prof.flow;
+
   if (method === 'winter_jig') {
     const w = Math.min(3.5, Math.max(0.4, Math.round((depth * 0.35 * flowCoeff) * 10) / 10));
-    return { weight: `Вольфрамовая мормышка ${w} г`, line: 'Зимний монофил 0.09–0.12 мм (флюр)', tactic: 'Плавный подъем с высокочастотной дрожью на 30–50 см и постукиванием о дно' };
+    return {
+      weight: `Вольфрамовая мормышка ${w} г`,
+      line: 'Зимний монофил 0.09–0.12 мм (флюр)',
+      tactic: 'Плавный подъем с высокочастотной дрожью на 30–50 см и постукиванием о дно'
+    };
   }
+
   if (method === 'winter_cisco') {
-    return { weight: 'Нижнее грузило / пилькер 6–14 г', line: 'Основная 0.14 мм, поводки 0.10 мм (3–5 микромормышек)', tactic: 'Плавное покачивание гирлянды в толще воды под нижней кромкой льда' };
+    return {
+      weight: 'Нижнее грузило / пилькер 6–14 г',
+      line: 'Основная 0.14 мм, поводки 0.10 мм (3–5 микромормышек)',
+      tactic: 'Плавное покачивание гирлянды в толще воды под нижней кромкой льда'
+    };
   }
+
   if (method === 'winter_lure') {
     const w = Math.min(32, Math.max(5, Math.round(depth * 2.0 * flowCoeff)));
-    return { weight: `Балансир / Виб / Вертикалка ${w} г`, line: 'Шнур #0.8 PE + поводок флюорокарбон 0.35 мм', tactic: 'Короткий взмах 15–20 см, сброс, зависание и пауза 4–6 секунд' };
+    return {
+      weight: `Балансир / Виб / Вертикалка ${w} г`,
+      line: 'Шнур #0.8 PE + поводок флюорокарбон 0.35 мм',
+      tactic: 'Короткий взмах 15–20 см, сброс, зависание и пауза 4–6 секунд'
+    };
   }
+
   if (method === 'winter_stuka') {
     const w = Math.min(65, Math.max(20, Math.round(depth * 3.5 * flowCoeff)));
-    return { weight: `Блесна-стукалка ${w} г с подсадкой нарезки`, line: 'Мононить 0.35–0.45 мм без поводка', tactic: 'Ритмичные удары по каменистому дну с паузой 3–5 секунд' };
+    return {
+      weight: `Блесна-стукалка ${w} г с подсадкой нарезки`,
+      line: 'Мононить 0.35–0.45 мм без поводка',
+      tactic: 'Ритмичные удары по каменистому дну с паузой 3–5 секунд'
+    };
   }
+
   if (method === 'winter_livebait') {
-    return { weight: `Скользящая оливка ${Math.max(6, Math.round(depth * 1.6 * flowCoeff))} г`, line: 'Мононить 0.35 мм, поводок флюр 0.45 мм', tactic: 'Живец (сорожка, карасик, ерш) в 30 см от дна' };
+    return {
+      weight: `Скользящая оливка ${Math.max(6, Math.round(depth * 1.6 * flowCoeff))} г`,
+      line: 'Мононить 0.35 мм, поводок флюр 0.45 мм (или 7-жильная струна на щуку)',
+      tactic: 'Живец (сорожка, карасик, ерш) в 30 см от дна'
+    };
   }
+
   if (method === 'spin_micro') {
     const w = Math.min(4.5, Math.max(0.4, Math.round((depth * 0.7 * flowCoeff) * 10) / 10));
-    return { weight: `${w} г (Чебурашка / Мормышка)`, line: 'Шнур #0.2–#0.3 PE + поводковый флюр 0.12 мм', tactic: 'Мормодрожь, ступенчатая проводка с касанием дна' };
+    return {
+      weight: `${w} г (Чебурашка / Мормышка)`,
+      line: 'Шнур #0.2–#0.3 PE + поводковый флюр 0.12 мм',
+      tactic: 'Мормодрожь, ступенчатая проводка с касанием дна'
+    };
   }
+
   if (method === 'fly') {
-    return { weight: 'Плавающий шнур WF-4/5-F + подлесок 9 ft', line: 'Типпет 0.12–0.16 мм', tactic: 'Подача под углом 45 градусов вниз по струе с контролем сноса петли' };
+    return {
+      weight: 'Плавающий шнур WF-4/5-F + подлесок 9 ft',
+      line: 'Типпет 0.12–0.16 мм',
+      tactic: 'Подача под углом 45 градусов вниз по струе с контролем сноса петли'
+    };
   }
-  return { weight: `${Math.max(15, Math.round(depth * 3.8 * flowCoeff))} г`, line: 'Шнур #1.0–#1.5 PE или леска 0.30 мм', tactic: 'Классическая джиговая или донная подача с контролем дна' };
+
+  return {
+    weight: `${Math.max(15, Math.round(depth * 3.8 * flowCoeff))} г`,
+    line: 'Шнур #1.0–#1.5 PE или леска 0.30 мм',
+    tactic: 'Классическая джиговая или донная подача с контролем дна'
+  };
 }
 
 function generateAdaptiveGuides(fish, water, depth, day) {
   let standAdvice = '';
-  if (fish.legal === 'redbook') { standAdvice = `⛔ <b>ОСОБЫЙ СТАТУС:</b> ${fish.name} включена в Красную книгу РФ. Вылов категорически запрещен!`; }
-  else if (fish.legal === 'introduced') { standAdvice = `⚡ <b>Интродуцент:</b> ${fish.name} обитает в водоемах-охладителях ГРЭС. При температуре воды ниже ${fish.tMinStop}°C впадает в оцепенение.`; }
-  else if (state.iceState === 'ice_safe') { standAdvice = `❄️ <b>Подледный горизонт (лед ~${state.iceThickness} см):</b> ${fish.name} держится на глубине ${depth} м. Зимой ключевую роль играют проточные участки.`; }
-  else if (state.iceState === 'ice_danger') { standAdvice = `⚠️ <b>Опасный период ледостава:</b> Выход на лед смертельно опасен, а открытая вода забита шугой.`; }
-  else if (fish.habitat === 'sea') { standAdvice = `🌊 <b>Морская акватория:</b> ${fish.name} занимает каменистые гряды, рифы и банки на горизонте ${depth} м. ${fish.baseAdvice}`; }
-  else { standAdvice = `На глубине ${depth} м (${WATER_PROFILES[water].name}) ${fish.name} занимает характерный микрорельеф. ${fish.baseAdvice}`; }
+  
+  if (fish.legal === 'redbook') {
+    standAdvice = `⛔ <b>ОСОБЫЙ СТАТУС:</b> ${fish.name} включена в Красную книгу РФ или региональные Красные книги. Вылов категорически запрещен! При случайной поимке особь должна быть незамедлительно возвращена в естественную среду обитания.`;
+  } else if (fish.legal === 'introduced') {
+    standAdvice = `⚡ <b>Интродуцент / Теплолюбивый вид:</b> ${fish.name} обитает в водоемах-охладителях ГРЭС/АЭС, прудовых хозяйствах и южных реках. При температуре воды ниже ${fish.tMinStop}°C впадает в оцепенение и не кормится.`;
+  } else if (state.iceState === 'ice_safe') {
+    standAdvice = `❄️ <b>Подледный горизонт (лед ~${state.iceThickness} см):</b> ${fish.name} держится на глубине ${depth} м. Зимой ключевую роль играют проточные участки, выходы русловых родников и плесы с достаточным кислородом.`;
+  } else if (state.iceState === 'ice_danger') {
+    standAdvice = `⚠️ <b>Опасный период ледостава:</b> Рыбалка крайне ограничена. Выход на лед смертельно опасен, а открытая вода забита шугой и заберегами.`;
+  } else if (fish.habitat === 'sea') {
+    standAdvice = `🌊 <b>Морская акватория:</b> ${fish.name} занимает каменистые гряды, рифы и песчаные банки на горизонте ${depth} м. ${fish.baseAdvice}`;
+  } else {
+    standAdvice = `На глубине ${depth} м (${WATER_PROFILES[water].name}) ${fish.name} занимает характерный микрорельеф. ${fish.baseAdvice}`;
+  }
 
-  let tackleAdvice = fish.legal === 'redbook' ? 'Любые любительские снасти запрещены.' : `Рекомендуемый монтаж: <b>${calcDynamicRig(state.method, water, depth, day.windMax).weight}</b> (${calcDynamicRig(state.method, water, depth, day.windMax).line}). ${calcDynamicRig(state.method, water, depth, day.windMax).tactic}. Профильная снасть: ${fish.topGear}`;
+  const rigInfo = calcDynamicRig(state.method, water, depth, day.windMax);
+  let tackleAdvice = fish.legal === 'redbook'
+    ? 'Любые любительские снасти по данному виду запрещены к применению.'
+    : `Рекомендуемый монтаж: <b>${rigInfo.weight}</b> (${rigInfo.line}). ${rigInfo.tactic}. Профильная снасть: ${fish.topGear}`;
+
   let baitAdvice = '';
-  if (fish.legal === 'redbook') { baitAdvice = 'Вид под строгой государственной охраной.'; }
-  else if (['silver_carp'].includes(fish.id)) { baitAdvice = 'Технопланктон (зеленый, топленое молоко).'; }
-  else if (['grass_carp'].includes(fish.id)) { baitAdvice = 'Молодой камыш, огурец, кукуруза.'; }
-  else if (['tilapia', 'channel_catfish', 'buffalo'].includes(fish.id)) { baitAdvice = 'Куриная печень, резка рыбы, пучок червей.'; }
-  else if (['crayfish', 'crab', 'king_crab'].includes(fish.id)) { baitAdvice = 'Свежая сельдь, рыбьи головы в сетке.'; }
-  else if (fish.habitat === 'sea') { baitAdvice = 'Морской рацион: нереис, резка наваги, мясо креветки.'; }
-  else if (['chir', 'pizhyan', 'peled', 'cisco', 'whitefish'].includes(fish.id)) { baitAdvice = 'Северный рацион: живой мотыль, бокоплав, опарыш, подвески из бисера.'; }
-  else if (state.method === 'winter_livebait') { baitAdvice = `Идеальный живец под хищника — мелкая плотва, ерш или пескарь.`; }
-  else if (state.iceState === 'ice_safe') { baitAdvice = 'Зимний рацион: мотыль, бокоплав, кусочки ерша.'; }
-  else { baitAdvice = day.waterTemp <= 8.0 ? 'Холодная вода: животный рацион (мотыль, червь, резка рыбы).' : 'Теплая вода: активный силикон, крэнки, растительные насадки.'; }
+  if (fish.legal === 'redbook') {
+    baitAdvice = 'Вид под строгой государственной охраной.';
+  } else if (['silver_carp'].includes(fish.id)) {
+    baitAdvice = 'Специализированный прессованный технопланктон (зеленый, оригинальный, топленое молоко), создающий облако мути.';
+  } else if (['grass_carp'].includes(fish.id)) {
+    baitAdvice = 'Молодой камыш, сочный огурец, водоросли, кукуруза, плавающие травяные бойлы.';
+  } else if (['tilapia', 'channel_catfish', 'buffalo'].includes(fish.id)) {
+    baitAdvice = 'Куриная печень, резка рыбы, креветка, пучок навозных червей, кукуруза с коноплей.';
+  } else if (['crayfish', 'crab', 'king_crab'].includes(fish.id)) {
+    baitAdvice = 'Приманка: свежая сельдь, мясо мидии, рыбьи головы в сетчатом садке.';
+  } else if (fish.habitat === 'sea') {
+    baitAdvice = 'Морской рацион: нереис (пескожил), полоски наваги или сельди, мясо креветки, яркие пилькеры.';
+  } else if (['chir', 'pizhyan', 'peled', 'cisco', 'whitefish'].includes(fish.id)) {
+    baitAdvice = 'Северный рацион сигов: пучок свежего мотыля, бокоплав (мормыш), личинка короеда, опарыш, подвески из бисера.';
+  } else if (state.method === 'winter_livebait') {
+    baitAdvice = `Идеальный живец под хищника — мелкая плотва (сорожка), ерш со дна или пескарь.`;
+  } else if (state.iceState === 'ice_safe') {
+    baitAdvice = 'Зимний рацион: живой мотыль, бокоплав, кусочки ерша, безнасадочные мормышки с подвесными пайетками.';
+  } else {
+    baitAdvice = day.waterTemp <= 8.0 
+      ? 'Холодная вода: животный рацион (мотыль, червь, резка рыбы), пассивная подача приманки с паузами.'
+      : 'Теплая вода: активный силикон, крэнки, вертушки, растительные насадки (кукуруза, перловка, горох).';
+  }
+
   return { standAdvice, tackleAdvice, baitAdvice };
 }
 
-function fmtHM(fHr) { const h = Math.floor(fHr), m = Math.round((fHr - h) * 60); return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; }
+function fmtHM(fHr) {
+  const h = Math.floor(fHr), m = Math.round((fHr - h) * 60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
 
 function renderThreeDayVerdict(fish) {
-  const box = document.getElementById('threeDayBox'); const days3 = DAYS_DATA.slice(0, 3);
+  const box = document.getElementById('threeDayBox');
+  const days3 = DAYS_DATA.slice(0, 3);
+
   box.innerHTML = days3.map((d, idx) => {
     const scWeather = calcDayBest(fish, d, state.method, state.water, state.depth);
-    const md = d.moon.moonDay; const isMoonGood = (md >= 4 && md <= 9) || (md >= 18 && md <= 23); const isMoonBad = (md <= 2 || md >= 29 || (md >= 14 && md <= 16));
+    const md = d.moon.moonDay;
+    const isMoonGood = (md >= 4 && md <= 9) || (md >= 18 && md <= 23);
+    const isMoonBad = (md <= 2 || md >= 29 || (md >= 14 && md <= 16));
     const moonText = isMoonGood ? 'По луне жор' : (isMoonBad ? 'Лунный спад' : 'Умеренная луна');
     const moonClass = isMoonGood ? 'good' : (isMoonBad ? 'bad' : 'warn');
-    let weaText = 'Погода отличная', weaClass = 'good';
+
+    let weaText = 'Погода отличная';
+    let weaClass = 'good';
     if (fish.legal === 'redbook') { weaText = 'Вылов запрещен'; weaClass = 'bad'; }
     else if (d.waterTemp < fish.tMinStop) { weaText = 'Анабиоз (холод)'; weaClass = 'bad'; }
     else if (state.iceState === 'ice_danger') { weaText = 'Опасный ледостав'; weaClass = 'bad'; }
     else if (scWeather < 35) { weaText = 'Слабый клев'; weaClass = 'bad'; }
     else if (scWeather < 65) { weaText = 'Умеренный клев'; weaClass = 'warn'; }
+
     const isTotalGood = scWeather >= 50 && !isMoonBad && state.iceState !== 'ice_danger' && fish.legal !== 'redbook';
     const thumbIcon = fish.legal === 'redbook' ? '⛔' : (isTotalGood ? '👍' : '👎');
+
     const reasons = [];
-    if (fish.legal === 'redbook') { reasons.push('Вид занесен в Красную книгу РФ'); }
-    else if (d.waterTemp < fish.tMinStop) { reasons.push(`Вода слишком холодная (~${d.waterTemp}°C), вид в оцепенении`); }
-    else {
+    if (fish.legal === 'redbook') {
+      reasons.push('Вид занесен в Красную книгу РФ');
+    } else if (d.waterTemp < fish.tMinStop) {
+      reasons.push(`Вода слишком холодная (~${d.waterTemp}°C), вид в оцепенении`);
+    } else {
       if (state.iceState === 'ice_safe') reasons.push(`Подледная ловля, монолит ~${state.iceThickness} см, воздух ${d.tDay}°C`);
       else if (state.iceState === 'ice_danger') reasons.push(`Ледостав не сформирован (~${state.iceThickness} см), выход запрещен`);
       else reasons.push(`Открытая вода (~${d.waterTemp}°C), температура воздуха ${d.tDay}°C`);
-      if (Math.abs(d.dP) >= 4) reasons.push(`Барический перепад ${Math.abs(d.dP)} мм рт. ст.`); else reasons.push('Стабильное барическое поле');
+
+      if (Math.abs(d.dP) >= 4) reasons.push(`Барический перепад ${Math.abs(d.dP)} мм рт. ст.`);
+      else reasons.push('Стабильное барическое поле');
     }
+
     const dayName = idx === 0 ? 'Сегодня' : (idx === 1 ? 'Завтра' : 'Послезавтра');
-    return `<div class="quick-verdict-card"><div class="qv-left"><div class="qv-date">${dayName}: ${d.label.split(',')[0]}</div><div class="qv-badges"><span class="qv-tag ${weaClass}">${weaText}</span><span class="qv-tag ${moonClass}">${moonText}</span></div></div><div class="qv-desc">• ${reasons.join('.<br>• ')}.</div><div class="qv-icon">${thumbIcon}</div></div>`;
+
+    return `<div class="quick-verdict-card">
+      <div class="qv-left">
+        <div class="qv-date">${dayName}: ${d.label.split(',')[0]}</div>
+        <div class="qv-badges">
+          <span class="qv-tag ${weaClass}">${weaText}</span>
+          <span class="qv-tag ${moonClass}">${moonText}</span>
+        </div>
+      </div>
+      <div class="qv-desc">
+        • ${reasons.join('.<br>• ')}.
+      </div>
+      <div class="qv-icon">${thumbIcon}</div>
+    </div>`;
   }).join('');
 }
 
 function renderAnnualCalendar(fish) {
   document.getElementById('annualTitle').textContent = `Годовой биоритм: ${fish.name}`;
-  const mNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек']; const curMonth = new Date().getMonth();
+  const mNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const curMonth = new Date().getMonth();
+
   const banner = document.getElementById('annualBanner');
-  banner.innerHTML = `<div class="banner-stat"><div class="b-lbl">Период размножения (нерест)</div><div class="b-val" style="color:#f43f5e;">${fish.spawnMonth.map(m => mNames[m-1]).join(' – ')}</div></div><div class="banner-stat"><div class="b-lbl">Правовой статус / Ограничения</div><div class="b-val" style="color:${fish.legal === 'redbook' ? 'var(--bad)' : (fish.legal === 'introduced' ? 'var(--badge-purple-text)' : 'var(--warn)')};">${fish.banMonths}</div></div><div class="banner-stat"><div class="b-lbl">Сезон максимального клева</div><div class="b-val" style="color:var(--good);">${fish.legal === 'redbook' ? 'Вылов запрещен' : (fish.monthActivity.map((v, i) => v === 3 ? mNames[i] : null).filter(Boolean).join(', ') || 'Лето / Осень')}</div></div><div class="banner-stat"><div class="b-lbl">Рабочий горизонт глубин</div><div class="b-val" style="color:var(--accent);">${fish.depthOpt[0]} – ${fish.depthOpt[1]} м (макс. ${fish.depthMax}м)</div></div>`;
+  banner.innerHTML = `
+    <div class="banner-stat">
+      <div class="b-lbl">Период размножения (нерест)</div>
+      <div class="b-val" style="color:#f43f5e;">${fish.spawnMonth.map(m => mNames[m-1]).join(' – ')}</div>
+    </div>
+    <div class="banner-stat">
+      <div class="b-lbl">Правовой статус / Ограничения</div>
+      <div class="b-val" style="color:${fish.legal === 'redbook' ? 'var(--bad)' : (fish.legal === 'introduced' ? 'var(--badge-purple-text)' : 'var(--warn)')};">${fish.banMonths}</div>
+    </div>
+    <div class="banner-stat">
+      <div class="b-lbl">Сезон максимального клева</div>
+      <div class="b-val" style="color:var(--good);">${fish.legal === 'redbook' ? 'Вылов запрещен' : (fish.monthActivity.map((v, i) => v === 3 ? mNames[i] : null).filter(Boolean).join(', ') || 'Лето / Осень')}</div>
+    </div>
+    <div class="banner-stat">
+      <div class="b-lbl">Рабочий горизонт глубин</div>
+      <div class="b-val" style="color:var(--accent);">${fish.depthOpt[0]} – ${fish.depthOpt[1]} м (макс. ${fish.depthMax}м)</div>
+    </div>
+  `;
+
   const grid = document.getElementById('monthGrid');
   grid.innerHTML = mNames.map((mn, idx) => {
-    const act = fish.monthActivity[idx]; const isCur = idx === curMonth;
-    let cls = 'h' + act, txt = act === 3 ? 'Жор' : (act === 2 ? 'Клев' : (act === 1 ? 'Слабо' : 'Спад'));
-    if (fish.legal === 'redbook') { cls = 'h0'; txt = 'Запрет'; } else if (fish.spawnMonth.includes(idx + 1)) { cls = 'spawn'; txt = 'Нерест'; }
-    return `<div class="m-cell ${isCur ? 'cur' : ''}"><span class="m-name">${mn}</span><div class="m-heat ${cls}"></div><span class="m-tag">${txt}</span></div>`;
+    const act = fish.monthActivity[idx];
+    const isCur = idx === curMonth;
+    let cls = 'h' + act;
+    let txt = act === 3 ? 'Жор' : (act === 2 ? 'Клев' : (act === 1 ? 'Слабо' : 'Спад'));
+    if (fish.legal === 'redbook') {
+      cls = 'h0';
+      txt = 'Запрет';
+    } else if (fish.spawnMonth.includes(idx + 1)) {
+      cls = 'spawn';
+      txt = 'Нерест';
+    }
+    return `<div class="m-cell ${isCur ? 'cur' : ''}">
+      <span class="m-name">${mn}</span>
+      <div class="m-heat ${cls}"></div>
+      <span class="m-tag">${txt}</span>
+    </div>`;
   }).join('');
 }
 
 function renderBeginnerGuide(fish, day) {
   document.getElementById('guideTitle').textContent = `Ихтиология и методика: ${fish.name} (${state.depth}м • ${WATER_PROFILES[state.water].name})`;
   const guides = generateAdaptiveGuides(fish, state.water, state.depth, day);
+  
   const gc = document.getElementById('guideContent');
-  gc.innerHTML = `<div class="guide-block"><h4>Гидробиология и стоянки</h4><p>${guides.standAdvice}</p></div><div class="guide-block"><h4>Снасти и подача</h4><p>${guides.tackleAdvice}</p></div><div class="guide-block"><h4>Кормовая база и насадки</h4><p>${guides.baitAdvice}</p></div>`;
+  gc.innerHTML = `
+    <div class="guide-block">
+      <h4>Гидробиология и стоянки</h4>
+      <p>${guides.standAdvice}</p>
+    </div>
+    <div class="guide-block">
+      <h4>Снасти и подача</h4>
+      <p>${guides.tackleAdvice}</p>
+    </div>
+    <div class="guide-block">
+      <h4>Кормовая база и насадки</h4>
+      <p>${guides.baitAdvice}</p>
+    </div>
+  `;
 }
 
 function renderAll() {
   if (!DAYS_DATA.length) return;
   const visibleSpecies = getFilteredFishList();
-  if (!state.fishId || !visibleSpecies.some(f => f.id === state.fishId)) { state.fishId = pickBestDefaultFish(visibleSpecies); }
+  
+  if (!state.fishId || !visibleSpecies.some(f => f.id === state.fishId)) {
+    state.fishId = pickBestDefaultFish(visibleSpecies);
+  }
+
   const fish = FISH_DB.find(f => f.id === state.fishId) || visibleSpecies[0];
   const day = DAYS_DATA[state.dayIdx] || DAYS_DATA[0];
   const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
 
   document.getElementById('basinTitle').textContent = `Бассейн: ${state.basinName}`;
-  document.getElementById('speciesCountInfo').textContent = state.showAllSpecies ? `Все виды РФ: ${visibleSpecies.length}` : `Фауна биотопа: ${visibleSpecies.length} видов`;
+  document.getElementById('speciesCountInfo').textContent = state.showAllSpecies
+    ? `Все виды РФ: ${visibleSpecies.length}`
+    : `Фауна биотопа: ${visibleSpecies.length} видов`;
 
   document.getElementById('fishStrip').innerHTML = visibleSpecies.map(f => {
     const sc = calcDayBest(f, day, state.method, state.water, state.depth);
     let badgeHtml = '';
-    if (f.legal === 'redbook') badgeHtml = '<span class="fish-status-badge status-redbook">Красная книга</span>';
-    else if (f.legal === 'license') badgeHtml = '<span class="fish-status-badge status-license">Лицензия</span>';
-    else if (f.legal === 'introduced') badgeHtml = '<span class="fish-status-badge status-introduced">Интродуцент</span>';
-    return `<div class="fish-chip ${f.id === fish.id ? 'active' : ''}" onclick="state.fishId='${f.id}';renderAll()" title="${f.name}"><div class="fish-img-box">${renderFishVisual(f)}</div><div class="fish-chip-name">${f.name}</div>${badgeHtml}${f.legal === 'redbook' ? '<span style="font-size:10px; color:var(--bad); font-weight:800;">ВЫЛОВ ЗАПРЕЩЕН</span>' : renderFiveFish(sc, 14, curTheme === 'dark' ? 'dark' : 'light')}</div>`;
+    if (f.legal === 'redbook') {
+      badgeHtml = '<span class="fish-status-badge status-redbook">Красная книга</span>';
+    } else if (f.legal === 'license') {
+      badgeHtml = '<span class="fish-status-badge status-license">Лицензия</span>';
+    } else if (f.legal === 'introduced') {
+      badgeHtml = '<span class="fish-status-badge status-introduced">Интродуцент</span>';
+    }
+
+    return `<div class="fish-chip ${f.id === fish.id ? 'active' : ''}" onclick="state.fishId='${f.id}';renderAll()" title="${f.name}">
+      <div class="fish-img-box">
+        ${renderFishVisual(f)}
+      </div>
+      <div class="fish-chip-name">${f.name}</div>
+      ${badgeHtml}
+      ${f.legal === 'redbook' ? '<span style="font-size:10px; color:var(--bad); font-weight:800;">ВЫЛОВ ЗАПРЕЩЕН</span>' : renderFiveFish(sc, 14, curTheme === 'dark' ? 'dark' : 'light')}
+    </div>`;
   }).join('');
 
   const dpS = day.dP > 0 ? `+${day.dP}` : day.dP;
-  document.getElementById('astroBar').textContent = `🌙 ${day.moon.moonDay} л.д. (${day.moon.illum}%) • 🧭 ${day.pressAvg} мм (базис ${state.normPress}, Δ ${dpS}) • 💨 ${day.windDir} ${day.windMax} м/с • 💧 Вода ~${day.waterTemp}°C`;
+  document.getElementById('astroBar').textContent =
+    `🌙 ${day.moon.moonDay} л.д. (${day.moon.illum}%) • 🧭 ${day.pressAvg} мм (базис ${state.normPress}, Δ ${dpS}) • 💨 ${day.windDir} ${day.windMax} м/с • 💧 Вода ~${day.waterTemp}°C`;
 
   renderThreeDayVerdict(fish);
 
   document.getElementById('weekGrid').innerHTML = DAYS_DATA.map((d, i) => {
     const sc = calcDayBest(fish, d, state.method, state.water, state.depth);
-    return `<div class="day-card ${i === state.dayIdx ? 'active' : ''}" onclick="state.dayIdx=${i};renderAll()"><div class="d-head"><span>${d.label.split(',')[0]}</span><span>🌙${d.moon.moonDay}</span></div><div class="d-temp">${d.tDay > 0 ? '+'+d.tDay : d.tDay}° / ${d.tNight}°C</div><div class="d-meta">🧭 ${d.pressAvg} мм (${d.dP > 0 ? '+'+d.dP : d.dP})<br>💨 ${d.windDir}, ${d.windMax}м/с</div><div class="d-fishes">${fish.legal === 'redbook' ? '⛔' : renderFiveFish(sc, 16, curTheme)}</div></div>`;
+    return `<div class="day-card ${i === state.dayIdx ? 'active' : ''}" onclick="state.dayIdx=${i};renderAll()">
+      <div class="d-head"><span>${d.label.split(',')[0]}</span><span>🌙${d.moon.moonDay}</span></div>
+      <div class="d-temp">${d.tDay > 0 ? '+'+d.tDay : d.tDay}° / ${d.tNight}°C</div>
+      <div class="d-meta">🧭 ${d.pressAvg} мм (${d.dP > 0 ? '+'+d.dP : d.dP})<br>💨 ${d.windDir}, ${d.windMax}м/с</div>
+      <div class="d-fishes">${fish.legal === 'redbook' ? '⛔' : renderFiveFish(sc, 16, curTheme)}</div>
+    </div>`;
   }).join('');
 
   const hScores = day.hours.map(hr => ({ ...hr, score: calcHourly(fish, day, hr, state.method, state.water, state.depth) }));
   let bestH = 12, bestAvg = -1;
-  for (let h = 0; h < 24; h++) { const avg = (hScores[h].score + hScores[(h+1)%24].score + hScores[(h+2)%24].score) / 3; if (avg > bestAvg) { bestAvg = avg; bestH = h; } }
+  for (let h = 0; h < 24; h++) {
+    const avg = (hScores[h].score + hScores[(h+1)%24].score + hScores[(h+2)%24].score) / 3;
+    if (avg > bestAvg) { bestAvg = avg; bestH = h; }
+  }
 
-  document.getElementById('peakFishes').innerHTML = fish.legal === 'redbook' ? '<span style="color:var(--bad); font-weight:800; font-size:13px;">ВЫЛОВ ЗАПРЕЩЕН ЗАКОНОМ</span>' : renderFiveFish(calcDayBest(fish, day, state.method, state.water, state.depth), 20, curTheme);
-  document.getElementById('peakWindowSub').textContent = fish.legal === 'redbook' ? 'Особо ценный охраняемый биоресурс' : `Оптимальный выход: ${String(bestH).padStart(2,'0')}:00 – ${String((bestH+3)%24).padStart(2,'0')}:00`;
+  document.getElementById('peakFishes').innerHTML = fish.legal === 'redbook'
+    ? '<span style="color:var(--bad); font-weight:800; font-size:13px;">ВЫЛОВ ЗАПРЕЩЕН ЗАКОНОМ</span>'
+    : renderFiveFish(calcDayBest(fish, day, state.method, state.water, state.depth), 20, curTheme);
+  
+  document.getElementById('peakWindowSub').textContent = fish.legal === 'redbook'
+    ? 'Особо ценный охраняемый биоресурс'
+    : `Оптимальный выход: ${String(bestH).padStart(2,'0')}:00 – ${String((bestH+3)%24).padStart(2,'0')}:00`;
 
   const rig = calcDynamicRig(state.method, state.water, state.depth, day.windMax);
   document.getElementById('weightVal').textContent = fish.legal === 'redbook' ? '—' : rig.weight;
@@ -1064,29 +1864,55 @@ function renderAll() {
   document.getElementById('baitSub').textContent = adaptiveGuides.baitAdvice;
 
   let rT = 'Штатная обстановка', rS = `Глубина ${state.depth} м откалибрована.`;
-  if (fish.legal === 'redbook') { rT = 'КРАСНАЯ КНИГА: Штрафная ответственность'; rS = 'Статья 258.1 УК РФ и ст. 8.35 КоАП РФ. Немедленный выпуск!'; }
-  else if (state.iceState === 'ice_danger') { rT = 'ОПАСНОСТЬ: Тонкий лед / Шуга!'; rS = 'Ледовый покров не держит человека. Выход на лед запрещен!'; }
-  else if (state.iceState === 'ice_safe') { rT = 'Безопасный ледовый монолит'; rS = `Толщина льда ~${state.iceThickness} см. Соблюдайте дистанцию между лунками от 4–5 м.`; }
+  if (fish.legal === 'redbook') {
+    rT = 'КРАСНАЯ КНИГА: Штрафная ответственность';
+    rS = 'Статья 258.1 УК РФ и ст. 8.35 КоАП РФ. Немедленный выпуск!';
+  } else if (state.iceState === 'ice_danger') {
+    rT = 'ОПАСНОСТЬ: Тонкий лед / Шуга!';
+    rS = 'Ледовый покров не держит человека. Выход на лед запрещен!';
+  } else if (state.iceState === 'ice_safe') {
+    rT = 'Безопасный ледовый монолит';
+    rS = `Толщина льда ~${state.iceThickness} см. Соблюдайте дистанцию между лунками от 4–5 м.`;
+  }
   document.getElementById('riskTitle').textContent = rT;
   document.getElementById('riskSub').textContent = rS;
 
   document.getElementById('hourlyTitle').textContent = `Суточный ритм: ${fish.name} (${day.label})`;
   document.getElementById('sunInfo').innerHTML = `<span>🌅 Восход: ${fmtHM(day.sunriseHr)}</span><span>🌇 Закат: ${fmtHM(day.sunsetHr)}</span><span>🌕 Кульминация Луны: ${String(day.moon.transitHour).padStart(2,'0')}:00</span>`;
+
   const curH = new Date().getHours();
   document.getElementById('hourlyList').innerHTML = hScores.map(it => {
     const isNow = (state.dayIdx === 0 && it.hour === curH);
     const isTw = Math.abs(it.hour + 0.5 - day.sunriseHr) <= 1.2 || Math.abs(it.hour + 0.5 - day.sunsetHr) <= 1.2;
     const arr = it.dp3h > 0.4 ? '↑' : (it.dp3h < -0.4 ? '↓' : '→');
-    return `<div class="hour-item ${isNow ? 'now' : ''} ${isTw ? 'twilight' : ''}"><div class="h-tm">${String(it.hour).padStart(2,'0')}:00</div><div>${fish.legal === 'redbook' ? '⛔' : renderFiveFish(it.score, 17, curTheme)}</div><div class="h-met">${it.tAir > 0 ? '+'+it.tAir : it.tAir}°C • ${it.press}${arr} • ${it.windDir} ${it.wind}м/с</div></div>`;
+    return `<div class="hour-item ${isNow ? 'now' : ''} ${isTw ? 'twilight' : ''}">
+      <div class="h-tm">${String(it.hour).padStart(2,'0')}:00</div>
+      <div>${fish.legal === 'redbook' ? '⛔' : renderFiveFish(it.score, 17, curTheme)}</div>
+      <div class="h-met">${it.tAir > 0 ? '+'+it.tAir : it.tAir}°C • ${it.press}${arr} • ${it.windDir} ${it.wind}м/с</div>
+    </div>`;
   }).join('');
 
-  renderAnnualCalendar(fish); renderBeginnerGuide(fish, day);
+  renderAnnualCalendar(fish);
+  renderBeginnerGuide(fish, day);
 }
 
-document.getElementById('methodSelect').addEventListener('change', e => { state.method = e.target.value; renderAll(); });
-document.getElementById('waterSelect').addEventListener('change', e => { state.water = e.target.value; syncDepthLimitsWithWater(state.water); renderAll(); });
-document.getElementById('depthRange').addEventListener('input', e => { state.depth = parseFloat(e.target.value); document.getElementById('depthVal').textContent = state.depth.toFixed(1); renderAll(); });
-document.getElementById('placeSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchPlaceByName(); });
+document.getElementById('methodSelect').addEventListener('change', e => { 
+  state.method = e.target.value; 
+  renderAll(); 
+});
+document.getElementById('waterSelect').addEventListener('change', e => { 
+  state.water = e.target.value; 
+  syncDepthLimitsWithWater(state.water);
+  renderAll(); 
+});
+document.getElementById('depthRange').addEventListener('input', e => {
+  state.depth = parseFloat(e.target.value);
+  document.getElementById('depthVal').textContent = state.depth.toFixed(1);
+  renderAll();
+});
+document.getElementById('placeSearchInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchPlaceByName();
+});
 
 initTheme();
 syncDepthLimitsWithWater(state.water);
@@ -1095,12 +1921,5 @@ renderAll();
 fetchLiveMeteo();
 fetchNearbyWaters(state.lat, state.lon);
 </script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => {}); });
-  }
-</script>
-
 </body>
 </html>
