@@ -584,13 +584,6 @@
     </div>
   </div>
 
-  <div class="filter-bar">
-    <span id="speciesCountInfo">Ихтиофауна бассейна: 0</span>
-    <button class="toggle-all-btn" id="showAllToggle" onclick="toggleShowAllSpecies()">Все 89 видов РФ</button>
-  </div>
-
-  <div class="fish-strip" id="fishStrip"></div>
-
   <div class="container">
     <div class="nearby-waters">
       <div id="nearbyStatus">🌊 Гидрографическая сеть локации (кликните для быстрой смены биотопа):</div>
@@ -620,6 +613,14 @@
         <label>Рабочая глубина: <span id="depthVal" style="color:var(--accent); font-weight:800;">1.2</span> м <span id="depthLimitNote" style="font-size:10px; color:var(--text-muted);">(от 0.2 до 6.0 м)</span></label>
         <input type="range" id="depthRange" min="0.2" max="6.0" step="0.1" value="1.2">
       </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column;">
+      <div class="filter-bar" style="border-radius: 12px 12px 0 0; border: 1px solid var(--border); border-bottom: none;">
+        <span id="speciesCountInfo">Ихтиофауна бассейна: 0</span>
+        <button class="toggle-all-btn" id="showAllToggle" onclick="toggleShowAllSpecies()">Все 89 видов РФ</button>
+      </div>
+      <div class="fish-strip" id="fishStrip" style="border-radius: 0 0 12px 12px; border: 1px solid var(--border);"></div>
     </div>
 
     <div class="section-label">Экспресс-сводка на 3 дня</div>
@@ -1846,7 +1847,7 @@ function renderAll() {
     const sc = calcDayBest(fish, d, state.method, state.water, state.depth);
     return `<div class="day-card ${i === state.dayIdx ? 'active' : ''}" onclick="state.dayIdx=${i};renderAll()">
       <div class="d-head"><span>${d.label.split(',')[0]}</span><span>🌙${d.moon.moonDay}</span></div>
-      <div class="d-temp">${d.tDay > 0 ? '+'+d.tDay : d.tDay}° / ${d.tNight}°C</div>
+      <div class="d-temp">${d.tDay > 0 ? '+'+d.tDay : d.tDay}° / ${d.tNight > 0 ? '+'+d.tNight : d.tNight}°C</div>
       <div class="d-meta">🧭 ${d.pressAvg} мм (${d.dP > 0 ? '+'+d.dP : d.dP})<br>💨 ${d.windDir}, ${d.windMax}м/с</div>
       <div class="d-fishes">${fish.legal === 'redbook' ? '⛔' : renderFiveFish(sc, 16, curTheme)}</div>
     </div>`;
