@@ -559,7 +559,7 @@
     <div class="basin-line" id="basinTitle">Бассейн: Обь-Тазовский (ЯНАО)</div>
     <div class="astro-line" id="astroBar">Расчет гидрологии, барического градиента и лунных фаз...</div>
     <div class="btn-row">
-      <button class="btn btn-accent" onclick="toggleMapDrawer()" id="mapToggleBtn">🗺 Карта водоемов</button>
+      <button class="btn btn-accent" onclick="toggleMapDrawer()" id="mapToggleBtn">🗺 Поиск по карте</button>
       <button class="btn" onclick="detectMyGPS()">🎯 Мой GPS</button>
       <button class="btn" onclick="fetchLiveMeteo()">🔄 Обновить прогноз</button>
     </div>
@@ -804,10 +804,10 @@ const BASIN_CONFIGS = {
  */
 const FISH_DB = [
   // --- БЛОК 1: Базовые пресноводные и хищные виды РФ (36 исходных) ---
-  { id:'pike', name:'Щука', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','amur','baikal'], waters:['small_river','big_river','quarry','tundra_lake', 'cooling_reservoir'], tWaterOpt:[8,16], tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.3,5.5], depthMax:12.0, spawnMonth:[4,5], banMonths:'Нерестовый весенний запрет', monthActivity:[1,2,0,0,3,2,2,3,3,3,2,1], baseAdvice:'У стен камыша, на бровках и свалах. На севере концентрируется у впадения ручьев.', topGear:'Спиннинг 7–28 г, поводок-струна, со льда — жерлицы.' },
-  { id:'perch', name:'Окунь речной', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','baikal'], waters:['small_river','big_river','quarry','tundra_lake','cooling_reservoir'], tWaterOpt:[10,18], tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', depthOpt:[0.3,4.5], depthMax:10.0, spawnMonth:[5,6], banMonths:'Период весеннего нереста', monthActivity:[2,2,2,0,1,3,3,3,3,3,2,2], baseAdvice:'Стайный хищник бровок и кос. Зимой отлично берет балансиры и безнасадки.', topGear:'Микроджиг 1–5 г, зимний удильник с балансиром 50 мм.' },
+  { id:'pike', name:'Щука', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','amur','baikal', 'black_azov'], waters:['small_river','big_river','quarry','tundra_lake', 'cooling_reservoir'], tWaterOpt:[8,16], tMinStop:0.5, coldFactor:0.88, optPress:756, bladderSens:0.85, feedMode:'crepuscular', depthOpt:[0.3,5.5], depthMax:12.0, spawnMonth:[4,5], banMonths:'Нерестовый весенний запрет', monthActivity:[1,2,0,0,3,2,2,3,3,3,2,1], baseAdvice:'У стен камыша, на бровках и свалах. На севере концентрируется у впадения ручьев.', topGear:'Спиннинг 7–28 г, поводок-струна, со льда — жерлицы.' },
+  { id:'perch', name:'Окунь речной', type:'predator', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west','baikal', 'black_azov'], waters:['small_river','big_river','quarry','tundra_lake','cooling_reservoir'], tWaterOpt:[10,18], tMinStop:0.5, coldFactor:0.86, optPress:758, bladderSens:1.15, feedMode:'crepuscular', depthOpt:[0.3,4.5], depthMax:10.0, spawnMonth:[5,6], banMonths:'Период весеннего нереста', monthActivity:[2,2,2,0,1,3,3,3,3,3,2,2], baseAdvice:'Стайный хищник бровок и кос. Зимой отлично берет балансиры и безнасадки.', topGear:'Микроджиг 1–5 г, зимний удильник с балансиром 50 мм.' },
   { id:'zander', name:'Судак', type:'predator', habitat:'fresh', legal:'free', basins:['volga_caspian','nw_karelia','euro_west','black_azov','baltic'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[12,20], tMinStop:1.0, coldFactor:0.85, optPress:757, bladderSens:1.20, feedMode:'crepuscular', depthOpt:[3.0,12.0], depthMax:20.0, spawnMonth:[4,5], banMonths:'15 апреля — 10 июня', monthActivity:[1,1,2,0,1,3,2,2,3,3,2,1], baseAdvice:'Держится твердого дна, коряжников и русловых свалов.', topGear:'Джиг 14–36 г, судаковые вибы со льда.' },
-  { id:'crucian', name:'Карась серебряный / золотой', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','volga_caspian','euro_west','amur'], waters:['small_river','quarry','tundra_lake','cooling_reservoir'], tWaterOpt:[16,24], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.3,2.8], depthMax:5.0, spawnMonth:[5,6], banMonths:'15 мая — 15 июня', monthActivity:[0,0,1,2,0,3,3,3,2,1,0,0], baseAdvice:'Любит прогретый ил, старицы и окна водной растительности.', topGear:'Маховая удочка, флэт-фидер, мормышинг.' },
+  { id:'crucian', name:'Карась серебряный / золотой', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','volga_caspian','euro_west','amur', 'black_azov'], waters:['small_river','quarry','tundra_lake','cooling_reservoir'], tWaterOpt:[16,24], tMinStop:4.0, coldFactor:0.35, optPress:758, bladderSens:0.90, feedMode:'diurnal', depthOpt:[0.3,2.8], depthMax:5.0, spawnMonth:[5,6], banMonths:'15 мая — 15 июня', monthActivity:[0,0,1,2,0,3,3,3,2,1,0,0], baseAdvice:'Любит прогретый ил, старицы и окна водной растительности.', topGear:'Маховая удочка, флэт-фидер, мормышинг.' },
   { id:'carp', name:'Карп / Сазан', type:'peace', habitat:'fresh', legal:'free', basins:['volga_caspian','euro_west','black_azov','amur'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[18,25], tMinStop:6.0, coldFactor:0.25, optPress:757, bladderSens:0.95, feedMode:'crepuscular', depthOpt:[1.5,8.0], depthMax:14.0, spawnMonth:[5,6], banMonths:'1 мая — 15 июня', monthActivity:[0,0,0,1,0,2,3,3,3,1,0,0], baseAdvice:'Держится глинистых бровок, коряжника и ракушечных столов.', topGear:'Карповый бланк 3.5 lbs, метод-фидер, волосяной монтаж.' },
   { id:'bream', name:'Лещ', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','euro_west'], waters:['big_river','quarry','cooling_reservoir'], tWaterOpt:[14,20], tMinStop:1.5, coldFactor:0.60, optPress:758, bladderSens:1.05, feedMode:'crepuscular', depthOpt:[2.5,10.0], depthMax:16.0, spawnMonth:[5,6], banMonths:'1 мая — 10 июня', monthActivity:[1,1,2,2,0,3,3,3,3,2,1,1], baseAdvice:'Кормится со дна на русловых бровках, чувствителен к шлейфу прикорма.', topGear:'Фидер 3.6–3.9 м, зимняя поплавочная удочка с мотылем.' },
   { id:'roach', name:'Плотва (Сорога)', type:'peace', habitat:'fresh', legal:'free', basins:['arctic_ob_taz','nw_karelia','volga_caspian','yenisei_lena','euro_west'], waters:['small_river','big_river','quarry','tundra_lake', 'cooling_reservoir'], tWaterOpt:[12,19], tMinStop:1.0, coldFactor:0.65, optPress:758, bladderSens:1.00, feedMode:'diurnal', depthOpt:[0.4,4.0], depthMax:8.0, spawnMonth:[5,6], banMonths:'Период весеннего хода', monthActivity:[2,2,3,0,2,3,3,3,3,2,2,2], baseAdvice:'Активна в протоках и у растительности, зимой уверенно берет на безмотылку.', topGear:'Поплавок, пикер, мормышка-гвоздешарик.' },
@@ -1009,10 +1009,19 @@ function updateWaterSelectOptions(basinCode) {
 
 function getFilteredFishList() {
   if (state.showAllSpecies) return FISH_DB;
+  
   return FISH_DB.filter(f => {
     const basinMatch = f.basins.includes(state.basinCode);
-    const waterMatch = !f.waters || f.waters.includes(state.water);
-    if (f.legal === 'introduced' && state.water !== 'cooling_reservoir') return false;
+    
+    let waterMatch = !f.waters || f.waters.includes(state.water);
+    if (!waterMatch && (state.water === 'tundra_lake' || state.water === 'quarry') && ['crucian', 'carp', 'silver_carp', 'grass_carp', 'perch', 'pike'].includes(f.id)) {
+      waterMatch = true; 
+    }
+
+    if (f.legal === 'introduced' && state.water !== 'cooling_reservoir' && state.water !== 'quarry') {
+      if (!['carp', 'silver_carp', 'grass_carp'].includes(f.id)) return false;
+    }
+
     return basinMatch && waterMatch;
   });
 }
@@ -1196,6 +1205,9 @@ function toggleMapDrawer() {
         mapInstance.invalidateSize();
         mapInstance.setView([state.lat, state.lon]);
       }
+      // Умный скролл с поправкой на шапку
+      const offset = dr.getBoundingClientRect().top + window.scrollY - 100;
+      window.scrollTo({ top: offset, behavior: 'smooth' });
     }, 150);
   }
 }
