@@ -934,37 +934,37 @@ const MAP_LAYERS = {
 };
 
 function detectBasinByCoords(lat, lon) {
-  if (lat >= 43.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) {
+  if (lat >= 41.0 && lat <= 47.8 && lon >= 34.0 && lon <= 41.5) {
     return { code: 'black_azov', name: 'Черноморско-Азовский бассейн' };
   }
-  if (lat >= 54.0 && lat <= 60.5 && lon >= 19.0 && lon <= 30.5) {
+  if (lat >= 54.0 && lat <= 60.5 && lon >= 19.0 && lon <= 31.0) {
     return { code: 'baltic', name: 'Балтийский морской бассейн' };
   }
-  if (lat >= 65.0 && lon >= 30.5 && lon <= 58.0) {
+  if (lat >= 65.0 && lon >= 30.5 && lon <= 55.0) {
     return { code: 'barents_white', name: 'Баренцево-Беломорский арктический бассейн' };
   }
-  if (lat >= 60.0 && lat < 66.0 && lon >= 29.0 && lon <= 38.0) {
+  if (lat >= 60.5 && lat < 66.5 && lon >= 29.0 && lon <= 38.0) {
     return { code: 'nw_karelia', name: 'Ладожско-Онежский и Карельский бассейн' };
   }
-  if (lon >= 135.0 && lat >= 42.0) {
-    return { code: 'pacific_sea', name: 'Тихоокеанский и Дальневосточный морской бассейн' };
+  if (lon >= 130.0 && lat >= 42.0) {
+    return { code: 'pacific_sea', name: 'Тихоокеанский бассейн' };
   }
-  if (lon >= 118.0 && lon < 141.0 && lat >= 47.0 && lat < 55.0) {
+  if (lon >= 118.0 && lon < 141.0 && lat >= 47.0 && lat < 55.5) {
     return { code: 'amur', name: 'Амурский пресноводный бассейн' };
   }
   if (lat >= 51.0 && lat <= 56.5 && lon >= 103.0 && lon <= 112.0) {
-    return { code: 'baikal', name: 'Байкало-Ангарский рифтовый бассейн' };
+    return { code: 'baikal', name: 'Байкало-Ангарский бассейн' };
   }
   if (lon >= 88.0 && lon < 135.0 && lat >= 52.0) {
-    return { code: 'yenisei_lena', name: 'Енисейско-Ленский бассейн Восточной Сибири' };
+    return { code: 'yenisei_lena', name: 'Енисейско-Ленский бассейн' };
   }
-  if (lon >= 59.0 && lon < 88.0 && lat >= 53.0) {
-    return { code: 'arctic_ob_taz', name: 'Обь-Тазовский бассейн (ЯНАО, Обь, Пур, Таз)' };
+  if (lat >= 63.0 && lon >= 64.0 && lon < 88.0) {
+    return { code: 'arctic_ob_taz', name: 'Обь-Тазовский бассейн (ЯНАО, Пур, Таз, Обь)' };
   }
-  if (lon < 38.0 && lat < 56.0) {
+  if (lon < 37.0 && lat < 56.0) {
     return { code: 'euro_west', name: 'Днепровско-Донской бассейн' };
   }
-  return { code: 'volga_caspian', name: 'Волжско-Каспийский бассейн' };
+  return { code: 'volga_caspian', name: 'Волжско-Каспийский бассейн (Волга, Кама, Урал)' };
 }
 
 function getFilteredFishList() {
@@ -972,7 +972,6 @@ function getFilteredFishList() {
   return FISH_DB.filter(f => {
     const basinMatch = f.basins.includes(state.basinCode);
     const waterMatch = !f.waters || f.waters.includes(state.water);
-    // Искусственные интродуценты не показываются в нативном открытом севере
     if (f.legal === 'introduced' && state.water !== 'cooling_reservoir') return false;
     return basinMatch && waterMatch;
   });
@@ -986,19 +985,31 @@ function toggleShowAllSpecies() {
   renderAll();
 }
 
-function evaluateIceCondition(dailyTemps) {
-  let freezingDegreeDays = 0;
-  for (let t of dailyTemps) {
-    if (t < 0) freezingDegreeDays += Math.abs(t);
-  }
-  const currentTemp = dailyTemps[0];
+function evaluateIceCondition(dailyTempsMax, dailyTempsMin, waterTemp) {
+  const tCurMax = Array.isArray(dailyTempsMax) ? dailyTempsMax[0] : dailyTempsMax;
+  const tCurMin = Array.isArray(dailyTempsMin) ? dailyTempsMin[0] : (tCurMax - 4);
+  const tCurMean = (tCurMax + tCurMin) / 2;
 
-  if (freezingDegreeDays >= 35 && currentTemp <= -4) {
+  let freezeSum = 0;
+  let freezeDays = 0;
+  if (Array.isArray(dailyTempsMax) && Array.isArray(dailyTempsMin)) {
+    for (let i = 0; i < dailyTempsMax.length; i++) {
+      const m = (dailyTempsMax[i] + dailyTempsMin[i]) / 2;
+      if (m <= 0) {
+        freezeDays++;
+        freezeSum += Math.abs(m);
+      } else if (i <= 2) {
+        break; 
+      }
+    }
+  }
+
+  if (freezeDays >= 5 && freezeSum >= 45 && tCurMax <= -3) {
     state.iceState = 'ice_safe';
-    state.iceThickness = Math.min(90, Math.max(12, Math.round(2.1 * Math.sqrt(freezingDegreeDays))));
-  } else if (currentTemp <= -1.0 || freezingDegreeDays > 8) {
+    state.iceThickness = Math.min(110, Math.max(12, Math.round(2.0 * Math.sqrt(freezeSum))));
+  } else if ((tCurMean <= -1.5 || (tCurMax <= 0 && tCurMin <= -5)) && waterTemp <= 1.2 && freezeSum >= 8) {
     state.iceState = 'ice_danger';
-    state.iceThickness = Math.min(8, Math.max(1, Math.round(1.0 * Math.sqrt(Math.max(1, freezingDegreeDays)))));
+    state.iceThickness = Math.min(7, Math.max(1, Math.round(0.8 * Math.sqrt(freezeSum))));
   } else {
     state.iceState = 'open_water';
     state.iceThickness = 0;
@@ -1016,11 +1027,11 @@ function updateSeasonUI() {
   banner.className = 'season-banner ' + (state.iceState === 'ice_safe' ? 'ice-safe' : (state.iceState === 'ice_danger' ? 'ice-danger' : 'open-water'));
 
   if (state.iceState === 'ice_safe') {
-    txt.innerHTML = '❄️ <b>Подледный режим</b>: Прочный ледостав. Доступны зимние оснастки!';
-    th.textContent = `Толщина монолита: ~${state.iceThickness} см (безопасно)`;
+    txt.innerHTML = '❄️ <b>Подледный режим</b>: Прочный монолит. Доступны зимние оснастки!';
+    th.textContent = `Лед монолит: ~${state.iceThickness} см (безопасно)`;
   } else if (state.iceState === 'ice_danger') {
-    txt.innerHTML = '⚠️ <b>Опасный ледостав / Шуга</b>: Забереги, шугоход. Выход на лед категорически запрещен!';
-    th.textContent = `Лед: ~${state.iceThickness} см (смертельно опасно)`;
+    txt.innerHTML = '⚠️ <b>Опасный ледостав / Шуга</b>: Припай, шугоход. Выход на лед смертельно опасен!';
+    th.textContent = `Лед: ~${state.iceThickness} см (опасно)`;
   } else {
     txt.innerHTML = '🌊 <b>Сезон открытой воды</b>: Акватории свободны от льда.';
     th.textContent = 'Открытая вода';
@@ -1256,52 +1267,51 @@ async function fetchLocationName(lat, lon) {
 
 async function fetchNearbyWaters(lat, lon) {
   const chipsEl = document.getElementById('nearbyChips');
-  chipsEl.innerHTML = `<span class="w-chip">Гидрологический поиск...</span>`;
+  chipsEl.innerHTML = `<span class="w-chip">Анализ гидросети (радиус 40–90 км)...</span>`;
 
-  let defaultWaters = [];
-  if (['black_azov', 'baltic', 'pacific_sea', 'barents_white'].includes(state.basinCode)) {
-    defaultWaters = [
-      { label: '🌊 Морская бухта / залив', wType: 'sea_gulf' },
-      { label: '⚓ Открытое море / банка', wType: 'open_sea' },
-      { label: '🌊 Приустьевой участок реки', wType: 'small_river' }
-    ];
-  } else if (state.basinCode === 'arctic_ob_taz') {
-    defaultWaters = [
-      { label: '🌊 р. Седе-Яха', wType: 'small_river' },
-      { label: '🌊 р. Ево-Яха', wType: 'small_river' },
-      { label: '⚓ р. Пур / Обь', wType: 'big_river' },
-      { label: '🌿 Озеро тундровое (сор)', wType: 'tundra_lake' },
-      { label: '💧 Песчаный карьер', wType: 'quarry' }
-    ];
-  } else if (state.basinCode === 'baikal') {
-    defaultWaters = [
-      { label: '⚓ Озеро Байкал (открытый)', wType: 'quarry' },
-      { label: '🌊 Малое Море / залив', wType: 'tundra_lake' },
-      { label: '🌊 р. Селенга / Ангара', wType: 'big_river' }
-    ];
-  } else if (state.basinCode === 'volga_caspian') {
-    defaultWaters = [
-      { label: '⚓ Русло Волги / Камы / Дона', wType: 'big_river' },
-      { label: '🌊 Протока / Ерик / Воложка', wType: 'small_river' },
-      { label: '💧 Водохранилище', wType: 'quarry' },
-      { label: '🌿 Ильмень / Затон', wType: 'tundra_lake' },
-      { label: '⚡ Теплый сброс ГРЭС', wType: 'cooling_reservoir' }
-    ];
-  } else {
-    defaultWaters = [
+  function getRegionalWatersFallback(bCode, lat, lon) {
+    if (bCode === 'arctic_ob_taz') {
+      return [
+        { label: '🌊 р. Седе-Яха', wType: 'small_river' },
+        { label: '🌊 р. Ево-Яха', wType: 'small_river' },
+        { label: '🌊 р. Тамчара-Яха', wType: 'small_river' },
+        { label: '⚓ р. Пур / Обь', wType: 'big_river' },
+        { label: '💧 Озеро тундровое (сор)', wType: 'tundra_lake' },
+        { label: '💧 Песчаный карьер', wType: 'quarry' }
+      ];
+    }
+    if (lat >= 56.0 && lat <= 57.6 && lon >= 59.8 && lon <= 61.8) {
+      return [
+        { label: '🌊 р. Сысерть', wType: 'small_river' },
+        { label: '🌊 р. Исеть', wType: 'big_river' },
+        { label: '💧 Сысертский пруд / вдхр', wType: 'quarry' },
+        { label: '💧 Верхне-Макаровское вдхр', wType: 'quarry' },
+        { label: '🌊 р. Чусовая (бассейн)', wType: 'small_river' },
+        { label: '💧 Озеро Иткуль / Синара', wType: 'quarry' }
+      ];
+    }
+    if (bCode === 'volga_caspian') {
+      return [
+        { label: '⚓ Магистральное русло (Волга/Кама)', wType: 'big_river' },
+        { label: '🌊 Протока / река 2-го порядка', wType: 'small_river' },
+        { label: '💧 Водохранилище / плес', wType: 'quarry' },
+        { label: '🌿 Затон / старица / пруд', wType: 'tundra_lake' }
+      ];
+    }
+    return [
       { label: '🌊 Малая / средняя река', wType: 'small_river' },
-      { label: '⚓ Магистральное русло', wType: 'big_river' },
-      { label: '💧 Карьер / водохранилище', wType: 'quarry' },
-      { label: '🌿 Озеро / старица', wType: 'tundra_lake' }
+      { label: '⚓ Крупная магистральная река', wType: 'big_river' },
+      { label: '💧 Карьер / озеро', wType: 'quarry' },
+      { label: '🌿 Старица / пруд', wType: 'tundra_lake' }
     ];
   }
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 1800);
-  const query = `[out:json][timeout:3];(way["waterway"="river"]["name"](around:25000,${lat},${lon});way["natural"="water"]["name"](around:25000,${lat},${lon}););out tags 10;`;
+  const timer = setTimeout(() => controller.abort(), 4000);
+  const query = `[out:json][timeout:4];(way["waterway"~"river|stream"]["name"](around:65000,${lat},${lon});way["natural"="water"]["name"](around:65000,${lat},${lon}););out tags 25;`;
 
   try {
-    const res = await fetch('https://maps.mail.ru/osm/tools/overpass/api/interpreter?data=' + encodeURIComponent(query), { signal: controller.signal });
+    const res = await fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query), { signal: controller.signal });
     clearTimeout(timer);
     const data = await res.json();
     const seen = new Set();
@@ -1309,15 +1319,16 @@ async function fetchNearbyWaters(lat, lon) {
 
     for (const el of (data.elements || [])) {
       const name = el.tags && (el.tags['name:ru'] || el.tags.name);
-      if (!name || seen.has(name)) continue;
-      seen.add(name);
-      const isRiver = el.tags.waterway === 'river';
-      const wType = isRiver
-        ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена/i.test(name) ? 'big_river' : 'small_river')
-        : (/губа|море|бухта|залив/i.test(name) ? 'sea_gulf' : (/карьер|вдхр|водохранилище/i.test(name) ? 'quarry' : 'tundra_lake'));
+      if (!name || seen.has(name.toLowerCase())) continue;
+      seen.add(name.toLowerCase());
+
+      const isRiver = el.tags.waterway === 'river' || el.tags.waterway === 'stream';
+      let wType = isRiver
+        ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена|исеть|чусовая/i.test(name) ? 'big_river' : 'small_river')
+        : (/море|губа|залив/i.test(name) ? 'sea_gulf' : (/карьер|вдхр|водохранилище|пруд/i.test(name) ? 'quarry' : 'tundra_lake'));
       const icon = isRiver ? '🌊 р. ' : '💧 ';
-      items.push({ label: icon + name.replace(/^(река|озеро)\s+/i, ''), wType });
-      if (items.length >= 6) break;
+      items.push({ label: icon + name.replace(/^(река|озеро|пруд)\s+/i, ''), wType });
+      if (items.length >= 7) break;
     }
 
     if (items.length > 0) {
@@ -1329,7 +1340,8 @@ async function fetchNearbyWaters(lat, lon) {
   } catch (e) {}
 
   clearTimeout(timer);
-  chipsEl.innerHTML = defaultWaters.map((it, idx) =>
+  const fallbackList = getRegionalWatersFallback(state.basinCode, lat, lon);
+  chipsEl.innerHTML = fallbackList.map((it, idx) =>
     `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`
   ).join('');
 }
@@ -1393,7 +1405,7 @@ function buildFallback() {
       moon, hours
     });
   }
-  evaluateIceCondition(temps);
+  evaluateIceCondition(temps, temps.map(t => t - 5), DAYS_DATA[0].waterTemp);
 }
 
 async function fetchLiveMeteo() {
@@ -1448,7 +1460,7 @@ async function fetchLiveMeteo() {
       };
     });
 
-    evaluateIceCondition(data.daily.temperature_2m_max);
+    evaluateIceCondition(data.daily.temperature_2m_max, data.daily.temperature_2m_min, DAYS_DATA[0].waterTemp);
     st.textContent = 'Онлайн • 14 дней';
     renderAll();
   } catch (e) {
@@ -1873,6 +1885,9 @@ function renderAll() {
   } else if (state.iceState === 'ice_safe') {
     rT = 'Безопасный ледовый монолит';
     rS = `Толщина льда ~${state.iceThickness} см. Соблюдайте дистанцию между лунками от 4–5 м.`;
+  } else {
+    rT = 'Сезон открытой воды';
+    rS = 'Ледовые явления отсутствуют. Ловля разрешенными снастями открытой воды.';
   }
   document.getElementById('riskTitle').textContent = rT;
   document.getElementById('riskSub').textContent = rS;
