@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f2942"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#g2)"/>
+  <rect x="244" y="60" width="24" height="115" rx="12" fill="#ef4444"/>
+  <rect x="244" y="110" width="24" height="28" fill="#f8fafc"/>
+  <ellipse cx="256" cy="230" rx="38" ry="72" fill="#38bdf8"/>
+  <polyline points="40,310 140,310 180,235 220,365 260,175 300,335 340,280 375,310 472,310" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="256" y="445" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="56" fill="#f8fafc" text-anchor="middle">КЛЁВ <tspan fill="#38bdf8">PRO</tspan></text>
+</svg>
