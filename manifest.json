@@ -1,7 +1,7 @@
 {
-  "name": "Клев ПРО • Атлас Ихтиофауны РФ",
+  "name": "Клев ПРО • Атлас Ихтиофауны РФ (115 видов)",
   "short_name": "Клев ПРО",
-  "description": "Прогноз биологической активности рыбы и гидрологии водоемов РФ",
+  "description": "Прогноз биологической активности 115 видов рыб и гидрологии водоемов РФ",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -9,6 +9,12 @@
   "theme_color": "#0b1120",
   "orientation": "portrait-primary",
   "icons": [
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "icon-192.png",
       "sizes": "192x192",
