@@ -11,10 +11,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Прогноз клева • Атлас Ихтиофауны России (89 видов) v6.1</title>
+  <title>Прогноз клева • Атлас Ихтиофауны России (89 видов) v6.2</title>
   
-  <link rel="manifest" href="manifest.json?v=6.1">
-  <link rel="icon" type="image/svg+xml" href="icon.svg?v=6.1">
+  <link rel="manifest" href="manifest.json?v=6.2">
+  <link id="dynamicFavicon" rel="icon" type="image/png" sizes="512x512" href="">
   <link id="dynamicTouchIcon" rel="apple-touch-icon" sizes="180x180" href="">
 
   <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css?v=6.1" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
@@ -689,8 +689,8 @@
   </div>
 
 <script>
-const APP_VERSION = '6.1';
-const CACHE_KEY = 'pro_fish_state_v6.1';
+const APP_VERSION = '6.2';
+const CACHE_KEY = 'pro_fish_state_v6.2';
 let clipSeq = 0;
 
 const IMG_SEARCH_DIRS = ['assets/fish/', 'fish/', ''];
@@ -737,22 +737,60 @@ const DEFAULT_STATE = {
   iceThickness: 0
 };
 
-// Генерация PNG-иконки поплавка для iOS Safari на лету
+// Генерация PNG-иконки поплавка для iOS Safari на лету (синхронно через Canvas 2D)
+function generateFloatIconDataURL(size = 512) {
+  const c = document.createElement('canvas');
+  c.width = size;
+  c.height = size;
+  const ctx = c.getContext('2d');
+  const s = size / 512;
+  ctx.scale(s, s);
+
+  const g = ctx.createLinearGradient(0, 0, 0, 512);
+  g.addColorStop(0, '#0b1120');
+  g.addColorStop(1, '#0f2942');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 512, 512);
+
+  ctx.fillStyle = '#ef4444';
+  ctx.fillRect(244, 60, 24, 115);
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(244, 110, 24, 28);
+
+  ctx.fillStyle = '#38bdf8';
+  ctx.beginPath();
+  ctx.ellipse(256, 230, 38, 72, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  const pts = [[40,310],[140,310],[180,235],[220,365],[260,175],[300,335],[340,280],[375,310],[472,310]];
+  ctx.strokeStyle = '#10b981';
+  ctx.lineWidth = 16;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
+  ctx.stroke();
+
+  ctx.font = '900 56px system-ui, -apple-system, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillText('КЛЁВ', 195, 445);
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillText('PRO', 360, 445);
+
+  return c.toDataURL('image/png');
+}
+
 function initDynamicTouchIcon() {
   try {
-    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0b1120"/><stop offset="100%" stop-color="#0f2942"/></linearGradient></defs><rect width="512" height="512" rx="110" fill="url(#g2)"/><rect x="244" y="60" width="24" height="115" rx="12" fill="#ef4444"/><rect x="244" y="110" width="24" height="28" fill="#f8fafc"/><ellipse cx="256" cy="230" rx="38" ry="72" fill="#38bdf8"/><polyline points="40,310 140,310 180,235 220,365 260,175 300,335 340,280 375,310 472,310" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><text x="256" y="445" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="56" fill="#f8fafc" text-anchor="middle">КЛЁВ <tspan fill="#38bdf8">PRO</tspan></text></svg>`;
-    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const img = new Image();
-    img.onload = function() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 512; canvas.height = 512;
-      canvas.getContext('2d').drawImage(img, 0, 0, 512, 512);
-      document.getElementById('dynamicTouchIcon').href = canvas.toDataURL('image/png');
-      URL.revokeObjectURL(url);
-    };
-    img.src = url;
-  } catch(e) {}
+    const png512 = generateFloatIconDataURL(512);
+    const fav = document.getElementById('dynamicFavicon');
+    const touch = document.getElementById('dynamicTouchIcon');
+    if (fav) fav.href = png512;
+    if (touch) touch.href = png512;
+  } catch (e) {
+    console.error('Canvas icon generation failed:', e);
+  }
 }
 
 let deferredInstallPrompt = null;
@@ -779,6 +817,27 @@ function checkStandaloneMode() {
   else if (btn && !deferredInstallPrompt) btn.style.display = 'inline-block';
 }
 
+function showInstallModal(htmlText) {
+  let modal = document.getElementById('customInstallModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'customInstallModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    modal.innerHTML = `
+      <div style="background:var(--bg-panel);border:1.5px solid var(--accent);border-radius:16px;max-width:360px;width:100%;padding:18px;box-shadow:var(--shadow);text-align:center;">
+        <img id="modalIconPreview" style="width:72px;height:72px;border-radius:16px;margin-bottom:10px;border:1px solid var(--border);" src="">
+        <div style="font-size:16px;font-weight:800;margin-bottom:8px;color:var(--text-main);">Установка «Клев ПРО»</div>
+        <div id="modalInstallText" style="font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:16px;text-align:left;"></div>
+        <button class="btn btn-accent" style="width:100%;" onclick="document.getElementById('customInstallModal').style.display='none'">Понятно</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  document.getElementById('modalIconPreview').src = generateFloatIconDataURL(192);
+  document.getElementById('modalInstallText').innerHTML = htmlText;
+  modal.style.display = 'flex';
+}
+
 async function installShortcut() {
   if (deferredInstallPrompt) {
     deferredInstallPrompt.prompt();
@@ -787,11 +846,12 @@ async function installShortcut() {
     return;
   }
   const ua = navigator.userAgent.toLowerCase();
-  const isIOS = /iphone|ipad|ipod/.test(ua);
-  if (isIOS) {
-    alert('📲 Чтобы добавить ярлык «Клев ПРО» на главный экран iPhone:\n\n1. Нажмите кнопку «Поделиться» (квадрат со стрелкой вверх внизу экрана Safari).\n2. Прокрутите меню и выберите «На экран "Домой"».');
+  if (/iphone|ipad|ipod/.test(ua)) {
+    showInstallModal('1. Нажмите кнопку <b>«Поделиться»</b> (квадрат со стрелкой внизу экрана).<br>2. Выберите пункт <b>«На экран "Домой"»</b>.');
+  } else if (/yabrowser/.test(ua)) {
+    showInstallModal('1. Нажмите кнопку меню <b>«⋮»</b> или <b>«≡»</b> на нижней панели браузера.<br>2. Выберите <b>«Добавить ярлык на телефон»</b>.');
   } else {
-    alert('📲 Чтобы установить приложение:\n\nНажмите меню браузера «⋮» (три точки вверху справа) и выберите «Установить приложение» или «Добавить на главный экран».');
+    showInstallModal('1. Нажмите меню браузера <b>«⋮»</b> (в правом верхнем углу).<br>2. Выберите <b>«Добавить на главный экран»</b> ➔ <b>«Создать ярлык»</b>.');
   }
 }
 
@@ -1038,7 +1098,7 @@ try {
   if (savedState) {
     state = { ...state, ...JSON.parse(savedState) };
   } else {
-    ['pro_fish_state', 'pro_fish_state_v2', 'pro_fish_state_v3', 'pro_fish_state_v4', 'pro_fish_state_v5'].forEach(k => localStorage.removeItem(k));
+    ['pro_fish_state', 'pro_fish_state_v2', 'pro_fish_state_v3', 'pro_fish_state_v4', 'pro_fish_state_v5', 'pro_fish_state_v6.1'].forEach(k => localStorage.removeItem(k));
   }
 } catch(e) {
   console.warn('Ошибка чтения localStorage', e);
@@ -2271,7 +2331,7 @@ document.getElementById('placeSearchInput').addEventListener('keydown', e => {
 });
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  navigator.serviceWorker.register('sw.js?v=6.1').catch(() => {});
+  navigator.serviceWorker.register('sw.js?v=6.2').catch(() => {});
 }
 
 initTheme();
