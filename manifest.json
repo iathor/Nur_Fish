@@ -1,0 +1,19 @@
+{
+  "name": "Клев ПРО • Атлас Ихтиофауны РФ",
+  "short_name": "Клев ПРО",
+  "description": "Прогноз биологической активности рыбы и гидрологии водоемов РФ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0b1120",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg?v=6.1",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
