@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v6.1';
 const TILE_CACHE = `map-tiles-${CACHE_VERSION}`;
 const ASSET_CACHE = `app-assets-${CACHE_VERSION}`;
 
@@ -16,18 +16,23 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
-  // 1. СТРОГИЙ БАЙПАС: Игнорируем запросы к внешним API (погода, карты, геокодер)
-  // Они всегда должны идти напрямую через сеть, SW не вмешивается!
+  // 1. СТРОГИЙ БАЙПАС: Метео, геокодеры и Overpass API всегда идут напрямую
   if (url.hostname.includes('open-meteo.com') || 
+      url.hostname.includes('overpass-api.de') || 
       url.hostname.includes('maps.mail.ru') || 
       url.hostname.includes('bigdatacloud.net')) {
     return; 
   }
 
-  // 2. Кэширование тайлов карт - Cache First
-  if (url.pathname.includes('/tile/') || url.pathname.includes('/rastertiles/') || url.hostname.includes('openstreetmap.de')) {
+  // 2. Кэширование тайлов всех 4 слоев карт - Cache First
+  if (url.hostname.includes('opentopomap.org') ||
+      url.hostname.includes('arcgisonline.com') ||
+      url.hostname.includes('cartocdn.com') ||
+      url.hostname.includes('openstreetmap.org') ||
+      url.hostname.includes('openstreetmap.de')) {
     event.respondWith(
       caches.open(TILE_CACHE).then(cache => {
         return cache.match(event.request).then(response => {
@@ -42,8 +47,10 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 3. Кэширование картинок рыб и скриптов Leaflet - Stale-While-Revalidate
-  if (url.hostname.includes('yastatic.net') || url.pathname.includes('.png')) {
+  // 3. Кэширование картинок рыб, иконки и статики Leaflet - Stale-While-Revalidate
+  if (url.hostname.includes('yastatic.net') || 
+      url.hostname.includes('jsdelivr.net') || 
+      (url.origin === self.location.origin && (url.pathname.endsWith('.png') || url.pathname.endsWith('.svg') || url.pathname.endsWith('manifest.json')))) {
     event.respondWith(
       caches.open(ASSET_CACHE).then(cache => {
         return cache.match(event.request).then(cachedRes => {
