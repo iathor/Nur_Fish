@@ -11,14 +11,14 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Прогноз клева • Атлас Ихтиофауны России (115 видов) v6.2</title>
+  <title>Прогноз клева • Атлас Ихтиофауны России (115 видов)</title>
   
-  <link rel="manifest" href="manifest.json?v=6.2">
+  <link rel="manifest" href="manifest.json">
   <link id="dynamicFavicon" rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
   <link id="dynamicTouchIcon" rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
-  <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css?v=6.2" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
-  <script src="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.js?v=6.2"></script>
+  <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
+  <script src="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.js"></script>
   <script>
     if (typeof L === 'undefined') {
       document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />');
@@ -689,95 +689,51 @@
   </div>
 
 <script>
-const APP_VERSION = '6.2';
-const CACHE_KEY = 'pro_fish_state_v6.2';
+const APP_VERSION = '6.3';
+const CACHE_KEY = 'pro_fish_state_v6.3';
 let clipSeq = 0;
 
 const IMG_SEARCH_DIRS = ['assets/fish/', 'fish/', ''];
 const missingImagesSet = new Set();
 
 const MAP_LAYERS = {
-  topo: {
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    attr: '© OpenTopoMap'
-  },
-  sat: {
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attr: '© Esri'
-  },
-  carto: {
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    attr: '© CARTO'
-  },
-  osm: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attr: '© OpenStreetMap'
-  }
+  topo: { url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', attr: '© OpenTopoMap' },
+  sat: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: '© Esri' },
+  carto: { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', attr: '© CARTO' },
+  osm: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '© OpenStreetMap' }
 };
 
 const DEFAULT_STATE = {
-  lat: 66.0845,
-  lon: 76.6809,
-  locCountry: 'Россия',
-  locAdmin1: 'ЯНАО',
-  locAdmin2: 'Новый Уренгой',
-  locLabel: 'Новый Уренгой',
-  basinCode: 'arctic_ob_taz',
-  basinName: 'Обь-Тазовский бассейн (ЯНАО, Пур, Таз, Обь)',
-  water: 'small_river',
-  method: 'spin_micro',
-  depth: 1.2,
-  fishId: 'pike',
-  dayIdx: 0,
-  showAllSpecies: false,
-  theme: 'auto',
-  elevation: 45,
-  normPress: 756,
-  iceState: 'open_water',
-  iceThickness: 0
+  lat: 66.0845, lon: 76.6809,
+  locCountry: 'Россия', locAdmin1: 'ЯНАО', locAdmin2: 'Новый Уренгой', locLabel: 'Новый Уренгой',
+  basinCode: 'arctic_ob_taz', basinName: 'Обь-Тазовский бассейн (ЯНАО, Пур, Таз, Обь)',
+  water: 'small_river', method: 'spin_micro', depth: 1.2,
+  fishId: 'pike', dayIdx: 0, showAllSpecies: false, theme: 'auto',
+  elevation: 45, normPress: 756, iceState: 'open_water', iceThickness: 0
 };
 
-// Генерация PNG-иконки поплавка для iOS Safari на лету (синхронно через Canvas 2D)
 function generateFloatIconDataURL(size = 512) {
   const c = document.createElement('canvas');
-  c.width = size;
-  c.height = size;
+  c.width = size; c.height = size;
   const ctx = c.getContext('2d');
   const s = size / 512;
   ctx.scale(s, s);
 
   const g = ctx.createLinearGradient(0, 0, 0, 512);
-  g.addColorStop(0, '#0b1120');
-  g.addColorStop(1, '#0f2942');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 512, 512);
+  g.addColorStop(0, '#0b1120'); g.addColorStop(1, '#0f2942');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 512, 512);
 
-  ctx.fillStyle = '#ef4444';
-  ctx.fillRect(244, 60, 24, 115);
-  ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(244, 110, 24, 28);
-
-  ctx.fillStyle = '#38bdf8';
-  ctx.beginPath();
-  ctx.ellipse(256, 230, 38, 72, 0, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.fillStyle = '#ef4444'; ctx.fillRect(244, 60, 24, 115);
+  ctx.fillStyle = '#f8fafc'; ctx.fillRect(244, 110, 24, 28);
+  ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.ellipse(256, 230, 38, 72, 0, 0, Math.PI * 2); ctx.fill();
 
   const pts = [[40,310],[140,310],[180,235],[220,365],[260,175],[300,335],[340,280],[375,310],[472,310]];
-  ctx.strokeStyle = '#10b981';
-  ctx.lineWidth = 16;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  ctx.beginPath();
-  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
-  ctx.stroke();
+  ctx.strokeStyle = '#10b981'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); pts.forEach((p, i) => i === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1])); ctx.stroke();
 
-  ctx.font = '900 56px system-ui, -apple-system, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = '#f8fafc';
-  ctx.fillText('КЛЁВ', 195, 445);
-  ctx.fillStyle = '#38bdf8';
-  ctx.fillText('PRO', 360, 445);
-
+  ctx.font = '900 56px system-ui, -apple-system, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#f8fafc'; ctx.fillText('КЛЁВ', 195, 445);
+  ctx.fillStyle = '#38bdf8'; ctx.fillText('PRO', 360, 445);
   return c.toDataURL('image/png');
 }
 
@@ -788,20 +744,14 @@ function initDynamicTouchIcon() {
     const touch = document.getElementById('dynamicTouchIcon');
     if (fav) fav.href = png512;
     if (touch) touch.href = png512;
-  } catch (e) {
-    console.error('Canvas icon generation failed:', e);
-  }
+  } catch (e) {}
 }
 
 let deferredInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredInstallPrompt = e;
+  e.preventDefault(); deferredInstallPrompt = e;
   const btn = document.getElementById('installAppBtn');
-  if (btn) {
-    btn.style.display = 'inline-block';
-    btn.textContent = '📲 Установить приложение';
-  }
+  if (btn) { btn.style.display = 'inline-block'; btn.textContent = '📲 Установить приложение'; }
 });
 
 window.addEventListener('appinstalled', () => {
@@ -846,54 +796,41 @@ async function installShortcut() {
     return;
   }
   const ua = navigator.userAgent.toLowerCase();
-  if (/iphone|ipad|ipod/.test(ua)) {
-    showInstallModal('1. Нажмите кнопку <b>«Поделиться»</b> (квадрат со стрелкой внизу экрана).<br>2. Выберите пункт <b>«На экран "Домой"»</b>.');
-  } else if (/yabrowser/.test(ua)) {
-    showInstallModal('1. Нажмите кнопку меню <b>«⋮»</b> или <b>«≡»</b> на нижней панели браузера.<br>2. Выберите <b>«Добавить ярлык на телефон»</b>.');
-  } else {
-    showInstallModal('1. Нажмите меню браузера <b>«⋮»</b> (в правом верхнем углу).<br>2. Выберите <b>«Добавить на главный экран»</b> ➔ <b>«Создать ярлык»</b>.');
-  }
+  if (/iphone|ipad|ipod/.test(ua)) showInstallModal('1. Нажмите кнопку <b>«Поделиться»</b> (квадрат со стрелкой внизу).<br>2. Выберите пункт <b>«На экран "Домой"»</b>.');
+  else if (/yabrowser/.test(ua)) showInstallModal('1. Нажмите меню <b>«⋮»</b> или <b>«≡»</b> на нижней панели браузера.<br>2. Выберите <b>«Добавить ярлык на телефон»</b>.');
+  else showInstallModal('1. Нажмите меню браузера <b>«⋮»</b> (справа вверху).<br>2. Выберите <b>«Добавить на главный экран»</b> ➔ <b>«Создать ярлык»</b>.');
 }
 
 function renderFishVisual(f) {
-  if (missingImagesSet.has(f.id)) {
-    return getFishCustomSVG(f);
-  }
-  const firstSrc = `${IMG_SEARCH_DIRS[0]}${f.id}.png?v=${APP_VERSION}`;
-  return `<img src="${firstSrc}" alt="${f.name}" loading="lazy" data-fid="${f.id}" data-try="0" onerror="handleFishImgError(this)">`;
+  if (missingImagesSet.has(f.id)) return getFishCustomSVG(f);
+  return `<img src="${IMG_SEARCH_DIRS[0]}${f.id}.png?v=${APP_VERSION}" alt="${f.name}" loading="lazy" data-fid="${f.id}" data-try="0" onerror="handleFishImgError(this)">`;
 }
 
 function handleFishImgError(imgEl) {
   const fid = imgEl.getAttribute('data-fid');
   const nextTry = parseInt(imgEl.getAttribute('data-try') || '0', 10) + 1;
-
   if (nextTry < IMG_SEARCH_DIRS.length) {
     imgEl.setAttribute('data-try', String(nextTry));
     imgEl.src = `${IMG_SEARCH_DIRS[nextTry]}${fid}.png?v=${APP_VERSION}`;
   } else {
     missingImagesSet.add(fid);
-    const fishObj = FISH_DB.find(item => item.id === fid) || { id: fid, name: fid };
-    imgEl.outerHTML = getFishCustomSVG(fishObj);
+    imgEl.outerHTML = getFishCustomSVG(FISH_DB.find(item => item.id === fid) || { id: fid, name: fid });
   }
 }
 
 function renderFiveFish(score0to100, size = 18, theme = 'dark') {
   const rating = Math.max(0, Math.min(5, (score0to100 / 100) * 5));
   let col = '#10b981';
-  if (rating < 1.8) col = '#ef4444';
-  else if (rating < 3.3) col = '#f59e0b';
-
+  if (rating < 1.8) col = '#ef4444'; else if (rating < 3.3) col = '#f59e0b';
   const bgCol = theme === 'light' ? '#cbd5e1' : '#334155';
   const dPath = "M2,8 Q8,2 15,5 L21,2 L19,8 L21,14 L15,11 Q8,14 2,8 Z";
   let out = `<div class="fish-scale" title="Индекс активности: ${rating.toFixed(1)} / 5">`;
   for (let i = 1; i <= 5; i++) {
     const frac = Math.max(0, Math.min(1, rating - (i - 1)));
-    const w = (23 * frac).toFixed(1);
-    const cid = `c_${++clipSeq}`;
+    const w = (23 * frac).toFixed(1), cid = `c_${++clipSeq}`;
     out += `<svg width="${size}" height="${Math.round(size*0.68)}" viewBox="0 0 23 16">
       <defs><clipPath id="${cid}"><rect x="0" y="0" width="${w}" height="16"/></clipPath></defs>
-      <path d="${dPath}" fill="${bgCol}"/>
-      ${frac > 0 ? `<path d="${dPath}" fill="${col}" clip-path="url(#${cid})"/>` : ''}
+      <path d="${dPath}" fill="${bgCol}"/>${frac > 0 ? `<path d="${dPath}" fill="${col}" clip-path="url(#${cid})"/>` : ''}
     </svg>`;
   }
   return out + `</div>`;
@@ -901,63 +838,32 @@ function renderFiveFish(score0to100, size = 18, theme = 'dark') {
 
 function getFishCustomSVG(f) {
   const uid = `f_${f.id}_${++clipSeq}`;
-  
   if (['flounder', 'halibut', 'turbot', 'starry_flounder', 'plaice', 'black_sea_sole'].includes(f.id)) {
     const col = f.id === 'halibut' ? '#334155' : (f.id === 'turbot' ? '#64748b' : '#854d0e');
-    return `<svg viewBox="0 0 100 44">
-      <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs>
-      <ellipse cx="48" cy="22" rx="34" ry="17" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.2"/>
-      <path d="M82,22 L94,14 L91,22 L94,30 Z" fill="${col}"/>
-      <circle cx="28" cy="18" r="2.2" fill="#facc15"/><circle cx="28" cy="18" r="1.1" fill="#000"/>
-      <circle cx="34" cy="15" r="2.2" fill="#facc15"/><circle cx="34" cy="15" r="1.1" fill="#000"/>
-    </svg>`;
+    return `<svg viewBox="0 0 100 44"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs><ellipse cx="48" cy="22" rx="34" ry="17" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.2"/><path d="M82,22 L94,14 L91,22 L94,30 Z" fill="${col}"/><circle cx="28" cy="18" r="2.2" fill="#facc15"/><circle cx="28" cy="18" r="1.1" fill="#000"/><circle cx="34" cy="15" r="2.2" fill="#facc15"/><circle cx="34" cy="15" r="1.1" fill="#000"/></svg>`;
   }
-
   if (['sterlet', 'siberian_sturgeon', 'russian_sturgeon', 'paddlefish', 'beluga', 'stellate_sturgeon', 'kaluga'].includes(f.id)) {
     const snout = f.id === 'paddlefish' ? 'M-6,22 L22,15' : 'M3,23 L22,15';
-    return `<svg viewBox="0 0 100 44">
-      <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#334155"/><stop offset="65%" stop-color="#64748b"/><stop offset="100%" stop-color="#fef08a"/></linearGradient></defs>
-      <path d="${snout} L78,17 L95,7 L88,22 L93,31 L78,24 L22,26 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.1"/>
-      <path d="M28,16 L32,13 L35,16 M42,16 L46,13 L49,16 M56,17 L60,14 L63,17" fill="#fde047"/>
-      <circle cx="21" cy="20" r="1.6" fill="#000"/>
-    </svg>`;
+    return `<svg viewBox="0 0 100 44"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#334155"/><stop offset="65%" stop-color="#64748b"/><stop offset="100%" stop-color="#fef08a"/></linearGradient></defs><path d="${snout} L78,17 L95,7 L88,22 L93,31 L78,24 L22,26 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.1"/><path d="M28,16 L32,13 L35,16 M42,16 L46,13 L49,16 M56,17 L60,14 L63,17" fill="#fde047"/><circle cx="21" cy="20" r="1.6" fill="#000"/></svg>`;
   }
-
   if (['catfish', 'amur_catfish', 'channel_catfish', 'burbot', 'eel', 'wolffish', 'loach'].includes(f.id)) {
     const bColor = f.id === 'channel_catfish' ? '#475569' : '#2a180a';
-    return `<svg viewBox="0 0 100 44">
-      <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${bColor}"/><stop offset="60%" stop-color="#694b2a"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs>
-      <path d="M7,22 Q20,13 42,16 L84,17 C95,17 95,25 84,25 L42,26 Q20,29 7,22 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.1"/>
-      <path d="M10,25 L3,32 M12,24 L4,27" stroke="#334155" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="15" cy="19" r="1.8" fill="#fde047"/><circle cx="15" cy="19" r="0.9" fill="#000"/>
-    </svg>`;
+    return `<svg viewBox="0 0 100 44"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${bColor}"/><stop offset="60%" stop-color="#694b2a"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs><path d="M7,22 Q20,13 42,16 L84,17 C95,17 95,25 84,25 L42,26 Q20,29 7,22 Z" fill="url(#${uid})" stroke="#0f172a" stroke-width="1.1"/><path d="M10,25 L3,32 M12,24 L4,27" stroke="#334155" stroke-width="1.5" stroke-linecap="round"/><circle cx="15" cy="19" r="1.8" fill="#fde047"/><circle cx="15" cy="19" r="0.9" fill="#000"/></svg>`;
   }
-
   let topC = '#334155', midC = '#94a3b8', finC = '#dc2626', eyeC = '#ef4444';
-  if (['silver_carp', 'grass_carp', 'buffalo', 'tilapia', 'black_carp', 'snakehead'].includes(f.id)) {
-    topC = '#3f3f46'; midC = '#a1a1aa'; finC = '#71717a'; eyeC = '#fbbf24';
-  } else if (['salmon', 'trout', 'rainbow_trout', 'brown_trout', 'char', 'pink_salmon', 'chum_salmon', 'coho_salmon', 'sockeye_salmon', 'chinook_salmon', 'cherry_salmon', 'taimen', 'lenok', 'white_salmon'].includes(f.id)) {
-    topC = '#1e3a8a'; midC = '#f43f5e'; finC = '#be123c'; eyeC = '#fde047';
-  }
-
-  return `<svg viewBox="0 0 100 44">
-    <defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${topC}"/><stop offset="55%" stop-color="${midC}"/><stop offset="100%" stop-color="#ffffff"/></linearGradient></defs>
-    <path d="M38,12 L47,4 L58,12 Z" fill="#475569"/>
-    <path d="M33,27 L40,35 L47,28 Z" fill="${finC}"/>
-    <path d="M78,17 L92,9 L86,21 L92,33 L78,25 Z" fill="${finC}"/>
-    <path d="M9,21 Q34,10 62,14 L79,17 L79,25 L62,27 Q34,31 9,21 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="1.1"/>
-    <circle cx="17" cy="19.5" r="2.2" fill="${eyeC}"/><circle cx="17" cy="19.5" r="1.1" fill="#0f172a"/>
-  </svg>`;
+  if (['silver_carp', 'grass_carp', 'buffalo', 'tilapia', 'black_carp', 'snakehead'].includes(f.id)) { topC = '#3f3f46'; midC = '#a1a1aa'; finC = '#71717a'; eyeC = '#fbbf24'; } 
+  else if (['salmon', 'trout', 'rainbow_trout', 'brown_trout', 'char', 'pink_salmon', 'chum_salmon', 'coho_salmon', 'sockeye_salmon', 'chinook_salmon', 'cherry_salmon', 'taimen', 'lenok', 'white_salmon'].includes(f.id)) { topC = '#1e3a8a'; midC = '#f43f5e'; finC = '#be123c'; eyeC = '#fde047'; }
+  return `<svg viewBox="0 0 100 44"><defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${topC}"/><stop offset="55%" stop-color="${midC}"/><stop offset="100%" stop-color="#ffffff"/></linearGradient></defs><path d="M38,12 L47,4 L58,12 Z" fill="#475569"/><path d="M33,27 L40,35 L47,28 Z" fill="${finC}"/><path d="M78,17 L92,9 L86,21 L92,33 L78,25 Z" fill="${finC}"/><path d="M9,21 Q34,10 62,14 L79,17 L79,25 L62,27 Q34,31 9,21 Z" fill="url(#${uid})" stroke="#1e293b" stroke-width="1.1"/><circle cx="17" cy="19.5" r="2.2" fill="${eyeC}"/><circle cx="17" cy="19.5" r="1.1" fill="#0f172a"/></svg>`;
 }
 
 const WATER_PROFILES = {
-  small_river:       { name: 'Малая / средняя река', minD: 0.2, maxD: 6.0, defD: 1.2, flow: 1.3 },
-  big_river:         { name: 'Крупная магистральная река', minD: 0.5, maxD: 18.0, defD: 4.5, flow: 2.2 },
-  quarry:            { name: 'Глубокое озеро / карьер / вдхр', minD: 0.5, maxD: 22.0, defD: 5.0, flow: 0.7 },
-  tundra_lake:       { name: 'Мелководное озеро / старица / пруд', minD: 0.2, maxD: 3.5, defD: 1.0, flow: 0.4 },
+  small_river: { name: 'Малая / средняя река', minD: 0.2, maxD: 6.0, defD: 1.2, flow: 1.3 },
+  big_river: { name: 'Крупная магистральная река', minD: 0.5, maxD: 18.0, defD: 4.5, flow: 2.2 },
+  quarry: { name: 'Глубокое озеро / карьер / вдхр', minD: 0.5, maxD: 22.0, defD: 5.0, flow: 0.7 },
+  tundra_lake: { name: 'Мелководное озеро / старица / пруд', minD: 0.2, maxD: 3.5, defD: 1.0, flow: 0.4 },
   cooling_reservoir: { name: 'Теплый сброс ГРЭС/АЭС / Прудхоз', minD: 0.5, maxD: 8.0, defD: 2.5, flow: 1.1 },
-  sea_gulf:          { name: 'Морская губа / эстуарий / лиман', minD: 0.5, maxD: 15.0, defD: 3.5, flow: 1.8 },
-  open_sea:          { name: 'Открытое море / банка / шельф', minD: 2.0, maxD: 60.0, defD: 15.0, flow: 2.4 }
+  sea_gulf: { name: 'Морская губа / эстуарий / лиман', minD: 0.5, maxD: 15.0, defD: 3.5, flow: 1.8 },
+  open_sea: { name: 'Открытое море / банка / шельф', minD: 2.0, maxD: 60.0, defD: 15.0, flow: 2.4 }
 };
 
 const BASIN_CONFIGS = {
@@ -1098,17 +1004,14 @@ try {
   if (savedState) {
     state = { ...state, ...JSON.parse(savedState) };
   } else {
-    ['pro_fish_state', 'pro_fish_state_v2', 'pro_fish_state_v3', 'pro_fish_state_v4', 'pro_fish_state_v5', 'pro_fish_state_v6.1'].forEach(k => localStorage.removeItem(k));
+    ['pro_fish_state', 'pro_fish_state_v2', 'pro_fish_state_v3', 'pro_fish_state_v4', 'pro_fish_state_v5', 'pro_fish_state_v6.1', 'pro_fish_state_v6.2'].forEach(k => localStorage.removeItem(k));
   }
-} catch(e) {
-  console.warn('Ошибка чтения localStorage', e);
-}
+} catch(e) {}
 
 function saveState() {
   try {
     const s = { ...state };
-    delete s.iceState; 
-    delete s.iceThickness;
+    delete s.iceState; delete s.iceThickness;
     localStorage.setItem(CACHE_KEY, JSON.stringify(s));
   } catch(e) {}
 }
@@ -1119,9 +1022,7 @@ let mapMarker = null;
 let currentTileLayer = null;
 
 function formatLocalYYYYMMDD(dt) {
-  const y = dt.getFullYear();
-  const m = String(dt.getMonth() + 1).padStart(2, '0');
-  const d = String(dt.getDate()).padStart(2, '0');
+  const y = dt.getFullYear(), m = String(dt.getMonth() + 1).padStart(2, '0'), d = String(dt.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 
@@ -1151,50 +1052,35 @@ function updateWaterSelectOptions(basinCode) {
     <option value="tundra_lake">Озеро / старица / пруд (0.2–3.5 м)</option>
     <option value="cooling_reservoir">Теплый сброс ГРЭС/АЭС / Прудхоз (0.5–8 м)</option>
   `;
-  
-  if (hasSea) {
-    html += `
-      <option value="sea_gulf">Морская губа / эстуарий / лиман (0.5–15 м)</option>
-      <option value="open_sea">Открытое море / банка / шельф (до 60 м)</option>
-    `;
-  }
+  if (hasSea) html += `<option value="sea_gulf">Морская губа / эстуарий / лиман (0.5–15 м)</option><option value="open_sea">Открытое море / банка / шельф (до 60 м)</option>`;
   sel.innerHTML = html;
 
   if (hasSea || (currentVal !== 'sea_gulf' && currentVal !== 'open_sea')) {
-    sel.value = currentVal || 'small_river';
-    state.water = sel.value;
+    sel.value = currentVal || 'small_river'; state.water = sel.value;
   } else {
-    sel.value = 'small_river';
-    state.water = 'small_river';
+    sel.value = 'small_river'; state.water = 'small_river';
   }
 }
 
 function getFilteredFishList() {
   if (state.showAllSpecies) return FISH_DB;
-  
   return FISH_DB.filter(f => {
     const basinMatch = f.basins.includes(state.basinCode);
-    
     let waterMatch = !f.waters || f.waters.includes(state.water);
     if (!waterMatch && (state.water === 'tundra_lake' || state.water === 'quarry') && ['crucian', 'carp', 'silver_carp', 'grass_carp', 'perch', 'pike', 'roach', 'bream'].includes(f.id)) {
       waterMatch = true; 
     }
-
     if (f.legal === 'introduced' && state.water !== 'cooling_reservoir' && state.water !== 'quarry') {
       if (!['carp', 'silver_carp', 'grass_carp'].includes(f.id)) return false;
     }
-
     return basinMatch && waterMatch;
   });
 }
 
 function toggleShowAllSpecies() {
   state.showAllSpecies = !state.showAllSpecies;
-  document.getElementById('showAllToggle').textContent = state.showAllSpecies
-    ? 'Только бассейн и биотоп'
-    : `Все ${FISH_DB.length} видов РФ`;
-  saveState();
-  renderAll();
+  document.getElementById('showAllToggle').textContent = state.showAllSpecies ? 'Только бассейн и биотоп' : `Все ${FISH_DB.length} видов РФ`;
+  saveState(); renderAll();
 }
 
 function evaluateIceCondition(dailyTempsMax, dailyTempsMin, waterTemp) {
@@ -1202,45 +1088,30 @@ function evaluateIceCondition(dailyTempsMax, dailyTempsMin, waterTemp) {
   const tCurMin = Array.isArray(dailyTempsMin) ? dailyTempsMin[0] : (tCurMax - 4);
   const tCurMean = (tCurMax + tCurMin) / 2;
 
-  let freezeSum = 0;
-  let freezeDays = 0;
+  let freezeSum = 0, freezeDays = 0;
   if (Array.isArray(dailyTempsMax) && Array.isArray(dailyTempsMin)) {
     for (let i = 0; i < dailyTempsMax.length; i++) {
       const m = (dailyTempsMax[i] + dailyTempsMin[i]) / 2;
-      if (m <= 0) {
-        freezeDays++;
-        freezeSum += Math.abs(m);
-      } else if (i <= 2) {
-        break; 
-      }
+      if (m <= 0) { freezeDays++; freezeSum += Math.abs(m); } 
+      else if (i <= 2) break; 
     }
   }
 
   if (state.water === 'cooling_reservoir') {
-    state.iceState = 'open_water';
-    state.iceThickness = 0;
+    state.iceState = 'open_water'; state.iceThickness = 0;
   } else if (freezeDays >= 5 && freezeSum >= 45 && tCurMax <= -3) {
-    state.iceState = 'ice_safe';
-    state.iceThickness = Math.min(110, Math.max(12, Math.round(2.0 * Math.sqrt(freezeSum))));
+    state.iceState = 'ice_safe'; state.iceThickness = Math.min(110, Math.max(12, Math.round(2.0 * Math.sqrt(freezeSum))));
   } else if ((tCurMean <= -1.5 || (tCurMax <= 0 && tCurMin <= -5)) && waterTemp <= 1.2 && freezeSum >= 8) {
-    state.iceState = 'ice_danger';
-    state.iceThickness = Math.min(7, Math.max(1, Math.round(0.8 * Math.sqrt(freezeSum))));
+    state.iceState = 'ice_danger'; state.iceThickness = Math.min(7, Math.max(1, Math.round(0.8 * Math.sqrt(freezeSum))));
   } else {
-    state.iceState = 'open_water';
-    state.iceThickness = 0;
+    state.iceState = 'open_water'; state.iceThickness = 0;
   }
-
-  updateSeasonUI();
-  populateSeasonalMethods();
+  updateSeasonUI(); populateSeasonalMethods();
 }
 
 function updateSeasonUI() {
-  const banner = document.getElementById('seasonBanner');
-  const txt = document.getElementById('seasonStatusText');
-  const th = document.getElementById('iceThicknessText');
-
+  const banner = document.getElementById('seasonBanner'), txt = document.getElementById('seasonStatusText'), th = document.getElementById('iceThicknessText');
   banner.className = 'season-banner ' + (state.iceState === 'ice_safe' ? 'ice-safe' : (state.iceState === 'ice_danger' ? 'ice-danger' : 'open-water'));
-
   if (state.iceState === 'ice_safe') {
     txt.innerHTML = '❄️ <b>Подледный режим</b>: Прочный монолит. Доступны зимние оснастки!';
     th.textContent = `Лед монолит: ~${state.iceThickness} см (безопасно)`;
@@ -1254,10 +1125,8 @@ function updateSeasonUI() {
 }
 
 function populateSeasonalMethods() {
-  const sel = document.getElementById('methodSelect');
-  const prevVal = state.method;
+  const sel = document.getElementById('methodSelect'), prevVal = state.method;
   sel.innerHTML = '';
-
   const isSea = (state.water === 'sea_gulf' || state.water === 'open_sea');
   let options = [];
 
@@ -1278,46 +1147,24 @@ function populateSeasonalMethods() {
       { val: 'float', text: 'Поплавочная снасть (Мах / Болонка / Сбирулино)' },
       { val: 'fly', text: 'Нахлыст: Сухие / мокрые мушки, стримеры' }
     ];
-    
-    if (isSea) {
-      options.push(
-        { val: 'sea_rock', text: 'Морской рокфишинг / Ajing / Дроп-шот' },
-        { val: 'sea_surf', text: 'Морской сёрфкастинг с берега (тяжелая донка)' },
-        { val: 'sea_boat', text: 'Морской отвесный лов с борта (пилькеры, сабики)' }
-      );
-    }
+    if (isSea) options.push({ val: 'sea_rock', text: 'Морской рокфишинг / Ajing / Дроп-шот' }, { val: 'sea_surf', text: 'Морской сёрфкастинг с берега (тяжелая донка)' }, { val: 'sea_boat', text: 'Морской отвесный лов с борта (пилькеры, сабики)' });
   }
 
   options.forEach(opt => {
-    const el = document.createElement('option');
-    el.value = opt.val;
-    el.textContent = opt.text;
-    sel.appendChild(el);
+    const el = document.createElement('option'); el.value = opt.val; el.textContent = opt.text; sel.appendChild(el);
   });
-
-  const validVals = options.map(o => o.val);
-  if (validVals.includes(prevVal)) {
-    state.method = prevVal;
-  } else {
-    state.method = options[0].val;
-  }
+  if (options.map(o => o.val).includes(prevVal)) state.method = prevVal; else state.method = options[0].val;
   sel.value = state.method;
 }
 
 function applyTheme(t) {
-  const root = document.documentElement;
-  const btn = document.getElementById('themeBtn');
+  const root = document.documentElement, btn = document.getElementById('themeBtn');
   let effectiveTheme = t;
-
   if (t === 'auto') {
-    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    effectiveTheme = isDark ? 'dark' : 'light';
+    effectiveTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
     btn.innerHTML = '💻 Авто';
-  } else if (t === 'dark') {
-    btn.innerHTML = '🌙 Тёмная';
-  } else {
-    btn.innerHTML = '☀️ Светлая';
-  }
+  } else if (t === 'dark') btn.innerHTML = '🌙 Тёмная';
+  else btn.innerHTML = '☀️ Светлая';
 
   root.setAttribute('data-theme', effectiveTheme);
   const metaTheme = document.querySelector('meta[name="theme-color"]');
@@ -1328,18 +1175,13 @@ function applyTheme(t) {
 function cycleTheme() {
   const modes = ['auto', 'dark', 'light'];
   let next = modes[(modes.indexOf(state.theme) + 1) % modes.length];
-  state.theme = next;
-  saveState();
-  applyTheme(next);
-  renderAll();
+  state.theme = next; saveState(); applyTheme(next); renderAll();
 }
 
 function initTheme() {
   const saved = state.theme || 'auto';
   applyTheme(saved);
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    if (state.theme === 'auto') applyTheme('auto');
-  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.theme === 'auto') applyTheme('auto'); });
 }
 
 function switchMapLayer(key) {
@@ -1357,10 +1199,7 @@ function toggleMapDrawer() {
   dr.classList.toggle('open');
   if (dr.classList.contains('open')) {
     setTimeout(() => {
-      if (typeof L === 'undefined') {
-        alert('Загрузка картографического движка...');
-        return;
-      }
+      if (typeof L === 'undefined') { alert('Загрузка картографического движка...'); return; }
       if (!mapInstance) {
         mapInstance = L.map('mapBox').setView([state.lat, state.lon], 9);
         mapInstance.attributionControl.setPrefix(false);
@@ -1368,8 +1207,7 @@ function toggleMapDrawer() {
         mapMarker = L.marker([state.lat, state.lon]).addTo(mapInstance);
         mapInstance.on('click', e => setNewLocation(e.latlng.lat, e.latlng.lng));
       } else {
-        mapInstance.invalidateSize();
-        mapInstance.setView([state.lat, state.lon]);
+        mapInstance.invalidateSize(); mapInstance.setView([state.lat, state.lon]);
       }
       dr.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 150);
@@ -1379,24 +1217,48 @@ function toggleMapDrawer() {
 async function searchPlaceByName() {
   const q = document.getElementById('placeSearchInput').value.trim();
   if (!q) return;
-  try {
-    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=ru&format=json`);
-    const data = await res.json();
-    if (data.results && data.results.length > 0) {
-      const p = data.results[0];
-      state.locCountry = p.country || 'РФ';
-      state.locAdmin1 = p.admin1 || '';
-      state.locAdmin2 = p.admin2 || p.name;
-      state.locLabel = p.name;
-      updateLocationHeader();
-      await setNewLocation(p.latitude, p.longitude, true);
-      if (mapInstance) mapInstance.setView([p.latitude, p.longitude], 10);
-    } else {
-      alert('Локация или водоем не найдены.');
-    }
-  } catch (e) {
-    alert('Сбой геокодера.');
+  const st = document.getElementById('apiStatus');
+  st.textContent = 'Поиск локации...';
+
+  async function fetchWithTimeout(url, ms = 6000) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms);
+    try {
+      const r = await fetch(url, { signal: ctrl.signal, headers: { 'Accept-Language': 'ru' } });
+      clearTimeout(t);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return await r.json();
+    } catch (e) { clearTimeout(t); throw e; }
   }
+
+  try {
+    const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=1&accept-language=ru`;
+    const nomData = await fetchWithTimeout(nomUrl, 6500);
+    if (Array.isArray(nomData) && nomData.length > 0) {
+      const p = nomData[0], addr = p.address || {};
+      state.locCountry = addr.country || 'Россия';
+      state.locAdmin1 = addr.state || addr.region || '';
+      state.locAdmin2 = addr.city || addr.town || addr.village || addr.county || p.name || q;
+      state.locLabel = p.name || state.locAdmin2;
+      updateLocationHeader(); await setNewLocation(parseFloat(p.lat), parseFloat(p.lon), true);
+      if (mapInstance) mapInstance.setView([parseFloat(p.lat), parseFloat(p.lon)], 10);
+      return;
+    }
+  } catch (e) {}
+
+  try {
+    const omUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=1&language=ru&format=json`;
+    const omData = await fetchWithTimeout(omUrl, 6500);
+    if (omData && omData.results && omData.results.length > 0) {
+      const p = omData.results[0];
+      state.locCountry = p.country || 'Россия'; state.locAdmin1 = p.admin1 || '';
+      state.locAdmin2 = p.admin2 || p.name; state.locLabel = p.name;
+      updateLocationHeader(); await setNewLocation(p.latitude, p.longitude, true);
+      if (mapInstance) mapInstance.setView([p.latitude, p.longitude], 10);
+      return;
+    }
+    alert('Локация или водоем не найдены.');
+  } catch (e) { alert('Сбой сети при поиске. Проверьте интернет или выберите точку на карте вручную.'); }
 }
 
 function updateLocationHeader() {
@@ -1407,90 +1269,93 @@ function updateLocationHeader() {
 
 function detectMyGPS() {
   if (!navigator.geolocation) {
-    alert('Геолокация недоступна на устройстве.');
-    return;
+    alert('Геолокация не поддерживается вашим браузером.'); return;
   }
-  document.getElementById('apiStatus').textContent = 'Опрос GPS...';
+  const st = document.getElementById('apiStatus');
+  st.textContent = 'Опрос GPS...';
+
   navigator.geolocation.getCurrentPosition(
-    pos => {
-      setNewLocation(pos.coords.latitude, pos.coords.longitude);
+    pos => { setNewLocation(pos.coords.latitude, pos.coords.longitude); },
+    err => {
+      if (err.code !== err.PERMISSION_DENIED) {
+        st.textContent = 'Поиск по сотовой сети...';
+        navigator.geolocation.getCurrentPosition(
+          pos2 => setNewLocation(pos2.coords.latitude, pos2.coords.longitude),
+          err2 => handleGpsFinalError(err2),
+          { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+        );
+      } else { handleGpsFinalError(err); }
     },
-    () => {
-      document.getElementById('apiStatus').textContent = 'GPS отклонён';
-      alert('Включите доступ к GPS или укажите точку кликом на карте.');
-      if (!document.getElementById('mapDrawer').classList.contains('open')) toggleMapDrawer();
-    },
-    { enableHighAccuracy: true, timeout: 8000 }
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 120000 }
   );
+
+  function handleGpsFinalError(err) {
+    if (err.code === 1) {
+      st.textContent = 'Доступ к GPS запрещён';
+      alert('Доступ к геолокации запрещён в настройках браузера. Разрешите доступ или выберите точку на карте.');
+    } else if (err.code === 3) {
+      st.textContent = 'Таймаут GPS';
+      alert('Слабый сигнал спутников или мобильной сети. Укажите водоем кликом на карте.');
+    } else {
+      st.textContent = 'Сбой геопозиции';
+      alert('Не удалось определить координаты. Выберите точку на карте.');
+    }
+    if (!document.getElementById('mapDrawer').classList.contains('open')) toggleMapDrawer();
+  }
 }
 
 function pickBestDefaultFish(regionalList) {
   if (!regionalList || regionalList.length === 0) return 'pike';
   const curMonth = new Date().getMonth();
-  const sorted = [...regionalList]
-    .filter(f => f.legal !== 'redbook')
-    .sort((a, b) => b.monthActivity[curMonth] - a.monthActivity[curMonth]);
+  const sorted = [...regionalList].filter(f => f.legal !== 'redbook').sort((a, b) => b.monthActivity[curMonth] - a.monthActivity[curMonth]);
   return sorted[0]?.id || regionalList[0]?.id || 'pike';
 }
 
 function syncDepthLimitsWithWater(wType) {
   const prof = WATER_PROFILES[wType] || WATER_PROFILES.small_river;
-  const dRange = document.getElementById('depthRange');
-  const dValSpan = document.getElementById('depthVal');
-  const dNote = document.getElementById('depthLimitNote');
-
-  dRange.min = prof.minD;
-  dRange.max = prof.maxD;
+  const dRange = document.getElementById('depthRange'), dValSpan = document.getElementById('depthVal'), dNote = document.getElementById('depthLimitNote');
+  dRange.min = prof.minD; dRange.max = prof.maxD;
   dNote.textContent = `(от ${prof.minD} до ${prof.maxD} м)`;
-
   if (state.depth < prof.minD) state.depth = prof.minD;
   if (state.depth > prof.maxD) state.depth = prof.maxD;
-  dRange.value = state.depth;
-  dValSpan.textContent = state.depth.toFixed(1);
+  dRange.value = state.depth; dValSpan.textContent = state.depth.toFixed(1);
 }
 
 async function fetchLocationName(lat, lon) {
-  const targetUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ru`;
-
-  async function tryFetch(url, ms) {
+  async function tryFetch(url, ms = 6000) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), ms);
-    const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return await res.json();
-  }
-
-  let data = null;
-  const routes = [
-    { url: targetUrl, ms: 3000 },
-    { url: `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, ms: 5000 },
-    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, ms: 6000 }
-  ];
-
-  for (const route of routes) {
     try {
-      data = await tryFetch(route.url, route.ms);
-      if (data && (data.city || data.locality || data.principalSubdivision)) break; 
-    } catch (e) {
-      data = null;
-    }
+      const res = await fetch(url, { signal: controller.signal, headers: { 'Accept-Language': 'ru' } });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } catch (e) { clearTimeout(timer); throw e; }
   }
 
-  if (data) {
-    state.locCountry = data.countryName || 'Россия';
-    state.locAdmin1 = data.principalSubdivision || '';
-    state.locAdmin2 = data.locality || data.city || '';
-    state.locLabel = data.city || data.locality || data.principalSubdivision || 'Координатная точка';
-  } else {
-    state.locCountry = 'Россия';
-    state.locAdmin1 = `${lat.toFixed(2)}°N`;
-    state.locAdmin2 = `${lon.toFixed(2)}°E`;
-    state.locLabel = `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
-  }
-  
-  updateLocationHeader();
-  saveState();
+  try {
+    const nomUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1&zoom=10&accept-language=ru`;
+    const nom = await tryFetch(nomUrl, 6000);
+    if (nom && nom.address) {
+      const a = nom.address, city = a.city || a.town || a.village || a.hamlet || a.municipality || a.county || nom.name || '', reg = a.state || a.region || '';
+      if (city || reg) {
+        state.locCountry = a.country || 'Россия'; state.locAdmin1 = reg; state.locAdmin2 = city; state.locLabel = city || reg;
+        updateLocationHeader(); saveState(); return;
+      }
+    }
+  } catch (e) {}
+
+  try {
+    const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ru`;
+    const data = await tryFetch(bdcUrl, 7000);
+    if (data && (data.city || data.locality || data.principalSubdivision)) {
+      state.locCountry = data.countryName || 'Россия'; state.locAdmin1 = data.principalSubdivision || ''; state.locAdmin2 = data.locality || data.city || ''; state.locLabel = data.city || data.locality || data.principalSubdivision;
+      updateLocationHeader(); saveState(); return;
+    }
+  } catch (e) {}
+
+  state.locCountry = 'Россия'; state.locAdmin1 = `${lat.toFixed(2)}°N`; state.locAdmin2 = `${lon.toFixed(2)}°E`; state.locLabel = `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
+  updateLocationHeader(); saveState();
 }
 
 async function setNewLocation(lat, lon, skipReverseGeo = false) {
@@ -1521,100 +1386,56 @@ async function setNewLocation(lat, lon, skipReverseGeo = false) {
 
 async function fetchNearbyWaters(lat, lon) {
   const chipsEl = document.getElementById('nearbyChips');
-  chipsEl.innerHTML = `<span class="w-chip">Анализ гидросети (радиус 65 км)...</span>`;
+  chipsEl.innerHTML = `<span class="w-chip">Анализ гидросети (радиус 55 км)...</span>`;
 
   function getRegionalWatersFallback(bCode, lat, lon) {
-    if (bCode === 'arctic_ob_taz') {
-      return [
-        { label: '🌊 р. Седе-Яха', wType: 'small_river' },
-        { label: '🌊 р. Ево-Яха', wType: 'small_river' },
-        { label: '⚓ р. Пур / Таз / Обь', wType: 'big_river' },
-        { label: '💧 Озеро тундровое (сор)', wType: 'tundra_lake' },
-        { label: '💧 Песчаный карьер', wType: 'quarry' }
-      ];
-    }
-    if (lat >= 56.0 && lat <= 57.6 && lon >= 59.8 && lon <= 61.8) {
-      return [
-        { label: '🌊 р. Сысерть', wType: 'small_river' },
-        { label: '🌊 р. Исеть', wType: 'big_river' },
-        { label: '💧 Сысертский пруд / вдхр', wType: 'quarry' },
-        { label: '💧 Верхне-Макаровское вдхр', wType: 'quarry' },
-        { label: '🌊 р. Чусовая (бассейн)', wType: 'small_river' },
-        { label: '💧 Озеро Иткуль / Синара', wType: 'quarry' }
-      ];
-    }
-    if (bCode === 'volga_caspian') {
-      return [
-        { label: '⚓ Магистральное русло (Волга/Кама)', wType: 'big_river' },
-        { label: '🌊 Протока / река 2-го порядка', wType: 'small_river' },
-        { label: '💧 Водохранилище / плес', wType: 'quarry' },
-        { label: '🌿 Затон / старица / пруд', wType: 'tundra_lake' }
-      ];
-    }
-    if (['black_azov', 'baltic', 'pacific_sea', 'barents_white'].includes(bCode)) {
-      return [
-        { label: '🌊 Морская бухта / залив', wType: 'sea_gulf' },
-        { label: '⚓ Открытое море / банка', wType: 'open_sea' },
-        { label: '🌊 Приустьевой участок реки', wType: 'small_river' }
-      ];
-    }
-    return [
-      { label: '🌊 Малая / средняя река', wType: 'small_river' },
-      { label: '⚓ Крупная магистральная река', wType: 'big_river' },
-      { label: '💧 Карьер / озеро', wType: 'quarry' },
-      { label: '🌿 Старица / пруд', wType: 'tundra_lake' }
-    ];
+    if (bCode === 'arctic_ob_taz') return [ { label: '🌊 р. Седе-Яха', wType: 'small_river' }, { label: '🌊 р. Ево-Яха', wType: 'small_river' }, { label: '⚓ р. Пур / Таз / Обь', wType: 'big_river' }, { label: '💧 Озеро тундровое', wType: 'tundra_lake' }, { label: '💧 Песчаный карьер', wType: 'quarry' } ];
+    if (lat >= 56.0 && lat <= 57.6 && lon >= 59.8 && lon <= 61.8) return [ { label: '🌊 р. Сысерть', wType: 'small_river' }, { label: '🌊 р. Исеть', wType: 'big_river' }, { label: '💧 Сысертский пруд', wType: 'quarry' }, { label: '💧 Озеро Иткуль', wType: 'quarry' } ];
+    if (bCode === 'volga_caspian') return [ { label: '⚓ Магистральное русло', wType: 'big_river' }, { label: '🌊 Протока', wType: 'small_river' }, { label: '💧 Плес', wType: 'quarry' }, { label: '🌿 Затон', wType: 'tundra_lake' } ];
+    if (['black_azov', 'baltic', 'pacific_sea', 'barents_white'].includes(bCode)) return [ { label: '🌊 Морской залив', wType: 'sea_gulf' }, { label: '⚓ Открытое море', wType: 'open_sea' }, { label: '🌊 Приустьевой участок', wType: 'small_river' } ];
+    return [ { label: '🌊 Река', wType: 'small_river' }, { label: '⚓ Русло', wType: 'big_river' }, { label: '💧 Озеро', wType: 'quarry' }, { label: '🌿 Пруд', wType: 'tundra_lake' } ];
   }
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 4000);
-  const query = `[out:json][timeout:4];(way["waterway"~"river|stream"]["name"](around:65000,${lat},${lon});way["natural"="water"]["name"](around:65000,${lat},${lon}););out tags 25;`;
+  const query = `[out:json][timeout:6];(way["waterway"~"river|stream"]["name"](around:55000,${lat},${lon});way["natural"="water"]["name"](around:55000,${lat},${lon}););out tags 25;`;
+  const overpassEndpoints = [
+    'https://maps.mail.ru/osm/tools/overpass/api/interpreter?data=' + encodeURIComponent(query),
+    'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query),
+    'https://overpass.kumi.systems/api/interpreter?data=' + encodeURIComponent(query)
+  ];
 
-  try {
-    const res = await fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query), { signal: controller.signal });
-    clearTimeout(timer);
-    const data = await res.json();
-    const seen = new Set();
-    const items = [];
-
-    for (const el of (data.elements || [])) {
-      const name = el.tags && (el.tags['name:ru'] || el.tags.name);
-      if (!name || seen.has(name.toLowerCase())) continue;
-      seen.add(name.toLowerCase());
-
-      const isRiver = el.tags.waterway === 'river' || el.tags.waterway === 'stream';
-      let wType = isRiver
-        ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена|исеть|чусовая/i.test(name) ? 'big_river' : 'small_river')
-        : (/море|губа|залив/i.test(name) ? 'sea_gulf' : (/карьер|вдхр|водохранилище|пруд/i.test(name) ? 'quarry' : 'tundra_lake'));
-      const icon = isRiver ? '🌊 р. ' : '💧 ';
-      items.push({ label: icon + name.replace(/^(река|озеро|пруд)\s+/i, ''), wType });
-      if (items.length >= 7) break;
-    }
-
-    if (items.length > 0) {
-      chipsEl.innerHTML = items.map((it, idx) =>
-        `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`
-      ).join('');
-      return;
-    }
-  } catch (e) {}
-
-  clearTimeout(timer);
+  for (const ep of overpassEndpoints) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6500);
+    try {
+      const res = await fetch(ep, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const seen = new Set(), items = [];
+      for (const el of (data.elements || [])) {
+        const name = el.tags && (el.tags['name:ru'] || el.tags.name);
+        if (!name || seen.has(name.toLowerCase())) continue;
+        seen.add(name.toLowerCase());
+        const isRiver = el.tags.waterway === 'river' || el.tags.waterway === 'stream';
+        let wType = isRiver ? (/обь|иртыш|енисей|волга|кама|дон|днепр|пур|таз|амур|лена|исеть|чусовая/i.test(name) ? 'big_river' : 'small_river') : (/море|губа|залив/i.test(name) ? 'sea_gulf' : (/карьер|вдхр|водохранилище|пруд/i.test(name) ? 'quarry' : 'tundra_lake'));
+        const icon = isRiver ? '🌊 р. ' : '💧 ';
+        items.push({ label: icon + name.replace(/^(река|озеро|пруд)\s+/i, ''), wType });
+        if (items.length >= 7) break;
+      }
+      if (items.length > 0) {
+        chipsEl.innerHTML = items.map((it, idx) => `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`).join('');
+        return;
+      }
+    } catch (e) { clearTimeout(timer); }
+  }
   const fallbackList = getRegionalWatersFallback(state.basinCode, lat, lon);
-  chipsEl.innerHTML = fallbackList.map((it, idx) =>
-    `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`
-  ).join('');
+  chipsEl.innerHTML = fallbackList.map((it, idx) => `<span class="w-chip ${idx === 0 ? 'active' : ''}" onclick="selectNearbyWater(this, '${it.wType}')">${it.label}</span>`).join('');
 }
 
 function selectNearbyWater(el, wType) {
   document.querySelectorAll('.w-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  state.water = wType;
-  document.getElementById('waterSelect').value = wType;
-  syncDepthLimitsWithWater(wType);
-  populateSeasonalMethods();
-  saveState();
-  renderAll();
+  el.classList.add('active'); state.water = wType; document.getElementById('waterSelect').value = wType;
+  syncDepthLimitsWithWater(wType); populateSeasonalMethods(); saveState(); renderAll();
 }
 
 function computeMoon(dateStr) {
@@ -1631,172 +1452,153 @@ function computeMoon(dateStr) {
 
 function buildFallback() {
   const dRu = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], mRu = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
-  
-  const startDt = new Date();
-  startDt.setHours(0, 0, 0, 0); 
-  
+  const startDt = new Date(); startDt.setHours(0, 0, 0, 0); 
   DAYS_DATA = [];
-  const tempsMax = [];
-  const tempsMin = [];
-
+  const tempsMax = [], tempsMin = [];
   const dayOfYear = Math.floor((startDt - new Date(startDt.getFullYear(), 0, 0)) / 86400000);
   const seasonOffset = -Math.cos((dayOfYear + 10) / 365 * 2 * Math.PI);
   const latBase = Math.abs(state.lat);
-  const meanT = 22 - (latBase - 40) * 0.9;
-  const amplitude = 11 + (latBase - 40) * 0.45;
+  const meanT = 22 - (latBase - 40) * 0.9, amplitude = 11 + (latBase - 40) * 0.45;
 
   for (let i = 0; i < 14; i++) {
-    const cur = new Date(startDt.getTime() + i * 86400000);
-    const dStr = formatLocalYYYYMMDD(cur);
-    const moon = computeMoon(dStr);
-    
-    const tMax = Math.round(meanT + seasonOffset * amplitude - i * 0.25);
-    const tMin = tMax - 6;
-    tempsMax.push(tMax);
-    tempsMin.push(tMin);
-    const p = Math.round(756 + Math.sin(i * 0.7) * 4);
-    const dP = i === 0 ? -1 : Math.round(Math.cos(i) * 3);
-    const w = Math.round(5 + Math.sin(i) * 2);
+    const cur = new Date(startDt.getTime() + i * 86400000), dStr = formatLocalYYYYMMDD(cur), moon = computeMoon(dStr);
+    const tMax = Math.round(meanT + seasonOffset * amplitude - i * 0.25), tMin = tMax - 6;
+    tempsMax.push(tMax); tempsMin.push(tMin);
+    const p = Math.round(756 + Math.sin(i * 0.7) * 4), dP = i === 0 ? -1 : Math.round(Math.cos(i) * 3), w = Math.round(5 + Math.sin(i) * 2);
 
     const hours = [];
     for (let h = 0; h < 24; h++) {
       const wave = Math.sin(((h - 5) / 24) * 2 * Math.PI);
-      hours.push({
-        hour: h,
-        tAir: Math.round((tMin + (tMax - tMin) * ((wave + 1) / 2)) * 10) / 10,
-        press: Math.round(p + (dP * (h - 12)) / 24),
-        dp3h: Math.round((dP / 8) * 10) / 10,
-        wind: Math.max(1, w),
-        windDir: ['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'][(i + h) % 8],
-        cloud: 85, precip: 0.1
-      });
+      hours.push({ hour: h, tAir: Math.round((tMin + (tMax - tMin) * ((wave + 1) / 2)) * 10) / 10, press: Math.round(p + (dP * (h - 12)) / 24), dp3h: Math.round((dP / 8) * 10) / 10, wind: Math.max(1, w), windDir: ['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'][(i + h) % 8], cloud: 85, precip: 0.1 });
     }
-
-    DAYS_DATA.push({
-      date: dStr,
-      label: `${dRu[cur.getDay()]}, ${cur.getDate()} ${mRu[cur.getMonth()]}`,
-      tDay: tMax, tNight: tMin, pressAvg: p, dP, windMax: w, windDir: hours[12].windDir,
-      sunriseHr: 7.4 + i * 0.05, sunsetHr: 16.7 - i * 0.05,
-      waterTemp: 0, 
-      moon, hours
-    });
+    DAYS_DATA.push({ date: dStr, label: `${dRu[cur.getDay()]}, ${cur.getDate()} ${mRu[cur.getMonth()]}`, tDay: tMax, tNight: tMin, pressAvg: p, dP, windMax: w, windDir: hours[12].windDir, sunriseHr: 7.4 + i * 0.05, sunsetHr: 16.7 - i * 0.05, waterTemp: 0, moon, hours });
   }
 
   const wtBase = Math.max(0.2, (meanT + seasonOffset * amplitude) * 0.55 + 2.5);
   DAYS_DATA.forEach((d, i) => {
-    if (state.water === 'cooling_reservoir') {
-      d.waterTemp = Math.max(8, Math.min(30, Math.round((d.tDay * 0.2 + 18) * 10) / 10));
-    } else {
-      d.waterTemp = Math.max(0.2, Math.min(26, Math.round((wtBase - i * 0.1) * 10) / 10));
-    }
+    if (state.water === 'cooling_reservoir') d.waterTemp = Math.max(8, Math.min(30, Math.round((d.tDay * 0.2 + 18) * 10) / 10));
+    else d.waterTemp = Math.max(0.2, Math.min(26, Math.round((wtBase - i * 0.1) * 10) / 10));
   });
+  evaluateIceCondition(tempsMax, tempsMin, DAYS_DATA[0].waterTemp);
+}
 
+function parseMetNoData(metNo) {
+  const coords = metNo.geometry?.coordinates || [];
+  state.elevation = Math.round(coords[2] || 45);
+  state.normPress = Math.round(760 - (state.elevation / 11.5));
+  const dRu = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], mRu = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'], dirs = ['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'];
+  const byDate = {};
+
+  for (const item of metNo.properties.timeseries) {
+    const dt = new Date(item.time), dStr = formatLocalYYYYMMDD(dt), hr = dt.getHours();
+    if (!byDate[dStr]) byDate[dStr] = {};
+    const inst = item.data.instant.details;
+    const pSea = inst.air_pressure_at_sea_level || 1013.25;
+    const pMm = (pSea * 0.750062) - (state.elevation / 11.5);
+    byDate[dStr][hr] = { hour: hr, tAir: Math.round((inst.air_temperature ?? 0) * 10) / 10, press: Math.round(pMm), dp3h: 0, wind: Math.round((inst.wind_speed ?? 3) * 10) / 10, windDir: dirs[Math.round(((inst.wind_from_direction || 0) / 45)) % 8], cloud: Math.round(inst.cloud_area_fraction ?? 50), precip: item.data.next_1_hours?.details?.precipitation_amount ?? item.data.next_6_hours?.details?.precipitation_amount ?? 0 };
+  }
+
+  buildFallback();
+  const tempsMax = [], tempsMin = [];
+  DAYS_DATA.forEach((dayObj, i) => {
+    const mapH = byDate[dayObj.date];
+    if (mapH) {
+      let lastKnown = Object.values(mapH)[0];
+      for (let h = 0; h < 24; h++) {
+        if (mapH[h]) lastKnown = mapH[h];
+        else if (lastKnown) mapH[h] = { ...lastKnown, hour: h };
+        if (mapH[h]) dayObj.hours[h] = mapH[h];
+      }
+      for (let h = 0; h < 24; h++) {
+        const prevP = h >= 3 ? dayObj.hours[h - 3].press : dayObj.hours[0].press;
+        dayObj.hours[h].dp3h = Math.round((dayObj.hours[h].press - prevP) * 10) / 10;
+      }
+      const tArr = dayObj.hours.map(x => x.tAir), pArr = dayObj.hours.map(x => x.press), wArr = dayObj.hours.map(x => x.wind);
+      dayObj.tDay = Math.round(Math.max(...tArr)); dayObj.tNight = Math.round(Math.min(...tArr));
+      dayObj.pressAvg = Math.round(pArr.reduce((a, b) => a + b, 0) / 24);
+      dayObj.dP = i === 0 ? (dayObj.hours[23].press - dayObj.hours[0].press) : (dayObj.pressAvg - DAYS_DATA[i - 1].pressAvg);
+      dayObj.windMax = Math.round(Math.max(...wArr)); dayObj.windDir = dayObj.hours[12].windDir;
+      const meanT = (dayObj.tDay + dayObj.tNight) / 2;
+      dayObj.waterTemp = state.water === 'cooling_reservoir' ? Math.max(8, Math.min(30, Math.round((meanT * 0.2 + 18) * 10) / 10)) : Math.max(0.2, Math.min(24, Math.round((meanT * 0.50 + 2.5) * 10) / 10));
+    }
+    tempsMax.push(dayObj.tDay); tempsMin.push(dayObj.tNight);
+  });
   evaluateIceCondition(tempsMax, tempsMin, DAYS_DATA[0].waterTemp);
 }
 
 async function fetchLiveMeteo() {
   const st = document.getElementById('apiStatus');
-  const targetUrl = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}&hourly=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,wind_speed_10m_max,wind_direction_10m_dominant&forecast_days=14&wind_speed_unit=ms&timezone=auto&_cb=${Date.now()}`;
+  const targetUrl = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}&hourly=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,wind_speed_10m_max,wind_direction_10m_dominant&forecast_days=14&wind_speed_unit=ms&timezone=auto`;
 
   async function tryFetch(url, ms) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), ms);
-    const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return await res.json();
+    try {
+      const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } catch (e) { clearTimeout(timer); throw e; }
   }
 
   let data = null;
   const routes = [
-    { url: targetUrl, ms: 3000, text: 'Опрос метеосети...' },
-    { url: `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, ms: 6000, text: 'Резервный канал 1...' },
-    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, ms: 7000, text: 'Резервный канал 2...' }
+    { url: targetUrl, ms: 8500, text: 'Опрос метеосети...' },
+    { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, ms: 8000, text: 'Резервный шлюз...' }
   ];
 
   for (const route of routes) {
     try {
       st.textContent = route.text;
       data = await tryFetch(route.url, route.ms);
-      if (data && data.hourly) break; 
-    } catch (e) {
-      data = null; 
-    }
+      if (data && data.hourly && data.daily) break;
+    } catch (e) { data = null; }
   }
 
   if (!data || !data.hourly) {
-    st.textContent = 'Автономный режим (без сети)';
-    renderAll();
-    return;
+    try {
+      st.textContent = 'Метеоканал MET.no...';
+      const metNoUrl = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${state.lat.toFixed(4)}&lon=${state.lon.toFixed(4)}`;
+      const metNoData = await tryFetch(metNoUrl, 8500);
+      if (metNoData && metNoData.properties && metNoData.properties.timeseries) {
+        parseMetNoData(metNoData); st.textContent = 'Онлайн (MET.no)'; renderAll(); return;
+      }
+    } catch (e) {}
+    st.textContent = 'Автономный режим (без сети)'; renderAll(); return;
   }
 
   try {
     state.elevation = Math.round(data.elevation || 45);
     state.normPress = Math.round(760 - (state.elevation / 11.5));
-
     const dRu = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], mRu = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'], dirs = ['С','СВ','В','ЮВ','Ю','ЮЗ','З','СЗ'];
     const allP = data.hourly.surface_pressure.map(v => v * 0.750062);
 
     DAYS_DATA = data.daily.time.map((dStr, i) => {
-      const dt = new Date(dStr + 'T00:00:00');
-      const srD = new Date(data.daily.sunrise[i]), ssD = new Date(data.daily.sunset[i]);
-      const hours = [];
-      let sumP = 0;
+      const dt = new Date(dStr + 'T00:00:00'), srD = new Date(data.daily.sunrise[i]), ssD = new Date(data.daily.sunset[i]);
+      const hours = []; let sumP = 0;
       for (let h = 0; h < 24; h++) {
-        const g = i * 24 + h;
-        const pMm = allP[g] || 755;
-        sumP += pMm;
-        hours.push({
-          hour: h,
-          tAir: Math.round((data.hourly.temperature_2m[g] ?? 0) * 10) / 10,
-          press: Math.round(pMm),
-          dp3h: Math.round((pMm - (g >= 3 ? allP[g - 3] : pMm)) * 10) / 10,
-          wind: Math.round((data.hourly.wind_speed_10m[g] ?? 3) * 10) / 10,
-          windDir: dirs[Math.round(((data.hourly.wind_direction_10m[g] || 0) / 45)) % 8],
-          cloud: data.hourly.cloud_cover[g] ?? 50,
-          precip: data.hourly.precipitation[g] ?? 0
-        });
+        const g = i * 24 + h, pMm = allP[g] || 755; sumP += pMm;
+        hours.push({ hour: h, tAir: Math.round((data.hourly.temperature_2m[g] ?? 0) * 10) / 10, press: Math.round(pMm), dp3h: Math.round((pMm - (g >= 3 ? allP[g - 3] : pMm)) * 10) / 10, wind: Math.round((data.hourly.wind_speed_10m[g] ?? 3) * 10) / 10, windDir: dirs[Math.round(((data.hourly.wind_direction_10m[g] || 0) / 45)) % 8], cloud: data.hourly.cloud_cover[g] ?? 50, precip: data.hourly.precipitation[g] ?? 0 });
       }
-      const pAvg = Math.round(sumP / 24);
-      const prevAvg = i > 0 ? Math.round(allP.slice((i-1)*24, i*24).reduce((a,b)=>a+b,0)/24) : pAvg;
-      const meanT = (data.daily.temperature_2m_max[i] + data.daily.temperature_2m_min[i]) / 2;
-      return {
-        date: dStr, label: `${dRu[dt.getDay()]}, ${dt.getDate()} ${mRu[dt.getMonth()]}`,
-        tDay: Math.round(data.daily.temperature_2m_max[i]), tNight: Math.round(data.daily.temperature_2m_min[i]),
-        pressAvg: pAvg, dP: i === 0 ? Math.round(allP[23] - allP[0]) : (pAvg - prevAvg),
-        windMax: Math.round(data.daily.wind_speed_10m_max[i]),
-        windDir: dirs[Math.round(((data.daily.wind_direction_10m_dominant[i] || 0) / 45)) % 8],
-        sunriseHr: srD.getHours() + srD.getMinutes()/60, sunsetHr: ssD.getHours() + ssD.getMinutes()/60,
-        waterTemp: state.water === 'cooling_reservoir'
-          ? Math.max(8, Math.min(30, Math.round((meanT * 0.2 + 18) * 10) / 10))
-          : Math.max(0.2, Math.min(24, Math.round((meanT * 0.50 + 2.5) * 10) / 10)),
-        moon: computeMoon(dStr), hours
-      };
+      const pAvg = Math.round(sumP / 24), prevAvg = i > 0 ? Math.round(allP.slice((i-1)*24, i*24).reduce((a,b)=>a+b,0)/24) : pAvg, meanT = (data.daily.temperature_2m_max[i] + data.daily.temperature_2m_min[i]) / 2;
+      return { date: dStr, label: `${dRu[dt.getDay()]}, ${dt.getDate()} ${mRu[dt.getMonth()]}`, tDay: Math.round(data.daily.temperature_2m_max[i]), tNight: Math.round(data.daily.temperature_2m_min[i]), pressAvg: pAvg, dP: i === 0 ? Math.round(allP[23] - allP[0]) : (pAvg - prevAvg), windMax: Math.round(data.daily.wind_speed_10m_max[i]), windDir: dirs[Math.round(((data.daily.wind_direction_10m_dominant[i] || 0) / 45)) % 8], sunriseHr: srD.getHours() + srD.getMinutes()/60, sunsetHr: ssD.getHours() + ssD.getMinutes()/60, waterTemp: state.water === 'cooling_reservoir' ? Math.max(8, Math.min(30, Math.round((meanT * 0.2 + 18) * 10) / 10)) : Math.max(0.2, Math.min(24, Math.round((meanT * 0.50 + 2.5) * 10) / 10)), moon: computeMoon(dStr), hours };
     });
-
     evaluateIceCondition(data.daily.temperature_2m_max, data.daily.temperature_2m_min, DAYS_DATA[0].waterTemp);
-    st.textContent = 'Онлайн • 14 дней';
-    renderAll();
-  } catch (e) {
-    st.textContent = 'Ошибка парсинга данных';
-    renderAll();
-  }
+    st.textContent = 'Онлайн • 14 дней'; renderAll();
+  } catch (e) { st.textContent = 'Ошибка парсинга данных'; renderAll(); }
 }
 
 function calcHourly(fish, day, hrObj, method, water, depth) {
   if (fish.legal === 'redbook') return 0;
   if (depth > fish.depthMax) return 4;
   if (state.iceState === 'ice_danger' && !method.startsWith('winter_')) return 8;
-
   if (day.waterTemp < fish.tMinStop) return 5;
-
   let kTempOver = 1.0;
   if (day.waterTemp > fish.tWaterOpt[1]) {
     const excess = day.waterTemp - fish.tWaterOpt[1];
     if (excess >= 6) return 5;
     kTempOver = Math.max(0.2, 1.0 - (excess * 0.15));
   }
-
   let depthFactor = 1.0;
   if (depth <= 0.8 && (method === 'spin_micro' || method === 'float')) {
     if (['bleak', 'grayling', 'roach', 'chub', 'trout', 'ide', 'tugun', 'dace', 'rudd', 'gudgeon'].includes(fish.id)) depthFactor = 1.15;
@@ -1805,104 +1607,55 @@ function calcHourly(fish, day, hrObj, method, water, depth) {
   } else if (depth > fish.depthOpt[1]) {
     depthFactor = Math.max(0.20, 1.0 - (depth - fish.depthOpt[1]) / (fish.depthMax - fish.depthOpt[1]));
   }
-
   let methodFactor = 0.75;
-  if (method === 'winter_livebait') {
-    methodFactor = fish.type === 'predator' ? 1.12 : 0.05;
-  } else if (method === 'winter_lure') {
-    methodFactor = ['perch', 'pike', 'zander', 'grayling', 'smelt', 'trout', 'cod', 'navaga', 'lenok', 'volga_zander', 'char', 'broad_whitefish', 'saffron_cod'].includes(fish.id) ? 1.10 : 0.15;
-  } else if (method === 'winter_jig') {
-    methodFactor = ['chir', 'pizhyan', 'peled', 'cisco', 'roach', 'perch', 'whitefish', 'ruffe', 'smelt', 'bream', 'ide', 'dace', 'white_bream', 'vendace', 'omul', 'omul_arctic', 'valek', 'baikal_grayling'].includes(fish.id) ? 1.12 : 0.35;
-  } else if (method === 'winter_stuka') {
-    methodFactor = ['burbot', 'cod', 'halibut', 'navaga', 'wolffish'].includes(fish.id) ? 1.25 : 0.12;
-  } else if (method === 'winter_cisco') {
-    methodFactor = ['cisco', 'peled', 'smelt', 'whitefish', 'herring', 'vendace', 'omul', 'omul_arctic'].includes(fish.id) ? 1.25 : 0.18;
-  } else if (method === 'spin_micro') {
-    methodFactor = ['perch', 'roach', 'crucian', 'rudd', 'bleak', 'chub', 'grayling', 'trout', 'brown_trout', 'rainbow_trout', 'rotan', 'gudgeon', 'dace', 'ide', 'horse_mackerel', 'sea_bass', 'scorpionfish', 'wrasse'].includes(fish.id) ? 1.18 : (fish.type === 'predator' ? 0.82 : 0.30);
-  } else if (method === 'spin_jig') {
-    methodFactor = ['zander', 'pike', 'perch', 'catfish', 'volga_zander', 'amur_catfish', 'channel_catfish', 'burbot', 'cod', 'halibut', 'greenling'].includes(fish.id) ? 1.18 : (fish.type === 'predator' ? 0.85 : 0.08);
-  } else if (method === 'spin_lure') {
-    methodFactor = ['pike', 'perch', 'asp', 'chub', 'ide', 'grayling', 'trout', 'salmon', 'pink_salmon', 'chum_salmon', 'coho_salmon', 'chinook_salmon', 'cherry_salmon', 'lenok', 'char', 'dolly_varden', 'snakehead', 'sky_gazer', 'garfish', 'bluefish'].includes(fish.id) ? 1.18 : (fish.type === 'predator' ? 0.90 : 0.10);
-  } else if (method === 'bottom') {
-    methodFactor = (fish.type === 'peace' || ['catfish', 'burbot', 'channel_catfish', 'amur_catfish', 'ruffe', 'flounder', 'starry_flounder', 'turbot', 'plaice', 'goby'].includes(fish.id)) ? 1.15 : 0.25;
-  } else if (method === 'float') {
-    methodFactor = (fish.type === 'peace' || ['perch', 'rotan', 'ruffe', 'chub', 'grayling', 'trout', 'dolly_varden', 'garfish'].includes(fish.id)) ? 1.14 : 0.30;
-  } else if (method === 'fly') {
-    methodFactor = ['grayling', 'baikal_grayling', 'lenok', 'salmon', 'trout', 'chub', 'ide', 'tugun', 'dace', 'brown_trout', 'sockeye_salmon', 'char', 'dolly_varden', 'bleak', 'rudd', 'chekhon'].includes(fish.id) ? 1.22 : 0.15;
-  } else if (method === 'sea_rock') {
-    methodFactor = ['sea_bass', 'scorpionfish', 'horse_mackerel', 'sea_bream', 'wrasse', 'red_mullet', 'goby', 'garfish', 'greenling'].includes(fish.id) ? 1.22 : (fish.habitat === 'sea' ? 0.80 : 0.10);
-  } else if (method === 'sea_surf') {
-    methodFactor = ['flounder', 'starry_flounder', 'turbot', 'plaice', 'mullet', 'red_mullet', 'kutum', 'cod', 'navaga', 'goby'].includes(fish.id) ? 1.22 : (fish.habitat === 'sea' ? 0.80 : 0.15);
-  } else if (method === 'sea_boat') {
-    methodFactor = ['cod', 'haddock', 'saithe', 'halibut', 'wolffish', 'anglerfish', 'walleye_pollock', 'herring', 'mackerel', 'bluefish', 'horse_mackerel', 'greenling', 'king_crab'].includes(fish.id) ? 1.25 : (fish.habitat === 'sea' ? 0.85 : 0.10);
-  }
-
-  const h = hrObj.hour, sr = day.sunriseHr, ss = day.sunsetHr;
-  const dSr = Math.abs(h + 0.5 - sr), dSs = Math.abs(h + 0.5 - ss);
-  const isDay = (h + 0.5 >= sr - 0.5) && (h + 0.5 <= ss + 0.5);
-
+  if (method === 'winter_livebait') methodFactor = fish.type === 'predator' ? 1.12 : 0.05;
+  else if (method === 'winter_lure') methodFactor = ['perch', 'pike', 'zander', 'grayling', 'smelt', 'trout', 'cod', 'navaga', 'lenok', 'volga_zander', 'char', 'broad_whitefish', 'saffron_cod'].includes(fish.id) ? 1.10 : 0.15;
+  else if (method === 'winter_jig') methodFactor = ['chir', 'pizhyan', 'peled', 'cisco', 'roach', 'perch', 'whitefish', 'ruffe', 'smelt', 'bream', 'ide', 'dace', 'white_bream', 'vendace', 'omul', 'omul_arctic', 'valek', 'baikal_grayling'].includes(fish.id) ? 1.12 : 0.35;
+  else if (method === 'winter_stuka') methodFactor = ['burbot', 'cod', 'halibut', 'navaga', 'wolffish'].includes(fish.id) ? 1.25 : 0.12;
+  else if (method === 'winter_cisco') methodFactor = ['cisco', 'peled', 'smelt', 'whitefish', 'herring', 'vendace', 'omul', 'omul_arctic'].includes(fish.id) ? 1.25 : 0.18;
+  else if (method === 'spin_micro') methodFactor = ['perch', 'roach', 'crucian', 'rudd', 'bleak', 'chub', 'grayling', 'trout', 'brown_trout', 'rainbow_trout', 'rotan', 'gudgeon', 'dace', 'ide', 'horse_mackerel', 'sea_bass', 'scorpionfish', 'wrasse'].includes(fish.id) ? 1.18 : (fish.type === 'predator' ? 0.82 : 0.30);
+  else if (method === 'spin_jig') methodFactor = ['zander', 'pike', 'perch', 'catfish', 'volga_zander', 'amur_catfish', 'channel_catfish', 'burbot', 'cod', 'halibut', 'greenling'].includes(fish.id) ? 1.18 : (fish.type === 'predator' ? 0.85 : 0.08);
+  else if (method === 'spin_lure') methodFactor = ['pike', 'perch', 'asp', 'chub', 'ide', 'grayling', 'trout', 'salmon', 'pink_salmon', 'chum_salmon', 'coho_salmon', 'chinook_salmon', 'cherry_salmon', 'lenok', 'char', 'dolly_varden', 'snakehead', 'sky_gazer', 'garfish', 'bluefish'].includes(fish.id) ? 1.18 : (fish.type === 'predator' ? 0.90 : 0.10);
+  else if (method === 'bottom') methodFactor = (fish.type === 'peace' || ['catfish', 'burbot', 'channel_catfish', 'amur_catfish', 'ruffe', 'flounder', 'starry_flounder', 'turbot', 'plaice', 'goby'].includes(fish.id)) ? 1.15 : 0.25;
+  else if (method === 'float') methodFactor = (fish.type === 'peace' || ['perch', 'rotan', 'ruffe', 'chub', 'grayling', 'trout', 'dolly_varden', 'garfish'].includes(fish.id)) ? 1.14 : 0.30;
+  else if (method === 'fly') methodFactor = ['grayling', 'baikal_grayling', 'lenok', 'salmon', 'trout', 'chub', 'ide', 'tugun', 'dace', 'brown_trout', 'sockeye_salmon', 'char', 'dolly_varden', 'bleak', 'rudd', 'chekhon'].includes(fish.id) ? 1.22 : 0.15;
+  else if (method === 'sea_rock') methodFactor = ['sea_bass', 'scorpionfish', 'horse_mackerel', 'sea_bream', 'wrasse', 'red_mullet', 'goby', 'garfish', 'greenling'].includes(fish.id) ? 1.22 : (fish.habitat === 'sea' ? 0.80 : 0.10);
+  else if (method === 'sea_surf') methodFactor = ['flounder', 'starry_flounder', 'turbot', 'plaice', 'mullet', 'red_mullet', 'kutum', 'cod', 'navaga', 'goby'].includes(fish.id) ? 1.22 : (fish.habitat === 'sea' ? 0.80 : 0.15);
+  else if (method === 'sea_boat') methodFactor = ['cod', 'haddock', 'saithe', 'halibut', 'wolffish', 'anglerfish', 'walleye_pollock', 'herring', 'mackerel', 'bluefish', 'horse_mackerel', 'greenling', 'king_crab'].includes(fish.id) ? 1.25 : (fish.habitat === 'sea' ? 0.85 : 0.10);
+  const h = hrObj.hour, sr = day.sunriseHr, ss = day.sunsetHr, dSr = Math.abs(h + 0.5 - sr), dSs = Math.abs(h + 0.5 - ss), isDay = (h + 0.5 >= sr - 0.5) && (h + 0.5 <= ss + 0.5);
   let kLight = 0.25;
-  if (fish.feedMode === 'nocturnal') {
-    kLight = !isDay ? 1.05 : ((dSs <= 1.2 || dSr <= 1.0) ? 0.75 : 0.15);
-  } else if (fish.feedMode === 'crepuscular') {
-    kLight = (dSr <= 1.5 || dSs <= 1.5) ? 1.05 : (isDay ? 0.85 : 0.20);
-  } else if (fish.feedMode === 'diurnal') {
-    kLight = isDay ? 1.0 : 0.10;
-  } else {
-    kLight = 0.80;
-  }
-
+  if (fish.feedMode === 'nocturnal') kLight = !isDay ? 1.05 : ((dSs <= 1.2 || dSr <= 1.0) ? 0.75 : 0.15);
+  else if (fish.feedMode === 'crepuscular') kLight = (dSr <= 1.5 || dSs <= 1.5) ? 1.05 : (isDay ? 0.85 : 0.20);
+  else if (fish.feedMode === 'diurnal') kLight = isDay ? 1.0 : 0.10;
+  else kLight = 0.80;
   let kSeason = fish.coldFactor;
-  if (state.iceState === 'ice_safe' && ['crucian', 'carp', 'tench', 'catfish', 'mullet', 'mackerel', 'crayfish', 'silver_carp', 'grass_carp', 'tilapia', 'channel_catfish', 'buffalo', 'snakehead'].includes(fish.id)) {
-    kSeason = 0.05;
-  }
-
+  if (state.iceState === 'ice_safe' && ['crucian', 'carp', 'tench', 'catfish', 'mullet', 'mackerel', 'crayfish', 'silver_carp', 'grass_carp', 'tilapia', 'channel_catfish', 'buffalo', 'snakehead'].includes(fish.id)) kSeason = 0.05;
   const curMonth = new Date(day.date + 'T00:00:00').getMonth() + 1;
   let spawnBoost = 1.0;
   if (fish.spawnMonth && fish.spawnMonth.length > 0) {
-     const firstSpawn = fish.spawnMonth[0];
-     const preSpawn = firstSpawn === 1 ? 12 : firstSpawn - 1;
+     const firstSpawn = fish.spawnMonth[0], preSpawn = firstSpawn === 1 ? 12 : firstSpawn - 1;
      if (curMonth === preSpawn) spawnBoost = 1.25;
      if (fish.spawnMonth.includes(curMonth)) spawnBoost = 0.3;
   }
-
-  const dTr = Math.min(Math.abs(h - day.moon.transitHour), 24 - Math.abs(h - day.moon.transitHour));
-  const kSol = (dTr <= 1.5) ? 1.12 : 1.0;
-
-  const md = day.moon.moonDay;
+  const dTr = Math.min(Math.abs(h - day.moon.transitHour), 24 - Math.abs(h - day.moon.transitHour)), kSol = (dTr <= 1.5) ? 1.12 : 1.0, md = day.moon.moonDay;
   let kMoon = 1.0;
   if (md >= 28 || md <= 2 || (md >= 14 && md <= 17)) kMoon = 1.15;
   else if ((md >= 6 && md <= 9) || (md >= 21 && md <= 24)) kMoon = 0.75;
   else kMoon = 0.95;
-
-  const depthBuffer = Math.min(1.4, 0.8 + depth * 0.05);
-  const pDiff = Math.abs(hrObj.press - state.normPress);
-  let staticPK = Math.max(0.7, 1.0 - (pDiff * 0.01 / depthBuffer) * fish.bladderSens);
-  
-  let dynPK = 1.0;
+  const depthBuffer = Math.min(1.4, 0.8 + depth * 0.05), pDiff = Math.abs(hrObj.press - state.normPress);
+  let staticPK = Math.max(0.7, 1.0 - (pDiff * 0.01 / depthBuffer) * fish.bladderSens), dynPK = 1.0;
   if (fish.type === 'predator') {
-    if (hrObj.dp3h < -1.0) dynPK = 1.25;
-    else if (hrObj.dp3h > 1.0) dynPK = 0.6;
-    else dynPK = 1.0;
+    if (hrObj.dp3h < -1.0) dynPK = 1.25; else if (hrObj.dp3h > 1.0) dynPK = 0.6; else dynPK = 1.0;
   } else {
-    if (hrObj.dp3h > 1.0) dynPK = 1.15;
-    else if (hrObj.dp3h < -1.0) dynPK = 0.7;
-    else dynPK = 1.05;
+    if (hrObj.dp3h > 1.0) dynPK = 1.15; else if (hrObj.dp3h < -1.0) dynPK = 0.7; else dynPK = 1.05;
   }
   let kPress = staticPK * dynPK;
-
   if (fish.id === 'burbot' && (hrObj.dp3h < 0 || hrObj.precip > 0)) kPress = Math.min(1.2, kPress + 0.18);
-
   let kWea = 1.0;
   if (state.iceState !== 'ice_safe' && fish.id !== 'burbot') {
-    if (hrObj.wind < 1.0) kWea = 0.8;
-    else if (hrObj.wind > 6.0) kWea = 0.6;
-    else kWea = 1.1;
-
-    if (['С', 'СВ', 'В'].includes(hrObj.windDir)) kWea *= 0.8;
-    else if (['Ю', 'ЮЗ', 'З'].includes(hrObj.windDir)) kWea *= 1.15;
+    if (hrObj.wind < 1.0) kWea = 0.8; else if (hrObj.wind > 6.0) kWea = 0.6; else kWea = 1.1;
+    if (['С', 'СВ', 'В'].includes(hrObj.windDir)) kWea *= 0.8; else if (['Ю', 'ЮЗ', 'З'].includes(hrObj.windDir)) kWea *= 1.15;
   }
-
   return Math.max(4, Math.min(98, Math.round(92 * kSeason * spawnBoost * kLight * kSol * kMoon * kPress * kWea * kTempOver * methodFactor * depthFactor)));
 }
 
@@ -1913,393 +1666,132 @@ function calcDayBest(fish, day, method, water, depth) {
 }
 
 function calcDynamicRig(method, water, depth, wind) {
-  const prof = WATER_PROFILES[water] || WATER_PROFILES.small_river;
-  const flowCoeff = prof.flow;
-
-  if (method === 'winter_jig') {
-    const w = Math.min(3.5, Math.max(0.4, Math.round((depth * 0.35 * flowCoeff) * 10) / 10));
-    return {
-      weight: `Вольфрамовая мормышка ${w} г`,
-      line: 'Зимний монофил 0.09–0.12 мм (флюр)',
-      tactic: 'Плавный подъем с высокочастотной дрожью на 30–50 см и постукиванием о дно'
-    };
-  }
-
-  if (method === 'winter_cisco') {
-    return {
-      weight: 'Нижнее грузило / пилькер 6–14 г',
-      line: 'Основная 0.14 мм, поводки 0.10 мм (3–5 микромормышек)',
-      tactic: 'Плавное покачивание гирлянды в толще воды под нижней кромкой льда'
-    };
-  }
-
-  if (method === 'winter_lure') {
-    const w = Math.min(32, Math.max(5, Math.round(depth * 2.0 * flowCoeff)));
-    return {
-      weight: `Балансир / Виб / Вертикалка ${w} г`,
-      line: 'Шнур #0.8 PE + поводок флюорокарбон 0.35 мм',
-      tactic: 'Короткий взмах 15–20 см, сброс, зависание и пауза 4–6 секунд'
-    };
-  }
-
-  if (method === 'winter_stuka') {
-    const w = Math.min(65, Math.max(20, Math.round(depth * 3.5 * flowCoeff)));
-    return {
-      weight: `Блесна-стукалка ${w} г с подсадкой нарезки`,
-      line: 'Мононить 0.35–0.45 мм без поводка',
-      tactic: 'Ритмичные удары по каменистому дну с паузой 3–5 секунд'
-    };
-  }
-
-  if (method === 'winter_livebait') {
-    return {
-      weight: `Скользящая оливка ${Math.max(6, Math.round(depth * 1.6 * flowCoeff))} г`,
-      line: 'Мононить 0.35 мм, поводок флюр 0.45 мм (или 7-жильная струна на щуку)',
-      tactic: 'Живец (сорожка, карасик, ерш) в 30 см от дна'
-    };
-  }
-
-  if (method === 'spin_micro') {
-    const w = Math.min(4.5, Math.max(0.3, Math.round((depth * 0.65 * flowCoeff) * 10) / 10));
-    return {
-      weight: `${w} г (Чебурашка / Мормышка)`,
-      line: 'Шнур #0.2–#0.3 PE + поводковый флюр 0.12–0.14 мм',
-      tactic: 'Мормодрожь, пелагический зуд или микроджиговая ступенька с паузой на дне'
-    };
-  }
-
-  if (method === 'spin_jig') {
-    const w = Math.min(56, Math.max(8, Math.round(depth * 2.8 * flowCoeff)));
-    return {
-      weight: `Джиг-головка / груз ${w} г`,
-      line: 'Шнур #0.8–#1.5 PE + флюр 0.35 мм или стальная струна',
-      tactic: 'Два оборота катушки — пауза 2 секунды с четким отбоем по рельефу бровки'
-    };
-  }
-
-  if (method === 'spin_lure') {
-    const w = Math.min(28, Math.max(4, Math.round(depth * 2.2 * flowCoeff)));
-    return {
-      weight: `Колебалка / Воблер / Вертушка ${w} г`,
-      line: 'Шнур #0.6–#1.2 PE + титановый или стальной поводок 20 см',
-      tactic: 'Равномерная проводка на снос или мягкий твичинг с паузами'
-    };
-  }
-
-  if (method === 'bottom') {
-    const w = Math.min(130, Math.max(25, Math.round(depth * 12 * flowCoeff)));
-    return {
-      weight: `Фидерная кормушка / груз ${w} г`,
-      line: 'Шнур #0.8–#1.0 PE, поводок моно/флюр 0.12–0.18 мм (50–80 см)',
-      tactic: 'Клипсование на ракушечном переходе или нижней бровке, темп перезаброса 5–10 мин'
-    };
-  }
-
-  if (method === 'float') {
-    const w = Math.min(8.0, Math.max(0.5, Math.round((depth * 0.8 * flowCoeff + wind * 0.15) * 10) / 10));
-    return {
-      weight: `Поплавок ${w} г (разнесенная огрузка)`,
-      line: 'Основная мононить 0.14–0.16 мм, поводок 0.10–0.12 мм',
-      tactic: 'Проводка с легким придерживанием или фиксация подпаска в 3–5 см у дна'
-    };
-  }
-
-  if (method === 'fly') {
-    return {
-      weight: 'Плавающий шнур WF-4/5-F + подлесок 9 ft',
-      line: 'Типпет 0.12–0.16 мм',
-      tactic: 'Подача под углом 45 градусов вниз по струе с контролем сноса петли'
-    };
-  }
-
-  if (method === 'sea_rock') {
-    const w = Math.min(7.0, Math.max(1.0, Math.round((depth * 0.45 + wind * 0.2) * 10) / 10));
-    return {
-      weight: `Буллер / Tict / Джиг-риг ${w} г`,
-      line: 'Шнур #0.25–#0.4 PE + флюорокарбон 0.16–0.20 мм',
-      tactic: 'Волочение по каменистым россыпям с короткими подбросами и паузами'
-    };
-  }
-
-  if (method === 'sea_surf') {
-    const w = Math.min(180, Math.max(70, Math.round(80 + depth * 6 + wind * 5)));
-    return {
-      weight: `Сёрфовое грузило «Пуля / Гola» ${w} г`,
-      line: 'Шнур #1.2 PE + конусный шок-лидер 0.40 мм, отводные поводки с поплавками',
-      tactic: 'Дальний силовой заброс за вторую песчаную косу'
-    };
-  }
-
-  if (method === 'sea_boat') {
-    const w = Math.min(500, Math.max(60, Math.round(depth * 7.5 * flowCoeff)));
-    return {
-      weight: `Морской пилькер / пунда ${w} г`,
-      line: 'Морской мультиколор шнур #2.5–#4.0 PE + шок-лидер 0.80–1.0 мм',
-      tactic: 'Отвесное блеснение у дна в дрейфе со ставкой октопусов или перьев'
-    };
-  }
-
-  return {
-    weight: `${Math.max(15, Math.round(depth * 3.8 * flowCoeff))} г`,
-    line: 'Шнур #1.0–#1.5 PE или леска 0.30 мм',
-    tactic: 'Классическая джиговая или донная подача с контролем дна'
-  };
+  const prof = WATER_PROFILES[water] || WATER_PROFILES.small_river, flowCoeff = prof.flow;
+  if (method === 'winter_jig') return { weight: `Вольфрамовая мормышка ${Math.min(3.5, Math.max(0.4, Math.round((depth * 0.35 * flowCoeff) * 10) / 10))} г`, line: 'Зимний монофил 0.09–0.12 мм (флюр)', tactic: 'Плавный подъем с высокочастотной дрожью на 30–50 см и постукиванием о дно' };
+  if (method === 'winter_cisco') return { weight: 'Нижнее грузило / пилькер 6–14 г', line: 'Основная 0.14 мм, поводки 0.10 мм (3–5 микромормышек)', tactic: 'Плавное покачивание гирлянды в толще воды под нижней кромкой льда' };
+  if (method === 'winter_lure') return { weight: `Балансир / Виб / Вертикалка ${Math.min(32, Math.max(5, Math.round(depth * 2.0 * flowCoeff)))} г`, line: 'Шнур #0.8 PE + поводок флюорокарбон 0.35 мм', tactic: 'Короткий взмах 15–20 см, сброс, зависание и пауза 4–6 секунд' };
+  if (method === 'winter_stuka') return { weight: `Блесна-стукалка ${Math.min(65, Math.max(20, Math.round(depth * 3.5 * flowCoeff)))} г с подсадкой нарезки`, line: 'Мононить 0.35–0.45 мм без поводка', tactic: 'Ритмичные удары по каменистому дну с паузой 3–5 секунд' };
+  if (method === 'winter_livebait') return { weight: `Скользящая оливка ${Math.max(6, Math.round(depth * 1.6 * flowCoeff))} г`, line: 'Мононить 0.35 мм, поводок флюр 0.45 мм (или 7-жильная струна)', tactic: 'Живец (сорожка, карасик, ерш) в 30 см от дна' };
+  if (method === 'spin_micro') return { weight: `${Math.min(4.5, Math.max(0.3, Math.round((depth * 0.65 * flowCoeff) * 10) / 10))} г (Чебурашка / Мормышка)`, line: 'Шнур #0.2–#0.3 PE + поводковый флюр 0.12–0.14 мм', tactic: 'Мормодрожь, пелагический зуд или микроджиговая ступенька с паузой на дне' };
+  if (method === 'spin_jig') return { weight: `Джиг-головка / груз ${Math.min(56, Math.max(8, Math.round(depth * 2.8 * flowCoeff)))} г`, line: 'Шнур #0.8–#1.5 PE + флюр 0.35 мм или стальная струна', tactic: 'Два оборота катушки — пауза 2 секунды с четким отбоем по рельефу бровки' };
+  if (method === 'spin_lure') return { weight: `Колебалка / Воблер / Вертушка ${Math.min(28, Math.max(4, Math.round(depth * 2.2 * flowCoeff)))} г`, line: 'Шнур #0.6–#1.2 PE + титановый или стальной поводок 20 см', tactic: 'Равномерная проводка на снос или мягкий твичинг с паузами' };
+  if (method === 'bottom') return { weight: `Фидерная кормушка / груз ${Math.min(130, Math.max(25, Math.round(depth * 12 * flowCoeff)))} г`, line: 'Шнур #0.8–#1.0 PE, поводок моно/флюр 0.12–0.18 мм (50–80 см)', tactic: 'Клипсование на ракушечном переходе или нижней бровке, темп перезаброса 5–10 мин' };
+  if (method === 'float') return { weight: `Поплавок ${Math.min(8.0, Math.max(0.5, Math.round((depth * 0.8 * flowCoeff + wind * 0.15) * 10) / 10))} г`, line: 'Основная мононить 0.14–0.16 мм, поводок 0.10–0.12 мм', tactic: 'Проводка с легким придерживанием или фиксация подпаска в 3–5 см у дна' };
+  if (method === 'fly') return { weight: 'Плавающий шнур WF-4/5-F + подлесок 9 ft', line: 'Типпет 0.12–0.16 мм', tactic: 'Подача под углом 45 градусов вниз по струе с контролем сноса петли' };
+  if (method === 'sea_rock') return { weight: `Буллер / Tict / Джиг-риг ${Math.min(7.0, Math.max(1.0, Math.round((depth * 0.45 + wind * 0.2) * 10) / 10))} г`, line: 'Шнур #0.25–#0.4 PE + флюорокарбон 0.16–0.20 мм', tactic: 'Волочение по каменистым россыпям с короткими подбросами и паузами' };
+  if (method === 'sea_surf') return { weight: `Сёрфовое грузило «Пуля / Гola» ${Math.min(180, Math.max(70, Math.round(80 + depth * 6 + wind * 5)))} г`, line: 'Шнур #1.2 PE + конусный шок-лидер 0.40 мм, отводные поводки с поплавками', tactic: 'Дальний силовой заброс за вторую песчаную косу' };
+  if (method === 'sea_boat') return { weight: `Морской пилькер / пунда ${Math.min(500, Math.max(60, Math.round(depth * 7.5 * flowCoeff)))} г`, line: 'Морской мультиколор шнур #2.5–#4.0 PE + шок-лидер 0.80–1.0 мм', tactic: 'Отвесное блеснение у дна в дрейфе со ставкой октопусов или перьев' };
+  return { weight: `${Math.max(15, Math.round(depth * 3.8 * flowCoeff))} г`, line: 'Шнур #1.0–#1.5 PE или леска 0.30 мм', tactic: 'Классическая джиговая или донная подача с контролем дна' };
 }
 
 function generateAdaptiveGuides(fish, water, depth, day) {
   let standAdvice = '';
+  if (fish.legal === 'redbook') standAdvice = `⛔ <b>ОСОБЫЙ СТАТУС:</b> ${fish.name} включена в Красную книгу РФ или региональные Красные книги. Вылов категорически запрещен! При случайной поимке особь должна быть незамедлительно возвращена в естественную среду обитания.`;
+  else if (fish.legal === 'introduced') standAdvice = `⚡ <b>Интродуцент / Теплолюбивый вид:</b> ${fish.name} обитает в водоемах-охладителях ГРЭС/АЭС, прудовых хозяйствах и южных реках. При температуре воды ниже ${fish.tMinStop}°C впадает в оцепенение и не кормится.`;
+  else if (state.iceState === 'ice_safe') standAdvice = `❄️ <b>Подледный горизонт (лед ~${state.iceThickness} см):</b> ${fish.name} держится на глубине ${depth} м. Зимой ключевую роль играют проточные участки, выходы русловых родников и плесы с достаточным кислородом.`;
+  else if (state.iceState === 'ice_danger') standAdvice = `⚠️ <b>Опасный период ледостава:</b> Рыбалка крайне ограничена. Выход на лед смертельно опасен, а открытая вода забита шугой и заберегами.`;
+  else if (fish.habitat === 'sea') standAdvice = `🌊 <b>Морская акватория:</b> ${fish.name} занимает каменистые гряды, рифы и песчаные банки на горизонте ${depth} м. ${fish.baseAdvice}`;
+  else standAdvice = `На глубине ${depth} м (${WATER_PROFILES[water]?.name || 'водоем'}) ${fish.name} занимает характерный микрорельеф. ${fish.baseAdvice}`;
   
-  if (fish.legal === 'redbook') {
-    standAdvice = `⛔ <b>ОСОБЫЙ СТАТУС:</b> ${fish.name} включена в Красную книгу РФ или региональные Красные книги. Вылов категорически запрещен! При случайной поимке особь должна быть незамедлительно возвращена в естественную среду обитания.`;
-  } else if (fish.legal === 'introduced') {
-    standAdvice = `⚡ <b>Интродуцент / Теплолюбивый вид:</b> ${fish.name} обитает в водоемах-охладителях ГРЭС/АЭС, прудовых хозяйствах и южных реках. При температуре воды ниже ${fish.tMinStop}°C впадает в оцепенение и не кормится.`;
-  } else if (state.iceState === 'ice_safe') {
-    standAdvice = `❄️ <b>Подледный горизонт (лед ~${state.iceThickness} см):</b> ${fish.name} держится на глубине ${depth} м. Зимой ключевую роль играют проточные участки, выходы русловых родников и плесы с достаточным кислородом.`;
-  } else if (state.iceState === 'ice_danger') {
-    standAdvice = `⚠️ <b>Опасный период ледостава:</b> Рыбалка крайне ограничена. Выход на лед смертельно опасен, а открытая вода забита шугой и заберегами.`;
-  } else if (fish.habitat === 'sea') {
-    standAdvice = `🌊 <b>Морская акватория:</b> ${fish.name} занимает каменистые гряды, рифы и песчаные банки на горизонте ${depth} м. ${fish.baseAdvice}`;
-  } else {
-    standAdvice = `На глубине ${depth} м (${WATER_PROFILES[water]?.name || 'водоем'}) ${fish.name} занимает характерный микрорельеф. ${fish.baseAdvice}`;
-  }
-
   const rigInfo = calcDynamicRig(state.method, water, depth, day.windMax);
-  let tackleAdvice = fish.legal === 'redbook'
-    ? 'Любые любительские снасти по данному виду запрещены к применению.'
-    : `Рекомендуемый монтаж: <b>${rigInfo.weight}</b> (${rigInfo.line}). ${rigInfo.tactic}. Профильная снасть: ${fish.topGear}`;
-
+  let tackleAdvice = fish.legal === 'redbook' ? 'Любые любительские снасти по данному виду запрещены к применению.' : `Рекомендуемый монтаж: <b>${rigInfo.weight}</b> (${rigInfo.line}). ${rigInfo.tactic}. Профильная снасть: ${fish.topGear}`;
+  
   let baitAdvice = '';
-  if (fish.legal === 'redbook') {
-    baitAdvice = 'Вид под строгой государственной охраной.';
-  } else if (['silver_carp'].includes(fish.id)) {
-    baitAdvice = 'Специализированный прессованный технопланктон (зеленый, оригинальный, топленое молоко), создающий облако мути.';
-  } else if (['grass_carp'].includes(fish.id)) {
-    baitAdvice = 'Молодой камыш, сочный огурец, водоросли, кукуруза, плавающие травяные бойлы.';
-  } else if (['tilapia', 'channel_catfish', 'buffalo'].includes(fish.id)) {
-    baitAdvice = 'Куриная печень, резка рыбы, креветка, пучок навозных червей, кукуруза с коноплей.';
-  } else if (['crayfish', 'crab', 'king_crab'].includes(fish.id)) {
-    baitAdvice = 'Приманка: свежая сельдь, мясо мидии, рыбьи головы в сетчатом садке.';
-  } else if (fish.habitat === 'sea') {
-    baitAdvice = 'Морской рацион: нереис (пескожил), полоски наваги или сельди, мясо креветки, яркие пилькеры.';
-  } else if (['chir', 'pizhyan', 'peled', 'cisco', 'whitefish', 'vendace', 'omul', 'omul_arctic', 'valek'].includes(fish.id)) {
-    baitAdvice = 'Северный рацион сигов: пучок свежего мотыля, бокоплав (мормыш), личинка короеда, опарыш, подвески из бисера.';
-  } else if (state.method === 'winter_livebait') {
-    baitAdvice = `Идеальный живец под хищника — мелкая плотва (сорожка), ерш со дна или пескарь.`;
-  } else if (state.iceState === 'ice_safe') {
-    baitAdvice = 'Зимний рацион: живой мотыль, бокоплав, кусочки ерша, безнасадочные мормышки с подвесными пайетками.';
-  } else {
-    baitAdvice = day.waterTemp <= 8.0 
-      ? 'Холодная вода: животный рацион (мотыль, червь, резка рыбы), пассивная подача приманки с паузами.'
-      : 'Теплая вода: активный силикон, крэнки, вертушки, растительные насадки (кукуруза, перловка, горох).';
-  }
-
+  if (fish.legal === 'redbook') baitAdvice = 'Вид под строгой государственной охраной.';
+  else if (['silver_carp'].includes(fish.id)) baitAdvice = 'Специализированный прессованный технопланктон (зеленый, оригинальный, топленое молоко), создающий облако мути.';
+  else if (['grass_carp'].includes(fish.id)) baitAdvice = 'Молодой камыш, сочный огурец, водоросли, кукуруза, плавающие травяные бойлы.';
+  else if (['tilapia', 'channel_catfish', 'buffalo'].includes(fish.id)) baitAdvice = 'Куриная печень, резка рыбы, креветка, пучок навозных червей, кукуруза с коноплей.';
+  else if (['crayfish', 'crab', 'king_crab'].includes(fish.id)) baitAdvice = 'Приманка: свежая сельдь, мясо мидии, рыбьи головы в сетчатом садке.';
+  else if (fish.habitat === 'sea') baitAdvice = 'Морской рацион: нереис (пескожил), полоски наваги или сельди, мясо креветки, яркие пилькеры.';
+  else if (['chir', 'pizhyan', 'peled', 'cisco', 'whitefish', 'vendace', 'omul', 'omul_arctic', 'valek'].includes(fish.id)) baitAdvice = 'Северный рацион сигов: пучок свежего мотыля, бокоплав (мормыш), личинка короеда, опарыш, подвески из бисера.';
+  else if (state.method === 'winter_livebait') baitAdvice = `Идеальный живец под хищника — мелкая плотва (сорожка), ерш со дна или пескарь.`;
+  else if (state.iceState === 'ice_safe') baitAdvice = 'Зимний рацион: живой мотыль, бокоплав, кусочки ерша, безнасадочные мормышки с подвесными пайетками.';
+  else baitAdvice = day.waterTemp <= 8.0 ? 'Холодная вода: животный рацион (мотыль, червь, резка рыбы), пассивная подача приманки с паузами.' : 'Теплая вода: активный силикон, крэнки, вертушки, растительные насадки (кукуруза, перловка, горох).';
   return { standAdvice, tackleAdvice, baitAdvice };
 }
 
-function fmtHM(fHr) {
-  const h = Math.floor(fHr), m = Math.round((fHr - h) * 60);
-  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-}
+function fmtHM(fHr) { const h = Math.floor(fHr), m = Math.round((fHr - h) * 60); return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; }
 
 function renderThreeDayVerdict(fish) {
-  const box = document.getElementById('threeDayBox');
-  const days3 = DAYS_DATA.slice(0, 3);
-
+  const box = document.getElementById('threeDayBox'), days3 = DAYS_DATA.slice(0, 3);
   box.innerHTML = days3.map((d, idx) => {
-    const scWeather = calcDayBest(fish, d, state.method, state.water, state.depth);
-    const md = d.moon.moonDay;
-    const isMoonGood = (md >= 28 || md <= 2 || (md >= 14 && md <= 17));
-    const isMoonBad = ((md >= 6 && md <= 9) || (md >= 21 && md <= 24));
-    const moonText = isMoonGood ? 'По луне жор' : (isMoonBad ? 'Лунный спад' : 'Умеренная луна');
-    const moonClass = isMoonGood ? 'good' : (isMoonBad ? 'bad' : 'warn');
-
-    let weaText = 'Погода отличная';
-    let weaClass = 'good';
+    const scWeather = calcDayBest(fish, d, state.method, state.water, state.depth), md = d.moon.moonDay;
+    const isMoonGood = (md >= 28 || md <= 2 || (md >= 14 && md <= 17)), isMoonBad = ((md >= 6 && md <= 9) || (md >= 21 && md <= 24));
+    const moonText = isMoonGood ? 'По луне жор' : (isMoonBad ? 'Лунный спад' : 'Умеренная луна'), moonClass = isMoonGood ? 'good' : (isMoonBad ? 'bad' : 'warn');
+    let weaText = 'Погода отличная', weaClass = 'good';
     if (fish.legal === 'redbook') { weaText = 'Вылов запрещен'; weaClass = 'bad'; }
     else if (d.waterTemp < fish.tMinStop) { weaText = 'Анабиоз (холод)'; weaClass = 'bad'; }
     else if (state.iceState === 'ice_danger') { weaText = 'Опасный ледостав'; weaClass = 'bad'; }
     else if (scWeather < 35) { weaText = 'Слабый клев'; weaClass = 'bad'; }
     else if (scWeather < 65) { weaText = 'Умеренный клев'; weaClass = 'warn'; }
-
     const isTotalGood = scWeather >= 50 && !isMoonBad && state.iceState !== 'ice_danger' && fish.legal !== 'redbook';
     const thumbIcon = fish.legal === 'redbook' ? '⛔' : (isTotalGood ? '👍' : '👎');
-
     const reasons = [];
-    if (fish.legal === 'redbook') {
-      reasons.push('Вид занесен в Красную книгу РФ');
-    } else if (d.waterTemp < fish.tMinStop) {
-      reasons.push(`Вода слишком холодная (~${d.waterTemp}°C), вид в оцепенении`);
-    } else {
+    if (fish.legal === 'redbook') reasons.push('Вид занесен в Красную книгу РФ');
+    else if (d.waterTemp < fish.tMinStop) reasons.push(`Вода слишком холодная (~${d.waterTemp}°C), вид в оцепенении`);
+    else {
       if (state.iceState === 'ice_safe') reasons.push(`Подледная ловля, монолит ~${state.iceThickness} см, воздух ${d.tDay}°C`);
       else if (state.iceState === 'ice_danger') reasons.push(`Ледостав не сформирован (~${state.iceThickness} см), выход запрещен`);
       else reasons.push(`Открытая вода (~${d.waterTemp}°C), температура воздуха ${d.tDay}°C`);
-
-      if (fish.type === 'predator') {
-          if (d.dP < -2) reasons.push(`Падение давления радует хищника`);
-          else if (d.dP > 2) reasons.push(`Рост давления угнетает хищника`);
-      } else {
-          if (d.dP > 2) reasons.push(`Рост давления активизирует белую рыбу`);
-          else if (d.dP < -2) reasons.push(`Падение давления угнетает бель`);
-      }
+      if (fish.type === 'predator') { if (d.dP < -2) reasons.push(`Падение давления радует хищника`); else if (d.dP > 2) reasons.push(`Рост давления угнетает хищника`); } 
+      else { if (d.dP > 2) reasons.push(`Рост давления активизирует белую рыбу`); else if (d.dP < -2) reasons.push(`Падение давления угнетает бель`); }
     }
-
     const dayName = idx === 0 ? 'Сегодня' : (idx === 1 ? 'Завтра' : 'Послезавтра');
-
-    return `<div class="quick-verdict-card">
-      <div class="qv-left">
-        <div class="qv-date">${dayName}: ${d.label.split(',')[0]}</div>
-        <div class="qv-badges">
-          <span class="qv-tag ${weaClass}">${weaText}</span>
-          <span class="qv-tag ${moonClass}">${moonText}</span>
-        </div>
-      </div>
-      <div class="qv-desc">
-        • ${reasons.join('.<br>• ')}.
-      </div>
-      <div class="qv-icon">${thumbIcon}</div>
-    </div>`;
+    return `<div class="quick-verdict-card"><div class="qv-left"><div class="qv-date">${dayName}: ${d.label.split(',')[0]}</div><div class="qv-badges"><span class="qv-tag ${weaClass}">${weaText}</span><span class="qv-tag ${moonClass}">${moonText}</span></div></div><div class="qv-desc">• ${reasons.join('.<br>• ')}.</div><div class="qv-icon">${thumbIcon}</div></div>`;
   }).join('');
 }
 
 function renderAnnualCalendar(fish) {
   document.getElementById('annualTitle').textContent = `Годовой биоритм: ${fish.name}`;
-  const mNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
-  const curMonth = new Date().getMonth();
-
+  const mNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], curMonth = new Date().getMonth();
   const maxAct = Math.max(...fish.monthActivity);
-  const bestSeasonText = fish.legal === 'redbook' 
-    ? 'Вылов запрещен' 
-    : (maxAct > 0 
-        ? fish.monthActivity.map((v, i) => v === maxAct ? mNames[i] : null).filter(Boolean).join(', ') 
-        : 'Круглогодично / Нет данных');
-
+  const bestSeasonText = fish.legal === 'redbook' ? 'Вылов запрещен' : (maxAct > 0 ? fish.monthActivity.map((v, i) => v === maxAct ? mNames[i] : null).filter(Boolean).join(', ') : 'Круглогодично / Нет данных');
   let spawnText = 'Не изучено';
-  if (fish.spawnMonth && fish.spawnMonth.length > 0) {
-    if (fish.spawnMonth.length === 1) {
-      spawnText = mNames[fish.spawnMonth[0] - 1];
-    } else {
-      const firstM = mNames[fish.spawnMonth[0] - 1];
-      const lastM = mNames[fish.spawnMonth[fish.spawnMonth.length - 1] - 1];
-      spawnText = `${firstM} — ${lastM}`;
-    }
-  }
-
+  if (fish.spawnMonth && fish.spawnMonth.length > 0) spawnText = fish.spawnMonth.length === 1 ? mNames[fish.spawnMonth[0] - 1] : `${mNames[fish.spawnMonth[0] - 1]} — ${mNames[fish.spawnMonth[fish.spawnMonth.length - 1] - 1]}`;
   const banner = document.getElementById('annualBanner');
-  banner.innerHTML = `
-    <div class="banner-stat">
-      <div class="b-lbl">Период размножения (нерест)</div>
-      <div class="b-val" style="color:#f43f5e;">${spawnText}</div>
-    </div>
-    <div class="banner-stat">
-      <div class="b-lbl">Правовой статус / Ограничения</div>
-      <div class="b-val" style="color:${fish.legal === 'redbook' ? 'var(--bad)' : (fish.legal === 'introduced' ? 'var(--badge-purple-text)' : 'var(--warn)')};">${fish.banMonths}</div>
-    </div>
-    <div class="banner-stat">
-      <div class="b-lbl">Сезон максимального клева</div>
-      <div class="b-val" style="color:var(--good);">${bestSeasonText}</div>
-    </div>
-    <div class="banner-stat">
-      <div class="b-lbl">Рабочий горизонт глубин</div>
-      <div class="b-val" style="color:var(--accent);">${fish.depthOpt[0]} – ${fish.depthOpt[1]} м (макс. ${fish.depthMax}м)</div>
-    </div>
-  `;
-
+  banner.innerHTML = `<div class="banner-stat"><div class="b-lbl">Период размножения (нерест)</div><div class="b-val" style="color:#f43f5e;">${spawnText}</div></div><div class="banner-stat"><div class="b-lbl">Правовой статус / Ограничения</div><div class="b-val" style="color:${fish.legal === 'redbook' ? 'var(--bad)' : (fish.legal === 'introduced' ? 'var(--badge-purple-text)' : 'var(--warn)')};">${fish.banMonths}</div></div><div class="banner-stat"><div class="b-lbl">Сезон максимального клева</div><div class="b-val" style="color:var(--good);">${bestSeasonText}</div></div><div class="banner-stat"><div class="b-lbl">Рабочий горизонт глубин</div><div class="b-val" style="color:var(--accent);">${fish.depthOpt[0]} – ${fish.depthOpt[1]} м (макс. ${fish.depthMax}м)</div></div>`;
   const grid = document.getElementById('monthGrid');
   grid.innerHTML = mNames.map((mn, idx) => {
-    const act = fish.monthActivity[idx];
-    const isCur = idx === curMonth;
-    let cls = 'h' + act;
-    let txt = act === 3 ? 'Жор' : (act === 2 ? 'Клев' : (act === 1 ? 'Слабо' : 'Спад'));
-    
-    if (fish.legal === 'redbook') {
-      cls = 'h0';
-      txt = 'Запрет';
-    } else if (fish.spawnMonth.includes(idx + 1)) {
-      cls = 'spawn';
-      txt = 'Нерест';
-    }
-    
-    return `<div class="m-cell ${isCur ? 'cur' : ''}">
-      <span class="m-name">${mn}</span>
-      <div class="m-heat ${cls}"></div>
-      <span class="m-tag">${txt}</span>
-    </div>`;
+    const act = fish.monthActivity[idx], isCur = idx === curMonth;
+    let cls = 'h' + act, txt = act === 3 ? 'Жор' : (act === 2 ? 'Клев' : (act === 1 ? 'Слабо' : 'Спад'));
+    if (fish.legal === 'redbook') { cls = 'h0'; txt = 'Запрет'; } else if (fish.spawnMonth.includes(idx + 1)) { cls = 'spawn'; txt = 'Нерест'; }
+    return `<div class="m-cell ${isCur ? 'cur' : ''}"><span class="m-name">${mn}</span><div class="m-heat ${cls}"></div><span class="m-tag">${txt}</span></div>`;
   }).join('');
 }
 
 function renderBeginnerGuide(fish, day) {
   document.getElementById('guideTitle').textContent = `Ихтиология и методика: ${fish.name} (${state.depth}м • ${WATER_PROFILES[state.water]?.name || ''})`;
-  const guides = generateAdaptiveGuides(fish, state.water, state.depth, day);
-  
-  const gc = document.getElementById('guideContent');
-  gc.innerHTML = `
-    <div class="guide-block">
-      <h4>Гидробиология и стоянки</h4>
-      <p>${guides.standAdvice}</p>
-    </div>
-    <div class="guide-block">
-      <h4>Снасти и подача</h4>
-      <p>${guides.tackleAdvice}</p>
-    </div>
-    <div class="guide-block">
-      <h4>Кормовая база и насадки</h4>
-      <p>${guides.baitAdvice}</p>
-    </div>
-  `;
+  const guides = generateAdaptiveGuides(fish, state.water, state.depth, day), gc = document.getElementById('guideContent');
+  gc.innerHTML = `<div class="guide-block"><h4>Гидробиология и стоянки</h4><p>${guides.standAdvice}</p></div><div class="guide-block"><h4>Снасти и подача</h4><p>${guides.tackleAdvice}</p></div><div class="guide-block"><h4>Кормовая база и насадки</h4><p>${guides.baitAdvice}</p></div>`;
 }
 
 function renderAll() {
   if (!DAYS_DATA.length) return;
   const visibleSpecies = getFilteredFishList();
-  
-  if (!state.fishId || !visibleSpecies.some(f => f.id === state.fishId)) {
-    state.fishId = pickBestDefaultFish(visibleSpecies);
-  }
-
+  if (!state.fishId || !visibleSpecies.some(f => f.id === state.fishId)) state.fishId = pickBestDefaultFish(visibleSpecies);
   const fish = FISH_DB.find(f => f.id === state.fishId) || visibleSpecies[0] || FISH_DB[0];
-  const day = DAYS_DATA[state.dayIdx] || DAYS_DATA[0];
-  const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+  const day = DAYS_DATA[state.dayIdx] || DAYS_DATA[0], curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
 
   document.getElementById('basinTitle').textContent = `Бассейн: ${state.basinName}`;
-  document.getElementById('speciesCountInfo').textContent = state.showAllSpecies
-    ? `Все виды РФ: ${visibleSpecies.length}`
-    : `Фауна биотопа: ${visibleSpecies.length} видов`;
+  document.getElementById('speciesCountInfo').textContent = state.showAllSpecies ? `Все виды РФ: ${visibleSpecies.length}` : `Фауна биотопа: ${visibleSpecies.length} видов`;
 
   document.getElementById('fishStrip').innerHTML = visibleSpecies.map(f => {
     const sc = calcDayBest(f, day, state.method, state.water, state.depth);
     let badgeHtml = '';
-    if (f.legal === 'redbook') {
-      badgeHtml = '<span class="fish-status-badge status-redbook">Красная книга</span>';
-    } else if (f.legal === 'license') {
-      badgeHtml = '<span class="fish-status-badge status-license">Лицензия</span>';
-    } else if (f.legal === 'introduced') {
-      badgeHtml = '<span class="fish-status-badge status-introduced">Интродуцент</span>';
-    }
-
-    return `<div class="fish-chip ${f.id === fish.id ? 'active' : ''}" onclick="state.fishId='${f.id}';saveState();renderAll()" title="${f.name}">
-      <div class="fish-img-box">
-        ${renderFishVisual(f)}
-      </div>
-      <div class="fish-chip-name">${f.name}</div>
-      ${badgeHtml}
-      ${f.legal === 'redbook' ? '<span style="font-size:10px; color:var(--bad); font-weight:800;">ВЫЛОВ ЗАПРЕЩЕН</span>' : renderFiveFish(sc, 14, curTheme === 'dark' ? 'dark' : 'light')}
-    </div>`;
+    if (f.legal === 'redbook') badgeHtml = '<span class="fish-status-badge status-redbook">Красная книга</span>';
+    else if (f.legal === 'license') badgeHtml = '<span class="fish-status-badge status-license">Лицензия</span>';
+    else if (f.legal === 'introduced') badgeHtml = '<span class="fish-status-badge status-introduced">Интродуцент</span>';
+    return `<div class="fish-chip ${f.id === fish.id ? 'active' : ''}" onclick="state.fishId='${f.id}';saveState();renderAll()" title="${f.name}"><div class="fish-img-box">${renderFishVisual(f)}</div><div class="fish-chip-name">${f.name}</div>${badgeHtml}${f.legal === 'redbook' ? '<span style="font-size:10px; color:var(--bad); font-weight:800;">ВЫЛОВ ЗАПРЕЩЕН</span>' : renderFiveFish(sc, 14, curTheme === 'dark' ? 'dark' : 'light')}</div>`;
   }).join('');
 
   const dpS = day.dP > 0 ? `+${day.dP}` : day.dP;
-  document.getElementById('astroBar').textContent =
-    `🌙 ${day.moon.moonDay} л.д. (${day.moon.illum}%) • 🧭 ${day.pressAvg} мм (базис ${state.normPress}, Δ ${dpS}) • 💨 ${day.windDir} ${day.windMax} м/с • 💧 Вода ~${day.waterTemp}°C`;
+  document.getElementById('astroBar').textContent = `🌙 ${day.moon.moonDay} л.д. (${day.moon.illum}%) • 🧭 ${day.pressAvg} мм (базис ${state.normPress}, Δ ${dpS}) • 💨 ${day.windDir} ${day.windMax} м/с • 💧 Вода ~${day.waterTemp}°C`;
 
   renderThreeDayVerdict(fish);
 
   document.getElementById('weekGrid').innerHTML = DAYS_DATA.map((d, i) => {
     const sc = calcDayBest(fish, d, state.method, state.water, state.depth);
-    return `<div class="day-card ${i === state.dayIdx ? 'active' : ''}" onclick="state.dayIdx=${i};renderAll()">
-      <div class="d-head"><span>${d.label.split(',')[0]}</span><span>🌙${d.moon.moonDay}</span></div>
-      <div class="d-temp">${d.tDay > 0 ? '+'+d.tDay : d.tDay}° / ${d.tNight > 0 ? '+'+d.tNight : d.tNight}°C</div>
-      <div class="d-meta">🧭 ${d.pressAvg} мм (${d.dP > 0 ? '+'+d.dP : d.dP})<br>💨 ${d.windDir}, ${d.windMax}м/с</div>
-      <div class="d-fishes">${fish.legal === 'redbook' ? '⛔' : renderFiveFish(sc, 16, curTheme)}</div>
-    </div>`;
+    return `<div class="day-card ${i === state.dayIdx ? 'active' : ''}" onclick="state.dayIdx=${i};renderAll()"><div class="d-head"><span>${d.label.split(',')[0]}</span><span>🌙${d.moon.moonDay}</span></div><div class="d-temp">${d.tDay > 0 ? '+'+d.tDay : d.tDay}° / ${d.tNight > 0 ? '+'+d.tNight : d.tNight}°C</div><div class="d-meta">🧭 ${d.pressAvg} мм (${d.dP > 0 ? '+'+d.dP : d.dP})<br>💨 ${d.windDir}, ${d.windMax}м/с</div><div class="d-fishes">${fish.legal === 'redbook' ? '⛔' : renderFiveFish(sc, 16, curTheme)}</div></div>`;
   }).join('');
 
   const hScores = day.hours.map(hr => ({ ...hr, score: calcHourly(fish, day, hr, state.method, state.water, state.depth) }));
@@ -2309,13 +1801,8 @@ function renderAll() {
     if (avg > bestAvg) { bestAvg = avg; bestH = h; }
   }
 
-  document.getElementById('peakFishes').innerHTML = fish.legal === 'redbook'
-    ? '<span style="color:var(--bad); font-weight:800; font-size:13px;">ВЫЛОВ ЗАПРЕЩЕН ЗАКОНОМ</span>'
-    : renderFiveFish(calcDayBest(fish, day, state.method, state.water, state.depth), 20, curTheme);
-  
-  document.getElementById('peakWindowSub').textContent = fish.legal === 'redbook'
-    ? 'Особо ценный охраняемый биоресурс'
-    : `Оптимальный выход: ${String(bestH).padStart(2,'0')}:00 – ${String((bestH+3)%24).padStart(2,'0')}:00`;
+  document.getElementById('peakFishes').innerHTML = fish.legal === 'redbook' ? '<span style="color:var(--bad); font-weight:800; font-size:13px;">ВЫЛОВ ЗАПРЕЩЕН ЗАКОНОМ</span>' : renderFiveFish(calcDayBest(fish, day, state.method, state.water, state.depth), 20, curTheme);
+  document.getElementById('peakWindowSub').textContent = fish.legal === 'redbook' ? 'Особо ценный охраняемый биоресурс' : `Оптимальный выход: ${String(bestH).padStart(2,'0')}:00 – ${String((bestH+3)%24).padStart(2,'0')}:00`;
 
   const rig = calcDynamicRig(state.method, state.water, state.depth, day.windMax);
   document.getElementById('weightVal').textContent = fish.legal === 'redbook' ? '—' : rig.weight;
@@ -2326,19 +1813,10 @@ function renderAll() {
   document.getElementById('baitSub').textContent = adaptiveGuides.baitAdvice;
 
   let rT = 'Штатная обстановка', rS = `Глубина ${state.depth} м откалибрована.`;
-  if (fish.legal === 'redbook') {
-    rT = 'КРАСНАЯ КНИГА: Штрафная ответственность';
-    rS = 'Статья 258.1 УК РФ и ст. 8.35 КоАП РФ. Немедленный выпуск!';
-  } else if (state.iceState === 'ice_danger') {
-    rT = 'ОПАСНОСТЬ: Тонкий лед / Шуга!';
-    rS = 'Ледовый покров не держит человека. Выход на лед запрещен!';
-  } else if (state.iceState === 'ice_safe') {
-    rT = 'Безопасный ледовый монолит';
-    rS = `Толщина льда ~${state.iceThickness} см. Соблюдайте дистанцию между лунками от 4–5 м.`;
-  } else {
-    rT = 'Сезон открытой воды';
-    rS = 'Ледовые явления отсутствуют. Ловля разрешенными снастями открытой воды.';
-  }
+  if (fish.legal === 'redbook') { rT = 'КРАСНАЯ КНИГА: Штрафная ответственность'; rS = 'Статья 258.1 УК РФ и ст. 8.35 КоАП РФ. Немедленный выпуск!'; } 
+  else if (state.iceState === 'ice_danger') { rT = 'ОПАСНОСТЬ: Тонкий лед / Шуга!'; rS = 'Ледовый покров не держит человека. Выход на лед запрещен!'; } 
+  else if (state.iceState === 'ice_safe') { rT = 'Безопасный ледовый монолит'; rS = `Толщина льда ~${state.iceThickness} см. Соблюдайте дистанцию между лунками от 4–5 м.`; } 
+  else { rT = 'Сезон открытой воды'; rS = 'Ледовые явления отсутствуют. Ловля разрешенными снастями открытой воды.'; }
   document.getElementById('riskTitle').textContent = rT;
   document.getElementById('riskSub').textContent = rS;
 
@@ -2347,44 +1825,21 @@ function renderAll() {
 
   const curH = new Date().getHours();
   document.getElementById('hourlyList').innerHTML = hScores.map(it => {
-    const isNow = (state.dayIdx === 0 && it.hour === curH);
-    const isTw = Math.abs(it.hour + 0.5 - day.sunriseHr) <= 1.2 || Math.abs(it.hour + 0.5 - day.sunsetHr) <= 1.2;
-    const arr = it.dp3h > 0.4 ? '↑' : (it.dp3h < -0.4 ? '↓' : '→');
-    return `<div class="hour-item ${isNow ? 'now' : ''} ${isTw ? 'twilight' : ''}">
-      <div class="h-tm">${String(it.hour).padStart(2,'0')}:00</div>
-      <div>${fish.legal === 'redbook' ? '⛔' : renderFiveFish(it.score, 17, curTheme)}</div>
-      <div class="h-met">${it.tAir > 0 ? '+'+it.tAir : it.tAir}°C • ${it.press}${arr} • ${it.windDir} ${it.wind}м/с</div>
-    </div>`;
+    const isNow = (state.dayIdx === 0 && it.hour === curH), isTw = Math.abs(it.hour + 0.5 - day.sunriseHr) <= 1.2 || Math.abs(it.hour + 0.5 - day.sunsetHr) <= 1.2, arr = it.dp3h > 0.4 ? '↑' : (it.dp3h < -0.4 ? '↓' : '→');
+    return `<div class="hour-item ${isNow ? 'now' : ''} ${isTw ? 'twilight' : ''}"><div class="h-tm">${String(it.hour).padStart(2,'0')}:00</div><div>${fish.legal === 'redbook' ? '⛔' : renderFiveFish(it.score, 17, curTheme)}</div><div class="h-met">${it.tAir > 0 ? '+'+it.tAir : it.tAir}°C • ${it.press}${arr} • ${it.windDir} ${it.wind}м/с</div></div>`;
   }).join('');
 
   renderAnnualCalendar(fish);
   renderBeginnerGuide(fish, day);
 }
 
-document.getElementById('methodSelect').addEventListener('change', e => { 
-  state.method = e.target.value; 
-  saveState();
-  renderAll(); 
-});
-document.getElementById('waterSelect').addEventListener('change', e => { 
-  state.water = e.target.value; 
-  syncDepthLimitsWithWater(state.water);
-  populateSeasonalMethods();
-  saveState();
-  renderAll(); 
-});
-document.getElementById('depthRange').addEventListener('input', e => {
-  state.depth = parseFloat(e.target.value);
-  document.getElementById('depthVal').textContent = state.depth.toFixed(1);
-  saveState();
-  renderAll();
-});
-document.getElementById('placeSearchInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') searchPlaceByName();
-});
+document.getElementById('methodSelect').addEventListener('change', e => { state.method = e.target.value; saveState(); renderAll(); });
+document.getElementById('waterSelect').addEventListener('change', e => { state.water = e.target.value; syncDepthLimitsWithWater(state.water); populateSeasonalMethods(); saveState(); renderAll(); });
+document.getElementById('depthRange').addEventListener('input', e => { state.depth = parseFloat(e.target.value); document.getElementById('depthVal').textContent = state.depth.toFixed(1); saveState(); renderAll(); });
+document.getElementById('placeSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchPlaceByName(); });
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  navigator.serviceWorker.register('sw.js?v=6.2').catch(() => {});
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 initTheme();
@@ -2393,9 +1848,7 @@ checkStandaloneMode();
 updateLocationHeader();
 updateWaterSelectOptions(state.basinCode);
 syncDepthLimitsWithWater(state.water);
-document.getElementById('showAllToggle').textContent = state.showAllSpecies
-  ? 'Только бассейн и биотоп'
-  : `Все ${FISH_DB.length} видов РФ`;
+document.getElementById('showAllToggle').textContent = state.showAllSpecies ? 'Только бассейн и биотоп' : `Все ${FISH_DB.length} видов РФ`;
 buildFallback();
 renderAll();
 fetchLiveMeteo();
@@ -2403,3 +1856,4 @@ fetchNearbyWaters(state.lat, state.lon);
 </script>
 </body>
 </html>
+
