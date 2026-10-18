@@ -6,14 +6,19 @@
   <meta name="theme-color" content="#0b1120">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Клев ПРО v6">
+  <meta name="apple-mobile-web-app-title" content="Клев ПРО">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Прогноз клева • Атлас Ихтиофауны России (89 видов) v6.0</title>
+  <title>Прогноз клева • Атлас Ихтиофауны России (89 видов) v6.1</title>
   
-  <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css?v=6.0" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
-  <script src="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.js?v=6.0"></script>
+  <link rel="manifest" href="manifest.json?v=6.1">
+  <link rel="icon" type="image/svg+xml" href="icon.svg?v=6.1">
+  <link id="dynamicTouchIcon" rel="apple-touch-icon" sizes="180x180" href="">
+
+  <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css?v=6.1" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
+  <script src="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.js?v=6.1"></script>
   <script>
     if (typeof L === 'undefined') {
       document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />');
@@ -165,6 +170,7 @@
     .btn:hover { background: var(--border); }
     .btn-accent { background: #0284c7; border-color: #38bdf8; color: #fff; }
     .btn-accent:hover { background: #0369a1; }
+    .btn-install { border-color: var(--good); color: var(--good); display: none; }
 
     #mapDrawer {
       display: none;
@@ -278,7 +284,6 @@
     .status-redbook { background: var(--badge-red); color: var(--badge-red-text); }
     .status-license { background: var(--badge-amber); color: var(--badge-amber-text); }
     .status-introduced { background: var(--badge-purple); color: var(--badge-purple-text); }
-    .status-free { background: var(--badge-green); color: var(--badge-green-text); }
 
     .fish-img-box {
       width: 120px;
@@ -565,6 +570,7 @@
       <button class="btn btn-accent" onclick="toggleMapDrawer()" id="mapToggleBtn">🗺 Поиск по карте</button>
       <button class="btn" onclick="detectMyGPS()">🎯 Мой GPS</button>
       <button class="btn" onclick="fetchLiveMeteo()">🔄 Обновить прогноз</button>
+      <button class="btn btn-install" id="installAppBtn" onclick="installShortcut()">📲 Ярлык на экран</button>
     </div>
   </header>
 
@@ -683,8 +689,8 @@
   </div>
 
 <script>
-const APP_VERSION = '6.0';
-const CACHE_KEY = 'pro_fish_state_v6';
+const APP_VERSION = '6.1';
+const CACHE_KEY = 'pro_fish_state_v6.1';
 let clipSeq = 0;
 
 const IMG_SEARCH_DIRS = ['assets/fish/', 'fish/', ''];
@@ -730,6 +736,64 @@ const DEFAULT_STATE = {
   iceState: 'open_water',
   iceThickness: 0
 };
+
+// Генерация PNG-иконки поплавка для iOS Safari на лету
+function initDynamicTouchIcon() {
+  try {
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0b1120"/><stop offset="100%" stop-color="#0f2942"/></linearGradient></defs><rect width="512" height="512" rx="110" fill="url(#g2)"/><rect x="244" y="60" width="24" height="115" rx="12" fill="#ef4444"/><rect x="244" y="110" width="24" height="28" fill="#f8fafc"/><ellipse cx="256" cy="230" rx="38" ry="72" fill="#38bdf8"/><polyline points="40,310 140,310 180,235 220,365 260,175 300,335 340,280 375,310 472,310" fill="none" stroke="#10b981" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><text x="256" y="445" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="56" fill="#f8fafc" text-anchor="middle">КЛЁВ <tspan fill="#38bdf8">PRO</tspan></text></svg>`;
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512; canvas.height = 512;
+      canvas.getContext('2d').drawImage(img, 0, 0, 512, 512);
+      document.getElementById('dynamicTouchIcon').href = canvas.toDataURL('image/png');
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  } catch(e) {}
+}
+
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  const btn = document.getElementById('installAppBtn');
+  if (btn) {
+    btn.style.display = 'inline-block';
+    btn.textContent = '📲 Установить приложение';
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  const btn = document.getElementById('installAppBtn');
+  if (btn) btn.style.display = 'none';
+});
+
+function checkStandaloneMode() {
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const btn = document.getElementById('installAppBtn');
+  if (isStandalone && btn) btn.style.display = 'none';
+  else if (btn && !deferredInstallPrompt) btn.style.display = 'inline-block';
+}
+
+async function installShortcut() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    if (outcome === 'accepted') deferredInstallPrompt = null;
+    return;
+  }
+  const ua = navigator.userAgent.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(ua);
+  if (isIOS) {
+    alert('📲 Чтобы добавить ярлык «Клев ПРО» на главный экран iPhone:\n\n1. Нажмите кнопку «Поделиться» (квадрат со стрелкой вверх внизу экрана Safari).\n2. Прокрутите меню и выберите «На экран "Домой"».');
+  } else {
+    alert('📲 Чтобы установить приложение:\n\nНажмите меню браузера «⋮» (три точки вверху справа) и выберите «Установить приложение» или «Добавить на главный экран».');
+  }
+}
 
 function renderFishVisual(f) {
   if (missingImagesSet.has(f.id)) {
@@ -2206,7 +2270,13 @@ document.getElementById('placeSearchInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') searchPlaceByName();
 });
 
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js?v=6.1').catch(() => {});
+}
+
 initTheme();
+initDynamicTouchIcon();
+checkStandaloneMode();
 updateLocationHeader();
 updateWaterSelectOptions(state.basinCode);
 syncDepthLimitsWithWater(state.water);
