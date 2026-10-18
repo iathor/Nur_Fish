@@ -11,14 +11,14 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Прогноз клева • Атлас Ихтиофауны России (89 видов) v6.2</title>
+  <title>Прогноз клева • Атлас Ихтиофауны России (115 видов) v6.2</title>
   
   <link rel="manifest" href="manifest.json?v=6.2">
-  <link id="dynamicFavicon" rel="icon" type="image/png" sizes="512x512" href="">
-  <link id="dynamicTouchIcon" rel="apple-touch-icon" sizes="180x180" href="">
+  <link id="dynamicFavicon" rel="icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+  <link id="dynamicTouchIcon" rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
-  <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css?v=6.1" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
-  <script src="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.js?v=6.1"></script>
+  <link rel="stylesheet" href="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.css?v=6.2" onerror="this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'" />
+  <script src="https://yastatic.net/s3/front-maps-static/leaflet/1.9.4/leaflet.js?v=6.2"></script>
   <script>
     if (typeof L === 'undefined') {
       document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />');
@@ -624,7 +624,7 @@
     <div style="display: flex; flex-direction: column;">
       <div class="filter-bar" style="border-radius: 12px 12px 0 0; border: 1px solid var(--border); border-bottom: none;">
         <span id="speciesCountInfo">Ихтиофауна бассейна: 0</span>
-        <button class="toggle-all-btn" id="showAllToggle" onclick="toggleShowAllSpecies()">Все 89 видов РФ</button>
+        <button class="toggle-all-btn" id="showAllToggle" onclick="toggleShowAllSpecies()">Все 115 видов РФ</button>
       </div>
       <div class="fish-strip" id="fishStrip" style="border-radius: 0 0 12px 12px; border: 1px solid var(--border);"></div>
     </div>
@@ -1673,11 +1673,32 @@ async function fetchLiveMeteo() {
   const st = document.getElementById('apiStatus');
   st.textContent = 'Опрос метеосети...';
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${state.lat}&longitude=${state.lon}&hourly=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m,cloud_cover,precipitation&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset,wind_speed_10m_max,wind_direction_10m_dominant&forecast_days=14&wind_speed_unit=ms&timezone=auto&_cb=${Date.now()}`;
-  try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) throw new Error();
-    const data = await res.json();
 
+  async function fetchWithTimeout(fetchUrl, ms) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    const res = await fetch(fetchUrl, { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timer);
+    if (!res.ok) throw new Error('HTTP Error');
+    return await res.json();
+  }
+
+  let data;
+  try {
+    data = await fetchWithTimeout(url, 3500);
+  } catch (err) {
+    try {
+      st.textContent = 'Обход блокировки...';
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      data = await fetchWithTimeout(proxyUrl, 6000);
+    } catch (proxyErr) {
+      st.textContent = 'Автономный режим (без сети)';
+      renderAll();
+      return;
+    }
+  }
+
+  try {
     state.elevation = Math.round(data.elevation || 45);
     state.normPress = Math.round(760 - (state.elevation / 11.5));
 
@@ -1725,7 +1746,7 @@ async function fetchLiveMeteo() {
     st.textContent = 'Онлайн • 14 дней';
     renderAll();
   } catch (e) {
-    st.textContent = 'Автономный режим';
+    st.textContent = 'Ошибка парсинга данных';
     renderAll();
   }
 }
