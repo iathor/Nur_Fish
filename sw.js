@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1.0.1';
+const CACHE_VERSION = 'v1.0.2';
 const TILE_CACHE = `map-tiles-${CACHE_VERSION}`;
 const ASSET_CACHE = `app-assets-${CACHE_VERSION}`;
 
